@@ -25,24 +25,21 @@ function Details() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // Clean the ID and find the project
     const createdProjects = useSelector((state) => state.registration.createdProjects);
     const assignedProjects = useSelector((state) => state.registration.assignedProjects);
-    const project = useSelector((state) =>
-        [...state.registration.createdProjects, ...state.registration.assignedProjects]
-            .find(p => p._id === id)
-    );
+    const allProjects = [...createdProjects, ...assignedProjects];
+    const project = allProjects.find((p) => p._id === id);
 
     const [activeTab, setActiveTab] = useState("subtasks");
-
-    // Subtasks
     const [newSubtask, setNewSubtask] = useState("");
-    // Checklist
     const [newCheckItem, setNewCheckItem] = useState("");
-    // Milestones
     const [newMilestone, setNewMilestone] = useState("");
     const [newMilestoneDate, setNewMilestoneDate] = useState("");
-    // Safety Check: If project doesn't exist
+
+    // Attachments state
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState("");
+
     if (!project) {
         return (
             <div className="details-container">
@@ -54,9 +51,7 @@ function Details() {
 
     // --- SUBTASK HANDLERS ---
     const addSubtask = () => {
-        console.log("CLICKED, value:", newSubtask);
         if (!newSubtask.trim()) return;
-        console.log("DISPATCHING WITH ID:", id);
         const updated = [...(project.subtasks || []), { title: newSubtask.trim(), completed: false }];
         dispatch(updateProjectDetails({ id, field: 'subtasks', value: updated }));
         setNewSubtask("");
@@ -115,7 +110,51 @@ function Details() {
         dispatch(updateProjectDetails({ id, field: 'milestones', value: updated }));
     };
 
-    // Progress helpers
+    // --- ATTACHMENT HANDLERS ---
+    const uploadFile = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploading(true);
+        setUploadError("");
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch(`http://localhost:5000/api/projects/${id}/attachments`, {
+                method: 'POST',
+                body: formData
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Upload failed');
+            }
+            const updatedProject = await res.json();
+            // Sync updated project into Redux
+            dispatch(updateProjectDetails({ id, field: 'attachments', value: updatedProject.attachments }));
+            // Also sync activityLog
+            dispatch(updateProjectDetails({ id, field: 'activityLog', value: updatedProject.activityLog }));
+        } catch (err) {
+            setUploadError(err.message);
+        } finally {
+            setUploading(false);
+            e.target.value = '';  // reset file input
+        }
+    };
+
+    const deleteAttachment = async (fileId, filename) => {
+        if (!window.confirm(`Delete "${filename}"?`)) return;
+        try {
+            const res = await fetch(`http://localhost:5000/api/projects/${id}/attachments/${fileId}`, {
+                method: 'DELETE'
+            });
+            if (!res.ok) throw new Error('Delete failed');
+            const updatedProject = await res.json();
+            dispatch(updateProjectDetails({ id, field: 'attachments', value: updatedProject.attachments }));
+            dispatch(updateProjectDetails({ id, field: 'activityLog', value: updatedProject.activityLog }));
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
     const subtasksDone = (project.subtasks || []).filter(s => s.completed).length;
     const checklistDone = (project.checklist || []).filter(c => c.done).length;
     const milestonesDone = (project.milestones || []).filter(m => m.completed).length;
@@ -154,55 +193,33 @@ function Details() {
 
             <div className="details-card">
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '16px' }}>
-                    <span style={{
-                        background: STATUS_COLORS[project.status] || 'gray',
-                        color: 'white',
-                        padding: '4px 14px',
-                        borderRadius: '12px'
-                    }}>
+                    <span style={{ background: STATUS_COLORS[project.status] || 'gray', color: 'white', padding: '4px 14px', borderRadius: '12px' }}>
                         {project.status}
                     </span>
-                    <span style={{
-                        background: PRIORITY_COLORS[project.priority] || 'gray',
-                        color: 'white',
-                        padding: '4px 14px',
-                        borderRadius: '12px'
-                    }}>
+                    <span style={{ background: PRIORITY_COLORS[project.priority] || 'gray', color: 'white', padding: '4px 14px', borderRadius: '12px' }}>
                         {project.priority} priority
                     </span>
-                    <span style={{
-                        border: '1px solid var(--accent-amber)',
-                        padding: '4px 14px',
-                        borderRadius: '12px'
-                    }}>
+                    <span style={{ border: '1px solid var(--accent-amber)', padding: '4px 14px', borderRadius: '12px' }}>
                         Sprint {project.sprint}
                     </span>
                 </div>
 
-                {/* Core info */}
                 <h2>{project.Title}</h2>
                 <p><strong>Description:</strong> {project.Description}</p>
                 <p><strong>Due Date:</strong> {project.date}</p>
                 <p><strong>Start Date:</strong> {project.startDate}</p>
 
-                {/* Tags */}
                 {project.tags && project.tags.length > 0 && (
                     <div style={{ margin: '10px 0' }}>
                         <strong>Tags: </strong>
                         {project.tags.map((tag, i) => (
-                            <span key={i} style={{
-                                background: '#4a5568',
-                                color: 'white',
-                                padding: '2px 8px',
-                                borderRadius: '12px',
-                                fontSize: '12px',
-                                marginLeft: '4px'
-                            }}>
+                            <span key={i} style={{ background: '#4a5568', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '12px', marginLeft: '4px' }}>
                                 #{tag}
                             </span>
                         ))}
                     </div>
                 )}
+
                 {/* ── TABS ── */}
                 <div style={{ borderBottom: '1px solid #333', display: 'flex', gap: '4px', marginTop: '24px' }}>
                     <button style={tabStyle("subtasks")} onClick={() => setActiveTab("subtasks")}>
@@ -213,6 +230,9 @@ function Details() {
                     </button>
                     <button style={tabStyle("milestones")} onClick={() => setActiveTab("milestones")}>
                         Milestones ({(project.milestones || []).length})
+                    </button>
+                    <button style={tabStyle("attachments")} onClick={() => setActiveTab("attachments")}>
+                        📎 Files ({(project.attachments || []).length})
                     </button>
                     <button style={tabStyle("activity")} onClick={() => setActiveTab("activity")}>
                         Activity
@@ -225,8 +245,6 @@ function Details() {
                     {activeTab === "subtasks" && (
                         <div>
                             <ProgressBar done={subtasksDone} total={(project.subtasks || []).length} />
-
-                            {/* Add input */}
                             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                                 <input
                                     type="text"
@@ -239,7 +257,7 @@ function Details() {
                                 <button onClick={addSubtask} style={{ border: '1px solid var(--accent-amber)', padding: '6px 14px' }}>Add</button>
                             </div>
 
-                            {/* List */}
+                            {/* FIX: was missing closing ) on ternary */}
                             {(project.subtasks || []).length === 0 ? (
                                 <div style={{ color: 'gray', fontSize: '13px' }}>No subtasks yet</div>
                             ) : (
@@ -270,7 +288,6 @@ function Details() {
                     {activeTab === "checklist" && (
                         <div>
                             <ProgressBar done={checklistDone} total={(project.checklist || []).length} />
-
                             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                                 <input
                                     type="text"
@@ -283,28 +300,29 @@ function Details() {
                                 <button onClick={addCheckItem} style={{ border: '1px solid var(--accent-amber)', padding: '6px 14px' }}>Add</button>
                             </div>
 
-                            {(project.checklist || []).length === 0 && (
+                            {(project.checklist || []).length === 0 ? (
                                 <div style={{ color: 'gray', fontSize: '13px' }}>No checklist items yet</div>
+                            ) : (
+                                (project.checklist || []).map((c, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '1px solid #222' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={c.done}
+                                            onChange={() => toggleCheckItem(i)}
+                                            style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                                        />
+                                        <span style={{
+                                            flex: 1,
+                                            textDecoration: c.done ? 'line-through' : 'none',
+                                            color: c.done ? 'gray' : 'inherit',
+                                            fontSize: '14px'
+                                        }}>
+                                            {c.item}
+                                        </span>
+                                        <button onClick={() => deleteCheckItem(i)} style={{ background: 'none', border: 'none', color: 'gray', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                                    </div>
+                                ))
                             )}
-                            {(project.checklist || []).map((c, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '1px solid #222' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={c.done}
-                                        onChange={() => toggleCheckItem(i)}
-                                        style={{ cursor: 'pointer', width: '16px', height: '16px' }}
-                                    />
-                                    <span style={{
-                                        flex: 1,
-                                        textDecoration: c.done ? 'line-through' : 'none',
-                                        color: c.done ? 'gray' : 'inherit',
-                                        fontSize: '14px'
-                                    }}>
-                                        {c.item}
-                                    </span>
-                                    <button onClick={() => deleteCheckItem(i)} style={{ background: 'none', border: 'none', color: 'gray', cursor: 'pointer', fontSize: '16px' }}>×</button>
-                                </div>
-                            ))}
                         </div>
                     )}
 
@@ -312,7 +330,6 @@ function Details() {
                     {activeTab === "milestones" && (
                         <div>
                             <ProgressBar done={milestonesDone} total={(project.milestones || []).length} />
-
                             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
                                 <input
                                     type="text"
@@ -331,43 +348,146 @@ function Details() {
                                 <button onClick={addMilestone} style={{ border: '1px solid var(--accent-amber)', padding: '6px 14px' }}>Add</button>
                             </div>
 
-                            {(project.milestones || []).length === 0 && (
+                            {(project.milestones || []).length === 0 ? (
                                 <div style={{ color: 'gray', fontSize: '13px' }}>No milestones yet</div>
-                            )}
-                            {(project.milestones || []).map((m, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', borderBottom: '1px solid #222' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={m.completed}
-                                        onChange={() => toggleMilestone(i)}
-                                        style={{ cursor: 'pointer', width: '16px', height: '16px' }}
-                                    />
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{
-                                            textDecoration: m.completed ? 'line-through' : 'none',
-                                            color: m.completed ? 'gray' : 'inherit',
-                                            fontSize: '14px'
-                                        }}>
-                                            {m.title}
-                                        </div>
-                                        {m.dueDate && (
-                                            <div style={{ fontSize: '11px', color: 'gray', marginTop: '2px' }}>
-                                                📅 Due: {m.dueDate}
+                            ) : (
+                                (project.milestones || []).map((m, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', borderBottom: '1px solid #222' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={m.completed}
+                                            onChange={() => toggleMilestone(i)}
+                                            style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                                        />
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{
+                                                textDecoration: m.completed ? 'line-through' : 'none',
+                                                color: m.completed ? 'gray' : 'inherit',
+                                                fontSize: '14px'
+                                            }}>
+                                                {m.title}
                                             </div>
-                                        )}
+                                            {m.dueDate && (
+                                                <div style={{ fontSize: '11px', color: 'gray', marginTop: '2px' }}>
+                                                    📅 Due: {m.dueDate}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <span style={{
+                                            fontSize: '11px',
+                                            padding: '2px 8px',
+                                            borderRadius: '10px',
+                                            background: m.completed ? 'teal' : '#333',
+                                            color: 'white'
+                                        }}>
+                                            {m.completed ? 'Done' : 'Pending'}
+                                        </span>
+                                        <button onClick={() => deleteMilestone(i)} style={{ background: 'none', border: 'none', color: 'gray', cursor: 'pointer', fontSize: '16px' }}>×</button>
                                     </div>
-                                    <span style={{
-                                        fontSize: '11px',
-                                        padding: '2px 8px',
-                                        borderRadius: '10px',
-                                        background: m.completed ? 'teal' : '#333',
-                                        color: 'white'
-                                    }}>
-                                        {m.completed ? 'Done' : 'Pending'}
-                                    </span>
-                                    <button onClick={() => deleteMilestone(i)} style={{ background: 'none', border: 'none', color: 'gray', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                                ))
+                            )}
+                        </div>
+                    )}
+
+                    {/* ── ATTACHMENTS TAB ── */}
+                    {activeTab === "attachments" && (
+                        <div>
+                            {/* Upload area */}
+                            <div style={{
+                                border: '2px dashed #333',
+                                borderRadius: '10px',
+                                padding: '24px',
+                                textAlign: 'center',
+                                marginBottom: '20px',
+                                background: '#0d0d1a'
+                            }}>
+                                <div style={{ fontSize: '32px', marginBottom: '8px' }}>📎</div>
+                                <div style={{ color: '#666', fontSize: '13px', marginBottom: '12px' }}>
+                                    Upload any file — images, documents, code, etc. (max 20MB)
                                 </div>
-                            ))}
+                                <label style={{
+                                    display: 'inline-block',
+                                    padding: '8px 20px',
+                                    border: '1px solid var(--accent-amber)',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '13px',
+                                    color: 'var(--accent-amber)'
+                                }}>
+                                    {uploading ? 'Uploading...' : 'Choose File'}
+                                    <input
+                                        type="file"
+                                        onChange={uploadFile}
+                                        disabled={uploading}
+                                        style={{ display: 'none' }}
+                                    />
+                                </label>
+                                {uploadError && (
+                                    <div style={{ color: '#ef4444', fontSize: '13px', marginTop: '10px' }}>
+                                        ❌ {uploadError}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* File list */}
+                            {(project.attachments || []).length === 0 ? (
+                                <div style={{ color: 'gray', fontSize: '13px' }}>No files attached yet</div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {(project.attachments || []).map((att, i) => {
+                                        const ext = att.filename.split('.').pop().toLowerCase();
+                                        const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
+                                        const isPdf = ext === 'pdf';
+                                        const isDoc = ['doc', 'docx'].includes(ext);
+                                        const isCode = ['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'cpp', 'c', 'html', 'css', 'json'].includes(ext);
+
+                                        const icon = isImage ? '🖼️' : isPdf ? '📄' : isDoc ? '📝' : isCode ? '💻' : '📁';
+
+                                        return (
+                                            <div key={i} style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '10px 14px',
+                                                background: '#1a1a2e',
+                                                border: '1px solid #222240',
+                                                borderRadius: '8px'
+                                            }}>
+                                                <span style={{ fontSize: '20px' }}>{icon}</span>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ fontSize: '14px', color: '#e0e0e0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                        {att.filename}
+                                                    </div>
+                                                    <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>
+                                                        Uploaded {new Date(att.uploadedAt).toLocaleDateString()}
+                                                    </div>
+                                                </div>
+                                                {/* Download button */}
+                                                <a
+                                                    href={`http://localhost:5000/api/attachments/${att.path}`}
+                                                    download={att.filename}
+                                                    style={{
+                                                        padding: '4px 12px',
+                                                        border: '1px solid #4a9eff',
+                                                        borderRadius: '5px',
+                                                        color: '#4a9eff',
+                                                        fontSize: '12px',
+                                                        textDecoration: 'none',
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                    ⬇ Download
+                                                </a>
+                                                {/* Delete button */}
+                                                <button
+                                                    onClick={() => deleteAttachment(att.path, att.filename)}
+                                                    style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '18px', flexShrink: 0 }}>
+                                                    ×
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     )}
 

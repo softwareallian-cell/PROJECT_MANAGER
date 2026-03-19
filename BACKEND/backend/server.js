@@ -4,18 +4,33 @@ const cors = require('cors');
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 require('dotenv').config();
+const multer =require('multer');
+const {GridFSBucket}=require('mongodb');
+const {Readable}=require('stream');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+// multer — store file in memory buffer before streaming to GridFS
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 } // 20MB max
+});
+
+
 // DELETE the cached model before re-registering
 mongoose.deleteModel(/.*Project.*/);
 const Project = require('./models/Projects.js');
 const User = require('./models/User.js');
+let gridfsBucket;
 // Connection
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ DB Connected"))
+    .then(() => {console.log("✅ DB Connected");
+gridfsBucket = new GridFSBucket(mongoose.connection.db, {
+            bucketName: 'uploads'
+        });
+        console.log("✅ GridFS Bucket Ready");})
     .catch(err => console.error("❌ DB Error:", err));
 
 // --- USER ROUTES ---
@@ -290,5 +305,112 @@ app.delete('/api/projects/:id/assign/:userId', async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
+
+// =============================================
+// FILE ATTACHMENT ROUTES (GridFS)
+// =============================================
+ 
+// UPLOAD a file to a project
+app.post('/api/projects/:id/attachments', upload.single('file'), async (req, res) => {
+    try {
+    if (!gridfsBucket) return res.status(503).json({ message: 'Storage not ready' });
+        if (!req.file) return res.status(400).json({ message: 'No file provided' });
+ 
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ message: 'Project not found' });
+ 
+        // Stream the buffer into GridFS
+        const readable = Readable.from(req.file.buffer);
+        const uploadStream = gridfsBucket.openUploadStream(req.file.originalname, {
+            metadata: { projectId: req.params.id, mimetype: req.file.mimetype }
+        });
+ 
+        readable.pipe(uploadStream);
+ 
+        uploadStream.on('finish', async () => {
+            // Save reference in project.attachments
+            project.attachments.push({
+                filename: req.file.originalname,
+                path: String(uploadStream.id),   // GridFS file id stored as path
+                uploadedAt: new Date()
+            });
+            project.activityLog.push({
+                action: `File uploaded: "${req.file.originalname}"`,
+                timestamp: new Date()
+            });
+            await project.save();
+            res.json(project);
+        });
+ 
+        uploadStream.on('error', (err) => {
+            console.error('GRIDFS UPLOAD ERROR:', err.message);
+            res.status(500).json({ message: err.message });
+        });
+ 
+    } catch (err) {
+        console.error('UPLOAD ATTACHMENT ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+ 
+// DOWNLOAD a file by GridFS id
+app.get('/api/attachments/:fileId', async (req, res) => {
+    try {
+        const { ObjectId } = require('mongodb');
+        const fileId = new ObjectId(req.params.fileId);
+ 
+        // Find file metadata to get original filename + mimetype
+        const files = await gridfsBucket.find({ _id: fileId }).toArray();
+        if (!files || files.length === 0) {
+            return res.status(404).json({ message: 'File not found' });
+        }
+ 
+        const file = files[0];
+        res.set('Content-Type', file.metadata?.mimetype || 'application/octet-stream');
+        res.set('Content-Disposition', `attachment; filename="${file.filename}"`);
+ 
+        const downloadStream = gridfsBucket.openDownloadStream(fileId);
+        downloadStream.pipe(res);
+ 
+        downloadStream.on('error', () => {
+            res.status(404).json({ message: 'File not found' });
+        });
+ 
+    } catch (err) {
+        console.error('DOWNLOAD ATTACHMENT ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+ 
+// DELETE a file from a project
+app.delete('/api/projects/:id/attachments/:fileId', async (req, res) => {
+    try {
+        const { ObjectId } = require('mongodb');
+        const project = await Project.findById(req.params.id);
+        if (!project) return res.status(404).json({ message: 'Project not found' });
+ 
+        // Remove from GridFS
+        try {
+            await gridfsBucket.delete(new ObjectId(req.params.fileId));
+        } catch (e) {
+            console.warn('GridFS delete warning (file may already be gone):', e.message);
+        }
+ 
+        // Remove from project.attachments
+        const removedFile = project.attachments.find(a => a.path === req.params.fileId);
+        project.attachments = project.attachments.filter(a => a.path !== req.params.fileId);
+        project.activityLog.push({
+            action: `File deleted: "${removedFile?.filename || req.params.fileId}"`,
+            timestamp: new Date()
+        });
+        await project.save();
+        res.json(project);
+ 
+    } catch (err) {
+        console.error('DELETE ATTACHMENT ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+ 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server on ${PORT}`));
