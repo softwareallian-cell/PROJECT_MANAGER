@@ -5,10 +5,12 @@ import DashBoard from "./Components/DashBoard"
 import LoginPage from "./Components/LoginPage"
 import Projects from "./Components/Projects"
 import Details from "./Components/Details"
+import TrackerWidget from "./Components/TrackerWidget"
 import { GuestGuard, LoginGuard, ProjectGuard } from "./Components/Guards"
 import EditProfile from "./Components/EditProfile";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAssignedProjects, fetchCreatedProjects, fetchNotifications } from "./Components/Redux"
+import TimeSheet from "./Components/TimeSheet"
 function App() {
   const dispatch = useDispatch();
   const mode = useSelector((state) => state.registration.mode);
@@ -39,6 +41,7 @@ function App() {
           <Route path="/dashboard" element={<DashBoard />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/profile" element={<EditProfile />} />
+          <Route path="/timesheet" element={<TimeSheet />} />
 
 
           <Route element={<ProjectGuard />} >
@@ -49,6 +52,7 @@ function App() {
         <Route path="/*" element={<h1>404 NOT FOUND</h1>} />
       </Routes>
 
+      <TrackerWidget />
     </BrowserRouter >
   </>
   )

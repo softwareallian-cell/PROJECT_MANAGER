@@ -171,6 +171,32 @@ export const removeAssigneeDb = createAsyncThunk("projects/removeAssignee", asyn
     }
 });
 
+export const fetchTimeSessions = createAsyncThunk(
+    'timesessions/fetch',
+    async (projectId, { rejectWithValue }) => {
+        try {
+            const res = await axios.get(`${API_URL}/${projectId}/timesessions`);
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || err.message);
+        }
+    }
+);
+
+export const fetchAllTimeSessions = createAsyncThunk(
+    'timesessions/fetchAllUser',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const res = await axios.get(`http://localhost:5000/api/users/${userId}/timesessions`);
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || err.message);
+        }
+    }
+);
+
+
+
 const FORMSLICE = createSlice({
     name: 'registration',
     initialState: {
@@ -179,9 +205,13 @@ const FORMSLICE = createSlice({
         currentUser: JSON.parse(localStorage.getItem("CURRENTUSER"))?.[0] || null,
         notifications: [],
         userSearchResults: [],
+        timeSessions: [],
+        allTimeSessions: [],
         mode: localStorage.getItem("theme") || "dark",
         status: 'idle',
-        error: null
+        error: null,
+        activeTracker: JSON.parse(localStorage.getItem("activeTracker")) || null, // { projectId, subtaskIndex, subtaskTitle }
+        trackerPanelOpen: true
     },
     reducers: {
         toggleTheme: (state) => {
@@ -196,9 +226,24 @@ const FORMSLICE = createSlice({
             state.notifications = [];
             state.userSearchResults = [];
             localStorage.removeItem("CURRENTUSER");
+            localStorage.removeItem("activeTracker");
+            localStorage.removeItem("tracker_session");
             console.log("END OF LOGOUT");
         }, clearUserSearch: (state) => {
             state.userSearchResults = [];
+        },
+        startGlobalTracker: (state, action) => {
+            state.activeTracker = action.payload;
+            state.trackerPanelOpen = true;
+            localStorage.setItem("activeTracker", JSON.stringify(action.payload));
+        },
+        stopGlobalTracker: (state) => {
+            state.activeTracker = null;
+            localStorage.removeItem("activeTracker");
+            localStorage.removeItem("tracker_session");
+        },
+        setTrackerPanelOpen: (state, action) => {
+            state.trackerPanelOpen = action.payload;
         }
 
     },
@@ -272,9 +317,22 @@ const FORMSLICE = createSlice({
 
                 const assignedIndex = state.assignedProjects.findIndex(p => p._id === action.payload._id);
                 if (assignedIndex !== -1) state.assignedProjects[assignedIndex] = action.payload;
+            })
+            .addCase(fetchTimeSessions.fulfilled, (state, action) => {
+                state.timeSessions = action.payload;
+            })
+            .addCase(fetchAllTimeSessions.fulfilled, (state, action) => {
+                state.allTimeSessions = action.payload;
             });
     }
 });
 
-export const { toggleTheme, logoutUser, clearUserSearch } = FORMSLICE.actions;
+export const {
+    toggleTheme,
+    logoutUser,
+    clearUserSearch,
+    startGlobalTracker,
+    stopGlobalTracker,
+    setTrackerPanelOpen
+} = FORMSLICE.actions;
 export const store = configureStore({ reducer: { registration: FORMSLICE.reducer } });

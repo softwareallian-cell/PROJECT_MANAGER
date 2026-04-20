@@ -360,9 +360,14 @@ function DashBoard() {
                     />
                 )}
 
-                <button className="back-btn" onClick={() => navigate("/projects")} style={{ marginTop: '20px' }}>
-                    View All Projects
-                </button>
+                <div style={{ display: 'flex', gap: '12px', marginTop: '30px', borderTop: '1px solid #222', paddingTop: '20px' }}>
+                    <button className="back-btn" onClick={() => navigate("/projects")} style={{ flex: 1, padding: '12px', borderRadius: '10px' }}>
+                        📁 View All Projects
+                    </button>
+                    <button className="back-btn" onClick={() => navigate("/timesheet")} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(242, 170, 77, 0.1)', color: '#f2aa4d', border: '1px solid rgba(242, 170, 77, 0.3)' }}>
+                        ⏱️ Tracked Time Sheet
+                    </button>
+                </div>
             </div>
         </div>
     );

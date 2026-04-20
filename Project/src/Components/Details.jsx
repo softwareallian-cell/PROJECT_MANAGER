@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./Details.css";
 import { useDispatch, useSelector } from "react-redux";
-import { updateProjectDetails } from "./Redux";
+import { updateProjectDetails, fetchTimeSessions, startGlobalTracker } from "./Redux";
 
 const STATUS_COLORS = {
     backlog: 'gray',
@@ -35,6 +35,16 @@ function Details() {
     const [newCheckItem, setNewCheckItem] = useState("");
     const [newMilestone, setNewMilestone] = useState("");
     const [newMilestoneDate, setNewMilestoneDate] = useState("");
+    const [selectedSession, setSelectedSession] = useState(null);
+
+    // Time sessions
+    const timeSessions = useSelector((s) => s.registration.timeSessions);
+
+    useEffect(() => {
+        if (activeTab === "timelog" && project) {
+            dispatch(fetchTimeSessions(project._id));
+        }
+    }, [activeTab, project, dispatch]);
 
     // Attachments state
     const [uploading, setUploading] = useState(false);
@@ -186,7 +196,8 @@ function Details() {
     });
 
     return (
-        <div className="details-wrapper">
+        <>
+            <div className="details-wrapper">
             <button className="back-link" onClick={() => navigate("/projects")}>
                 ← Back to Projects
             </button>
@@ -221,7 +232,7 @@ function Details() {
                 )}
 
                 {/* ── TABS ── */}
-                <div style={{ borderBottom: '1px solid #333', display: 'flex', gap: '4px', marginTop: '24px' }}>
+                <div style={{ borderBottom: '1px solid #333', display: 'flex', gap: '4px', marginTop: '24px', flexWrap: 'wrap' }}>
                     <button style={tabStyle("subtasks")} onClick={() => setActiveTab("subtasks")}>
                         Subtasks ({(project.subtasks || []).length})
                     </button>
@@ -236,6 +247,9 @@ function Details() {
                     </button>
                     <button style={tabStyle("activity")} onClick={() => setActiveTab("activity")}>
                         Activity
+                    </button>
+                    <button id="timelog-tab-btn" style={tabStyle("timelog")} onClick={() => setActiveTab("timelog")}>
+                        ⏱ Time Log
                     </button>
                 </div>
 
@@ -261,25 +275,46 @@ function Details() {
                             {(project.subtasks || []).length === 0 ? (
                                 <div style={{ color: 'gray', fontSize: '13px' }}>No subtasks yet</div>
                             ) : (
-                                (project.subtasks || []).map((s, i) => (
-                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '1px solid #222' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={s.completed}
-                                            onChange={() => toggleSubtask(i)}
-                                            style={{ cursor: 'pointer', width: '16px', height: '16px' }}
-                                        />
-                                        <span style={{
-                                            flex: 1,
-                                            textDecoration: s.completed ? 'line-through' : 'none',
-                                            color: s.completed ? 'gray' : 'inherit',
-                                            fontSize: '14px'
-                                        }}>
-                                            {s.title}
-                                        </span>
-                                        <button onClick={() => deleteSubtask(i)} style={{ background: 'none', border: 'none', color: 'gray', cursor: 'pointer', fontSize: '16px' }}>×</button>
-                                    </div>
-                                ))
+                                (project.subtasks || []).map((s, i) => {
+                                    // Total logged seconds for this subtask
+                                    const loggedSecs = timeSessions
+                                        .filter(sess => sess.subtaskIndex === i && sess.status === 'stopped')
+                                        .reduce((acc, sess) => acc + (sess.totalSeconds || 0), 0);
+                                    const lh = Math.floor(loggedSecs / 3600);
+                                    const lm = Math.floor((loggedSecs % 3600) / 60);
+                                    const loggedLabel = loggedSecs > 0 ? `${lh}h ${String(lm).padStart(2,'0')}m` : null;
+
+                                    return (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '1px solid #222' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={s.completed}
+                                                onChange={() => toggleSubtask(i)}
+                                                style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                                            />
+                                            <span style={{
+                                                flex: 1,
+                                                textDecoration: s.completed ? 'line-through' : 'none',
+                                                color: s.completed ? 'gray' : 'inherit',
+                                                fontSize: '14px'
+                                            }}>
+                                                {s.title}
+                                            </span>
+                                            {loggedLabel && (
+                                                <span style={{ fontSize: '11px', color: '#f2aa4d', whiteSpace: 'nowrap' }}>⏱ {loggedLabel}</span>
+                                            )}
+                                            <button
+                                                id={`tracker-open-btn-${i}`}
+                                                onClick={() => dispatch(startGlobalTracker({ projectId: project._id, subtaskIndex: i, subtaskTitle: s.title }))}
+                                                style={{ background: 'rgba(242,170,77,0.12)', border: '1px solid rgba(242,170,77,0.4)', color: '#f2aa4d', borderRadius: '5px', padding: '3px 10px', fontSize: '12px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                                title="Track time on this subtask"
+                                            >
+                                                ▶ Track
+                                            </button>
+                                            <button onClick={() => deleteSubtask(i)} style={{ background: 'none', border: 'none', color: 'gray', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
                     )}
@@ -507,9 +542,127 @@ function Details() {
                         </div>
                     )}
 
+                    {/* ── TIME LOG TAB ── */}
+                    {activeTab === "timelog" && (
+                        <div className="timelog-tab">
+                            {timeSessions.length === 0 ? (
+                                <div style={{ color: 'gray', fontSize: '13px', padding: '12px 0' }}>No sessions tracked yet. Hit ▶ Track on any subtask above.</div>
+                            ) : (
+                                <>
+                                    {/* Summary Banner */}
+                                    <div className="timelog-summary-banner" style={{ marginBottom: '24px', padding: '20px', background: 'linear-gradient(135deg, rgba(242,170,77,0.1) 0%, rgba(242,170,77,0.05) 100%)', borderRadius: '16px', border: '1px solid rgba(242,170,77,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div>
+                                            <div style={{ fontSize: '12px', color: '#f2aa4d', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Total Tracked Performance</div>
+                                            <div style={{ fontSize: '28px', fontWeight: 800, color: '#fff' }}>
+                                                {(() => {
+                                                    const total = timeSessions
+                                                        .filter(s => s.status === 'stopped')
+                                                        .reduce((a, s) => a + (s.totalSeconds || 0), 0);
+                                                    const h = Math.floor(total / 3600);
+                                                    const m = Math.floor((total % 3600) / 60);
+                                                    return `${h}h ${String(m).padStart(2,'0')}m`;
+                                                })()}
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '20px', fontWeight: 700, color: '#f2aa4d' }}>{timeSessions.length}</div>
+                                            <div style={{ fontSize: '11px', color: '#64748b' }}>Completed Sessions</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Grid Layout */}
+                                    <div className="timelog-grid">
+                                        {timeSessions.map((sess, i) => {
+                                            const h = Math.floor((sess.totalSeconds || 0) / 3600);
+                                            const m = Math.floor(((sess.totalSeconds || 0) % 3600) / 60);
+                                            const durationLabel = `${h}h ${String(m).padStart(2,'0')}m`;
+                                            const dateLabel = new Date(sess.startedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                                            const lastShot = sess.screenshots?.[sess.screenshots.length - 1];
+
+                                            return (
+                                                <div key={i} className="timelog-card" onClick={() => setSelectedSession(sess)}>
+                                                    {lastShot && (
+                                                        <div 
+                                                            className="timelog-hover-preview" 
+                                                            style={{ backgroundImage: `url(http://localhost:5000/api/screenshots/${lastShot.gridfsId})` }}
+                                                        />
+                                                    )}
+                                                    <div className="timelog-card-content">
+                                                        <div className="timelog-card-header">
+                                                            <span className="timelog-card-date">{dateLabel}</span>
+                                                            <span className="timelog-card-duration">{durationLabel}</span>
+                                                        </div>
+                                                        <div className="timelog-card-title">{sess.subtaskTitle}</div>
+                                                        <div className="timelog-card-comment">
+                                                            {sess.comment || "Work session on this subtask..."}
+                                                        </div>
+                                                        <div style={{ marginTop: '12px', fontSize: '10px', color: '#4a5568', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            🖼️ {sess.screenshots?.length || 0} Captures
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
+
                 </div>
             </div>
         </div>
+
+            {/* Session Detail Overlay */}
+            {selectedSession && (
+                <div className="session-overlay" onClick={() => setSelectedSession(null)}>
+                    <div className="session-overlay-content" onClick={e => e.stopPropagation()}>
+                        <div className="session-overlay-header">
+                            <div>
+                                <div style={{ color: '#f2aa4d', fontSize: '12px', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>Session Details</div>
+                                <h2 style={{ margin: 0, fontSize: '24px' }}>{selectedSession.subtaskTitle}</h2>
+                                <div style={{ color: '#64748b', fontSize: '13px', marginTop: '4px' }}>
+                                    {new Date(selectedSession.startedAt).toLocaleString()} • {Math.floor(selectedSession.totalSeconds / 3600)}h {Math.floor((selectedSession.totalSeconds % 3600) / 60)}m
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => setSelectedSession(null)}
+                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', fontSize: '20px' }}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="session-overlay-body">
+                            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>User Comment</div>
+                                <div style={{ fontSize: '15px', color: '#e0e0e0', fontStyle: selectedSession.comment ? 'normal' : 'italic' }}>
+                                    {selectedSession.comment || "No comment provided for this session."}
+                                </div>
+                            </div>
+
+                            <div style={{ marginTop: '30px' }}>
+                                <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', marginBottom: '16px' }}>Activity Timeline ({selectedSession.screenshots?.length || 0} Captures)</div>
+                                <div className="session-gallery">
+                                    {selectedSession.screenshots?.map((shot, idx) => (
+                                        <div key={idx} className="gallery-item" onClick={() => window.open(`http://localhost:5000/api/screenshots/${shot.gridfsId}`)}>
+                                            <img src={`http://localhost:5000/api/screenshots/${shot.gridfsId}`} alt={`Capture ${idx + 1}`} title="Click to view full image" />
+                                            <div className="gallery-item-meta">
+                                                Capture @ {new Date(shot.capturedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {(!selectedSession.screenshots || selectedSession.screenshots.length === 0) && (
+                                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#4a5568', background: 'rgba(255,255,255,0.01)', borderRadius: '12px' }}>
+                                            No screenshots captured during this session.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
 

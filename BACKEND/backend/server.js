@@ -1,3 +1,4 @@
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -23,6 +24,7 @@ const upload = multer({
 mongoose.deleteModel(/.*Project.*/);
 const Project = require('./models/Projects.js');
 const User = require('./models/User.js');
+const TimeSession = require('./models/TimeSession.js');
 let gridfsBucket;
 // Connection
 mongoose.connect(process.env.MONGO_URI)
@@ -412,5 +414,130 @@ app.delete('/api/projects/:id/attachments/:fileId', async (req, res) => {
     }
 });
  
+// =============================================
+// TIME SESSION ROUTES
+// =============================================
+
+// CREATE a new time session
+app.post('/api/timesessions', async (req, res) => {
+    try {
+        const { projectId, subtaskIndex, subtaskTitle, userId, comment } = req.body;
+        const session = new TimeSession({ projectId, subtaskIndex, subtaskTitle, userId, comment });
+        const saved = await session.save();
+        res.status(201).json(saved);
+    } catch (err) {
+        console.error('CREATE TIMESESSION ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// PAUSE a time session
+app.put('/api/timesessions/:id/pause', async (req, res) => {
+    try {
+        const { totalSeconds } = req.body;
+        const session = await TimeSession.findByIdAndUpdate(
+            req.params.id,
+            { status: 'paused', totalSeconds },
+            { new: true }
+        );
+        if (!session) return res.status(404).json({ message: 'Session not found' });
+        res.json(session);
+    } catch (err) {
+        console.error('PAUSE TIMESESSION ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// STOP a time session
+app.put('/api/timesessions/:id/stop', async (req, res) => {
+    try {
+        const { totalSeconds } = req.body;
+        const session = await TimeSession.findByIdAndUpdate(
+            req.params.id,
+            { status: 'stopped', totalSeconds },
+            { new: true }
+        );
+        if (!session) return res.status(404).json({ message: 'Session not found' });
+        res.json(session);
+    } catch (err) {
+        console.error('STOP TIMESESSION ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// UPLOAD screenshot for a time session (streams into GridFS)
+app.post('/api/timesessions/:id/screenshot', upload.single('screenshot'), async (req, res) => {
+    try {
+        if (!gridfsBucket) return res.status(503).json({ message: 'Storage not ready' });
+        if (!req.file) return res.status(400).json({ message: 'No screenshot provided' });
+
+        const session = await TimeSession.findById(req.params.id);
+        if (!session) return res.status(404).json({ message: 'Session not found' });
+
+        const readable = Readable.from(req.file.buffer);
+        const uploadStream = gridfsBucket.openUploadStream(`screenshot-${Date.now()}.png`, {
+            metadata: { sessionId: req.params.id, mimetype: 'image/png' }
+        });
+
+        readable.pipe(uploadStream);
+
+        uploadStream.on('finish', async () => {
+            const gridfsId = String(uploadStream.id);
+            session.screenshots.push({ capturedAt: new Date(), gridfsId });
+            await session.save();
+            res.json({ gridfsId });
+        });
+
+        uploadStream.on('error', (err) => {
+            console.error('GRIDFS SCREENSHOT UPLOAD ERROR:', err.message);
+            res.status(500).json({ message: err.message });
+        });
+    } catch (err) {
+        console.error('SCREENSHOT UPLOAD ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET all time sessions for a project
+app.get('/api/projects/:projectId/timesessions', async (req, res) => {
+    try {
+        const sessions = await TimeSession.find({ projectId: req.params.projectId }).sort({ startedAt: -1 });
+        res.json(sessions);
+    } catch (err) {
+        console.error('GET TIMESESSIONS ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET all time sessions for a user across all projects
+app.get('/api/users/:userId/timesessions', async (req, res) => {
+    try {
+        const sessions = await TimeSession.find({ userId: req.params.userId }).sort({ startedAt: -1 });
+        res.json(sessions);
+    } catch (err) {
+        console.error('GET USER TIMESESSIONS ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// STREAM a screenshot image by GridFS file ID
+app.get('/api/screenshots/:fileId', async (req, res) => {
+    try {
+        const { ObjectId } = require('mongodb');
+        const fileId = new ObjectId(req.params.fileId);
+
+        const files = await gridfsBucket.find({ _id: fileId }).toArray();
+        if (!files || files.length === 0) return res.status(404).json({ message: 'Screenshot not found' });
+
+        res.set('Content-Type', 'image/png');
+        const downloadStream = gridfsBucket.openDownloadStream(fileId);
+        downloadStream.pipe(res);
+        downloadStream.on('error', () => res.status(404).json({ message: 'Screenshot not found' }));
+    } catch (err) {
+        console.error('GET SCREENSHOT ERROR:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server on ${PORT}`));

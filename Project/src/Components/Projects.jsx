@@ -127,7 +127,7 @@ function Projects() {
         setEditId(null);
     }
 
-    const [deleteId, setdeleteId] = useState(0);
+    const [deleteId, setdeleteId] = useState(null);
 
     // ASSIGN PANEL STATE
     const [assignPanelProjectId, setAssignPanelProjectId] = useState(null);
@@ -175,7 +175,8 @@ function Projects() {
         setViewMode("list");
     };
     return (
-        <>  <h1>WELCOME {CURRENT_USER[0].email}
+        <> 
+         <h1>WELCOME {CURRENT_USER[0].email}
             <span style={{
                 fontSize: '14px',
                 marginLeft: '10px',
@@ -225,7 +226,7 @@ function Projects() {
                             style={{
                                 border: activeTab === "assigned" ? '2px solid var(--accent-amber)' : '1px solid gray',
                             }}>
-                            Assigned to Me ({assignedProjects.length})
+                            Assigned to Me({assignedProjects.length})
                         </button>
                     </div>
 
@@ -278,7 +279,7 @@ function Projects() {
                 <div style={{ maxWidth: '800px' }}>
 
                     <div className="Search-Bar">
-                        <div style={{ display: 'flex', maxHeight: '38px' }}>
+                        <div style={{ display: 'flex', maxHeight: '38px', gap: '10px' }}>
                             <button
                                 onClick={() => setViewMode("list")}
                                 style={{
