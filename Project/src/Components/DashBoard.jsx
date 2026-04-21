@@ -1,34 +1,25 @@
 import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Bell, Folder, Clock } from "lucide-react";
 import "./DashBoard.css"
 import GanttView from "./GanttView";
 import { fetchCreatedProjects, fetchAssignedProjects } from "./Redux";
 
-const STATUS_COLORS = {
-    backlog: 'gray',
-    todo: '#4a9eff',
-    inprogress: '#f2aa4d',
-    inreview: '#a855f7',
-    onhold: 'orange',
-    done: 'teal',
-    complete: 'lime'
+const STATUS_CLASSES = {
+    backlog: 'status-backlog',
+    todo: 'status-todo',
+    inprogress: 'status-inprogress',
+    inreview: 'status-inreview',
+    onhold: 'status-onhold',
+    done: 'status-done',
+    complete: 'status-complete'
 };
 
-const STATUS_LABELS = {
-    backlog: 'Backlog',
-    todo: 'To Do',
-    inprogress: 'In Progress',
-    inreview: 'In Review',
-    onhold: 'On Hold',
-    done: 'Done',
-    complete: 'Complete'
-};
-
-const PRIORITY_COLORS = {
-    low: '#22c55e',
-    medium: '#f2aa4d',
-    high: '#ef4444'
+const PRIORITY_CLASSES = {
+    low: 'priority-low',
+    medium: 'priority-medium',
+    high: 'priority-high'
 };
 
 // ── Pure SVG Donut Chart ──────────────────────────────────────
@@ -40,23 +31,21 @@ function DonutChart({ data, size = 180, thickness = 36, title, total }) {
     const cx = size / 2;
     const cy = size / 2;
 
-    // Filter out zero values
     const nonZero = data.filter(d => d.value > 0);
     const sum = nonZero.reduce((acc, d) => acc + d.value, 0);
 
     if (sum === 0) {
         return (
-            <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '13px', color: '#555', marginBottom: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</div>
+            <div className="chart-box empty-chart">
+                <div className="chart-title">{title}</div>
                 <svg width={size} height={size}>
-                    <circle cx={cx} cy={cy} r={radius} fill="none" stroke="#1e1e3a" strokeWidth={thickness} />
-                    <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fill="#333" fontSize="13">No data</text>
+                    <circle cx={cx} cy={cy} r={radius} fill="none" stroke="var(--bg-secondary)" strokeWidth={thickness} />
+                    <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fill="var(--text-secondary)" fontSize="13">No data</text>
                 </svg>
             </div>
         );
     }
 
-    // Build slices
     let cumulative = 0;
     const slices = nonZero.map(d => {
         const pct = d.value / sum;
@@ -67,13 +56,11 @@ function DonutChart({ data, size = 180, thickness = 36, title, total }) {
     });
 
     return (
-        <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '13px', color: '#888', marginBottom: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</div>
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-                <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-                    {/* Background track */}
-                    <circle cx={cx} cy={cy} r={radius} fill="none" stroke="#1a1a2e" strokeWidth={thickness} />
-                    {/* Slices */}
+        <div className="chart-wrapper">
+            <div className="chart-title">{title}</div>
+            <div className="donut-container">
+                <svg width={size} height={size} className="donut-svg">
+                    <circle cx={cx} cy={cy} r={radius} fill="none" stroke="var(--bg-secondary)" strokeWidth={thickness} />
                     {slices.map((s, i) => (
                         <circle
                             key={i}
@@ -83,47 +70,36 @@ function DonutChart({ data, size = 180, thickness = 36, title, total }) {
                             strokeWidth={hovered === i ? thickness + 6 : thickness}
                             strokeDasharray={`${s.dashLength} ${circumference - s.dashLength}`}
                             strokeDashoffset={s.offset}
-                            strokeLinecap="butt"
-                            style={{ cursor: 'pointer', transition: 'stroke-width 0.15s' }}
+                            className={`donut-slice ${hovered === i ? 'hovered' : ''}`}
                             onMouseEnter={() => setHovered(i)}
                             onMouseLeave={() => setHovered(null)}
                         />
                     ))}
                 </svg>
-                {/* Center label */}
-                <div style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    textAlign: 'center', pointerEvents: 'none'
-                }}>
+                <div className="donut-center-overlay">
                     {hovered !== null ? (
                         <>
-                            <div style={{ fontSize: '20px', fontWeight: 700, color: slices[hovered]?.color }}>{slices[hovered]?.value}</div>
-                            <div style={{ fontSize: '10px', color: '#888', maxWidth: '60px', lineHeight: 1.2 }}>{slices[hovered]?.label}</div>
+                            <div className="donut-center-val highlighted" style={{ color: slices[hovered]?.color }}>{slices[hovered]?.value}</div>
+                            <div className="donut-center-label">{slices[hovered]?.label}</div>
                         </>
                     ) : (
                         <>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#f0f0f0' }}>{total ?? sum}</div>
-                            <div style={{ fontSize: '11px', color: '#555' }}>total</div>
+                            <div className="donut-center-val">{total ?? sum}</div>
+                            <div className="donut-center-label">total</div>
                         </>
                     )}
                 </div>
             </div>
 
-            {/* Legend */}
-            <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-start', paddingLeft: '10px' }}>
+            <div className="chart-legend">
                 {slices.map((s, i) => (
-                    <div key={i} style={{
-                        display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px',
-                        color: hovered === i ? s.color : '#888',
-                        cursor: 'pointer', transition: 'color 0.15s'
-                    }}
+                    <div key={i} className={`legend-item ${hovered === i ? 'active' : ''}`}
                         onMouseEnter={() => setHovered(i)}
                         onMouseLeave={() => setHovered(null)}>
-                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: s.color, flexShrink: 0 }} />
-                        <span>{s.label}</span>
-                        <span style={{ color: '#555', marginLeft: 'auto' }}>
-                            {s.value} ({Math.round(s.pct * 100)}%)
+                        <div className="legend-dot" style={{ background: s.color }} />
+                        <span className="label-text">{s.label}</span>
+                        <span className="legend-pct">
+                            {s.value} <small>({Math.round(s.pct * 100)}%)</small>
                         </span>
                     </div>
                 ))}
@@ -137,21 +113,22 @@ function AnalyticsTab({ createdProjects, assignedProjects }) {
     const allProjects = [...createdProjects, ...assignedProjects];
     const unique = [...new Map(allProjects.map(p => [p._id, p])).values()];
 
-    // Chart 1 — by status
-    const statusData = Object.entries(STATUS_COLORS).map(([key, color]) => ({
-        label: STATUS_LABELS[key],
-        value: unique.filter(p => p.status === key).length,
-        color
-    }));
+    const statusData = [
+        { label: 'Backlog', value: unique.filter(p => p.status === 'backlog').length, color: 'var(--text-secondary)' },
+        { label: 'To Do', value: unique.filter(p => p.status === 'todo').length, color: '#4a9eff' },
+        { label: 'In Progress', value: unique.filter(p => p.status === 'inprogress').length, color: 'var(--accent-amber)' },
+        { label: 'In Review', value: unique.filter(p => p.status === 'inreview').length, color: '#a855f7' },
+        { label: 'On Hold', value: unique.filter(p => p.status === 'onhold').length, color: '#f59e0b' },
+        { label: 'Done', value: unique.filter(p => p.status === 'done').length, color: '#10b981' },
+        { label: 'Complete', value: unique.filter(p => p.status === 'complete').length, color: '#22c55e' }
+    ];
 
-    // Chart 2 — by priority
-    const priorityData = Object.entries(PRIORITY_COLORS).map(([key, color]) => ({
-        label: key.charAt(0).toUpperCase() + key.slice(1),
-        value: unique.filter(p => p.priority === key).length,
-        color
-    }));
+    const priorityData = [
+        { label: 'Low', value: unique.filter(p => p.priority === 'low').length, color: '#10b981' },
+        { label: 'Medium', value: unique.filter(p => p.priority === 'medium').length, color: 'var(--accent-amber)' },
+        { label: 'High', value: unique.filter(p => p.priority === 'high').length, color: 'var(--danger)' }
+    ];
 
-    // Chart 3 — workload per member (assignedTo counts)
     const workloadMap = {};
     createdProjects.forEach(p => {
         (p.assignedTo || []).forEach(uid => {
@@ -165,14 +142,13 @@ function AnalyticsTab({ createdProjects, assignedProjects }) {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 6)
         .map(([uid, count], i) => ({
-            label: `…${uid}`,
+            label: `Member …${uid}`,
             value: count,
             color: memberColors[i % memberColors.length]
         }));
 
     const totalAssigned = workloadData.reduce((a, b) => a + b.value, 0);
 
-    // Stats summary row
     const today = new Date().toISOString().substring(0, 10);
     const overdue = unique.filter(p => p.date < today && !['done', 'complete'].includes(p.status)).length;
     const completed = unique.filter(p => ['done', 'complete'].includes(p.status)).length;
@@ -180,70 +156,47 @@ function AnalyticsTab({ createdProjects, assignedProjects }) {
     const completionRate = unique.length ? Math.round((completed / unique.length) * 100) : 0;
 
     const statCards = [
-        { label: 'Total Projects', value: unique.length, color: '#4a9eff' },
-        { label: 'Completed', value: completed, color: 'teal' },
-        { label: 'In Progress', value: inProgress, color: '#f2aa4d' },
-        { label: 'Overdue', value: overdue, color: '#ef4444' },
-        { label: 'Completion Rate', value: `${completionRate}%`, color: '#84cc16' },
+        { label: 'Total Projects', value: unique.length, class: 'total' },
+        { label: 'Completed', value: completed, class: 'completed' },
+        { label: 'In Progress', value: inProgress, class: 'progress' },
+        { label: 'Overdue', value: overdue, class: 'danger' },
+        { label: 'Completion Rate', value: `${completionRate}%`, class: 'rate' },
     ];
 
     return (
-        <div style={{ padding: '10px 0' }}>
-            {/* Summary stat cards */}
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '32px' }}>
+        <div className="analytics-tab-content">
+            <div className="analytics-grid">
                 {statCards.map(s => (
-                    <div key={s.label} style={{
-                        background: '#1a1a2e',
-                        border: `1px solid ${s.color}33`,
-                        borderRadius: '10px',
-                        padding: '16px 20px',
-                        minWidth: '130px',
-                        flex: '1'
-                    }}>
-                        <div style={{ fontSize: '28px', fontWeight: 700, color: s.color }}>{s.value}</div>
-                        <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>{s.label}</div>
+                    <div key={s.label} className={`analytics-card stat-variant-${s.class}`}>
+                        <div className="analytics-val">{s.value}</div>
+                        <div className="analytics-label">{s.label}</div>
                     </div>
                 ))}
             </div>
 
-            {/* Donut charts row */}
-            <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', justifyContent: 'space-around' }}>
-                <div style={{ background: '#1a1a2e', border: '1px solid #222240', borderRadius: '12px', padding: '24px' }}>
+            <div className="charts-container">
+                <DonutChart
+                    data={statusData}
+                    title="Distribution by Status"
+                    total={unique.length}
+                />
+                <DonutChart
+                    data={priorityData}
+                    title="Volume by Priority"
+                    total={unique.length}
+                />
+                {workloadData.length > 0 ? (
                     <DonutChart
-                        data={statusData}
-                        title="Projects by Status"
-                        total={unique.length}
-                        size={180}
-                        thickness={36}
+                        data={workloadData}
+                        title="Workload per Member"
+                        total={totalAssigned}
                     />
-                </div>
-
-                <div style={{ background: '#1a1a2e', border: '1px solid #222240', borderRadius: '12px', padding: '24px' }}>
-                    <DonutChart
-                        data={priorityData}
-                        title="Projects by Priority"
-                        total={unique.length}
-                        size={180}
-                        thickness={36}
-                    />
-                </div>
-
-                <div style={{ background: '#1a1a2e', border: '1px solid #222240', borderRadius: '12px', padding: '24px' }}>
-                    {workloadData.length > 0 ? (
-                        <DonutChart
-                            data={workloadData}
-                            title="Workload per Member"
-                            total={totalAssigned}
-                            size={180}
-                            thickness={36}
-                        />
-                    ) : (
-                        <div style={{ textAlign: 'center', minWidth: '200px' }}>
-                            <div style={{ fontSize: '13px', color: '#888', marginBottom: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Workload per Member</div>
-                            <div style={{ color: '#333', fontSize: '13px', padding: '40px 0' }}>No members assigned yet</div>
-                        </div>
-                    )}
-                </div>
+                ) : (
+                    <div className="chart-box empty-state">
+                        <div className="chart-title">Workload per Member</div>
+                        <div className="empty-chart-text">No active assignments</div>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -259,7 +212,7 @@ function DashBoard() {
     useEffect(() => {
         dispatch(fetchCreatedProjects(CURRENTUSER_ID));
         dispatch(fetchAssignedProjects(CURRENTUSER_ID));
-    }, []);
+    }, [dispatch, CURRENTUSER_ID]);
 
     const createdProjects = useSelector((state) => state.registration.createdProjects);
     const assignedProjects = useSelector((state) => state.registration.assignedProjects);
@@ -270,105 +223,120 @@ function DashBoard() {
 
     const total = createdProjects.length;
     const active = createdProjects.filter(p => p.status === 'inprogress').length;
-    const completed = createdProjects.filter(p => p.status === 'complete').length;
+    const completed = createdProjects.filter(p => p.status === 'complete' || p.status === 'done').length;
     const overdue = createdProjects.filter(p => p.date < today && p.status !== 'complete' && p.status !== 'done').length;
     const inReview = createdProjects.filter(p => p.status === 'inreview').length;
 
-    const pct = (count) => total ? `${Math.round((count / total) * 100)}%` : '0%';
-
-    const tabStyle = (tab) => ({
-        padding: '8px 20px',
-        cursor: 'pointer',
-        border: 'none',
-        borderBottom: activeTab === tab ? '2px solid var(--accent-amber)' : '2px solid transparent',
-        background: 'transparent',
-        color: activeTab === tab ? 'var(--accent-amber)' : 'inherit',
-        fontWeight: activeTab === tab ? 'bold' : 'normal',
-        fontSize: '14px'
-    });
+    const pctVal = (count) => total ? (count / total) * 100 : 0;
 
     return (
         <div className="dashboard-wrapper">
-            <div style={{ width: '100%' }}>
-                <h1 style={{ color: '#f2aa4d' }}>DASHBOARD VIEW</h1>
-
-                {/* Notification banner */}
+            <header className="dashboard-header">
+                <h1 className="dashboard-title">Project Control Center</h1>
                 {unreadCount > 0 && (
-                    <div style={{
-                        background: '#a855f7',
-                        color: 'white',
-                        padding: '10px 16px',
-                        borderRadius: '8px',
-                        marginBottom: '16px'
-                    }}>
-                        🔔 You have {unreadCount} unread notification{unreadCount > 1 ? 's' : ''}
+                    <div className="notice-banner">
+                        <span className="icon"><Bell size={18} /></span>
+                        <span>You have <strong>{unreadCount}</strong> pending update{unreadCount > 1 ? 's' : ''}</span>
                     </div>
                 )}
+            </header>
 
-                {/* Tab bar */}
-                <div style={{ borderBottom: '1px solid #333', display: 'flex', gap: '4px', marginBottom: '24px' }}>
-                    <button style={tabStyle("overview")} onClick={() => setActiveTab("overview")}>
-                        Overview
-                    </button>
-                    <button style={tabStyle("gantt")} onClick={() => setActiveTab("gantt")}>
-                        Gantt Chart
-                    </button>
-                    <button style={tabStyle("analytics")} onClick={() => setActiveTab("analytics")}>
-                        📊 Analytics
-                    </button>
-                </div>
+            <nav className="dashboard-tabs">
+                <button 
+                    className={`dashboard-tab${activeTab === "overview" ? " active" : ""}`} 
+                    onClick={() => setActiveTab("overview")}
+                >
+                    Overview
+                </button>
+                <button 
+                    className={`dashboard-tab${activeTab === "gantt" ? " active" : ""}`} 
+                    onClick={() => setActiveTab("gantt")}
+                >
+                    Gantt View
+                </button>
+                <button 
+                    className={`dashboard-tab${activeTab === "analytics" ? " active" : ""}`} 
+                    onClick={() => setActiveTab("analytics")}
+                >
+                    Live Analytics
+                </button>
+            </nav>
 
-                {/* ── Overview Tab ── */}
+            <main className="dashboard-main-content">
                 {activeTab === "overview" && (
-                    <div className="stat-card">
-                        <h2>Total Projects: {total}</h2>
-
-                        <h2>In Progress: {active}</h2>
-                        <div className="bar-track">
-                            <div className="bar-fill" style={{ background: STATUS_COLORS.inprogress, width: pct(active) }}></div>
+                    <div className="overview-pane">
+                        <div className="summary-stat-group">
+                            <div className="main-stat">
+                                <span className="val">{total}</span>
+                                <span className="lbl">Total Active Projects</span>
+                            </div>
+                            <div className="assigned-pill">
+                                <b>{assignedProjects.length}</b> projects assigned to you
+                            </div>
                         </div>
 
-                        <h2>In Review: {inReview}</h2>
-                        <div className="bar-track">
-                            <div className="bar-fill" style={{ background: STATUS_COLORS.inreview, width: pct(inReview) }}></div>
-                        </div>
+                        <div className="progress-section">
+                            <div className="progress-item">
+                                <div className="p-header">
+                                    <span>In Progress</span>
+                                    <span className="count">{active}</span>
+                                </div>
+                                <div className="p-track">
+                                    <div className="p-fill in-progress" style={{ width: `${pctVal(active)}%` }}></div>
+                                </div>
+                            </div>
 
-                        <h2>Completed: {completed}</h2>
-                        <div className="bar-track">
-                            <div className="bar-fill" style={{ background: STATUS_COLORS.complete, width: pct(completed) }}></div>
-                        </div>
+                            <div className="progress-item">
+                                <div className="p-header">
+                                    <span>In Review</span>
+                                    <span className="count">{inReview}</span>
+                                </div>
+                                <div className="p-track">
+                                    <div className="p-fill in-review" style={{ width: `${pctVal(inReview)}%` }}></div>
+                                </div>
+                            </div>
 
-                        <h2><i style={{ color: 'red' }}>Overdue:</i> {overdue}</h2>
-                        <div className="bar-track">
-                            <div className="bar-fill" style={{ background: 'red', width: pct(overdue) }}></div>
-                        </div>
+                            <div className="progress-item">
+                                <div className="p-header">
+                                    <span>Completed</span>
+                                    <span className="count">{completed}</span>
+                                </div>
+                                <div className="p-track">
+                                    <div className="p-fill completed" style={{ width: `${pctVal(completed)}%` }}></div>
+                                </div>
+                            </div>
 
-                        <h2>Assigned to Me: {assignedProjects.length}</h2>
+                            <div className="progress-item">
+                                <div className="p-header danger">
+                                    <span>Overdue</span>
+                                    <span className="count">{overdue}</span>
+                                </div>
+                                <div className="p-track">
+                                    <div className="p-fill overdue" style={{ width: `${pctVal(overdue)}%` }}></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
 
-                {/* ── Gantt Tab ── */}
-                {activeTab === "gantt" && (
-                    <GanttView />
-                )}
+                {activeTab === "gantt" && <GanttView />}
 
-                {/* ── Analytics Tab ── */}
                 {activeTab === "analytics" && (
                     <AnalyticsTab
                         createdProjects={createdProjects}
                         assignedProjects={assignedProjects}
                     />
                 )}
+            </main>
 
-                <div style={{ display: 'flex', gap: '12px', marginTop: '30px', borderTop: '1px solid #222', paddingTop: '20px' }}>
-                    <button className="back-btn" onClick={() => navigate("/projects")} style={{ flex: 1, padding: '12px', borderRadius: '10px' }}>
-                        📁 View All Projects
-                    </button>
-                    <button className="back-btn" onClick={() => navigate("/timesheet")} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(242, 170, 77, 0.1)', color: '#f2aa4d', border: '1px solid rgba(242, 170, 77, 0.3)' }}>
-                        ⏱️ Tracked Time Sheet
-                    </button>
-                </div>
-            </div>
+            <footer className="dashboard-footer">
+                <button className="dash-action-btn primary" onClick={() => navigate("/projects")}>
+                    <Folder size={18} /> Project Directory
+                </button>
+                <button className="dash-action-btn" onClick={() => navigate("/timesheet")}>
+                    <Clock size={18} /> Global Timesheet
+                </button>
+            </footer>
         </div>
     );
 }

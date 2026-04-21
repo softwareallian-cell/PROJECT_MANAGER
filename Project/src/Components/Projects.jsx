@@ -5,42 +5,38 @@ import { addProjectDb, assignProjectDb, clearUserSearch, deleteProjectDb, editPr
 import { createPortal } from "react-dom";
 import './Projects.css'
 import { NavLink, useNavigate } from "react-router-dom";
+import { Calendar, Users, X, Check, AlertTriangle, Trash2, Plus, LayoutDashboard, User, LogOut, Sun, Moon, Search, List, KanbanSquare } from "lucide-react";
 
 const STATUS_OPTIONS = ['backlog', 'todo', 'inprogress', 'inreview', 'onhold', 'done', 'complete'];
 const PRIORITY_OPTIONS = ['low', 'medium', 'high'];
 
-const STATUS_COLORS = {
-    backlog: 'gray',
-    todo: '#4a9eff',
-    inprogress: '#f2aa4d',
-    inreview: '#a855f7',
-    onhold: 'orange',
-    done: 'teal',
-    complete: 'lime'
+const STATUS_CLASSES = {
+    backlog: 'status-backlog',
+    todo: 'status-todo',
+    inprogress: 'status-inprogress',
+    inreview: 'status-inreview',
+    onhold: 'status-onhold',
+    done: 'status-done',
+    complete: 'status-complete'
 };
 
-const PRIORITY_COLORS = {
-    low: 'lime',
-    medium: '#f2aa4d',
-    high: 'red'
+const PRIORITY_CLASSES = {
+    low: 'priority-low',
+    medium: 'priority-medium',
+    high: 'priority-high'
 };
-
 
 function Projects() {
-
-
-
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const CURRENTUSER_ID = JSON.parse(localStorage.getItem("CURRENTUSER"))[0]._id;
     const CURRENT_USER = JSON.parse(localStorage.getItem("CURRENTUSER"));
+    const CURRENTUSER_ID = CURRENT_USER[0]._id;
     const themeMode = useSelector((state) => state.registration.mode);
     const isManager = CURRENT_USER[0].role === 'manager';
 
     const createdProjects = useSelector((state) => state.registration.createdProjects);
     const assignedProjects = useSelector((state) => state.registration.assignedProjects);
     const userSearchResults = useSelector((state) => state.registration.userSearchResults);
-
 
     const [activeTab, setActiveTab] = useState("mine");
     const [viewMode, setViewMode] = useState("list");
@@ -49,11 +45,11 @@ function Projects() {
     const [Description, setDesc] = useState("");
     const [Status, setStatus] = useState("backlog");
     const [Priority, setPriority] = useState("medium");
-    const [Tags, setTags] = useState("");         // comma separated input
+    const [Tags, setTags] = useState("");
     const [Sprint, setSprint] = useState(1);
     const [Due_Date, setDate] = useState("");
 
-    const [Search, setSearch] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
     const [Search_Status, setSearch_Status] = useState("all");
     const [Search_Priority, setSearch_Priority] = useState("all");
 
@@ -62,10 +58,10 @@ function Projects() {
     useEffect(() => {
         dispatch(fetchCreatedProjects(CURRENTUSER_ID));
         dispatch(fetchAssignedProjects(CURRENTUSER_ID));
-    }, []);
+    }, [dispatch, CURRENTUSER_ID]);
 
     const Filtered_Projects = activeProjects
-        .filter((p) => p.Title.toLocaleLowerCase().includes(Search.toLocaleLowerCase().trim()))
+        .filter((p) => p.Title.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase().trim()))
         .filter((p) => Search_Status === "all" ? true : p.status === Search_Status)
         .filter((p) => Search_Priority === "all" ? true : p.priority === Search_Priority);
 
@@ -84,8 +80,11 @@ function Projects() {
             startDate: new Date().toISOString().substring(0, 10)
         };
         dispatch(addProjectDb(data));
+        setTitle("");
+        setDesc("");
+        setTags("");
+        setDate("");
     };
-
 
     // Edit state
     const [EditId, setEditId] = useState(null);
@@ -106,8 +105,7 @@ function Projects() {
         setEditTags(p.tags ? p.tags.join(', ') : '');
         setEditSprint(p.sprint);
         setEditDate(p.date);
-
-    }
+    };
 
     const edit_Project = (e) => {
         e.preventDefault();
@@ -125,7 +123,7 @@ function Projects() {
             }
         }));
         setEditId(null);
-    }
+    };
 
     const [deleteId, setdeleteId] = useState(null);
 
@@ -144,6 +142,7 @@ function Projects() {
         setAssignSearchQ("");
         dispatch(clearUserSearch());
     };
+
     const handleAssignSearch = (e) => {
         const q = e.target.value;
         setAssignSearchQ(q);
@@ -154,7 +153,6 @@ function Projects() {
         }
     };
 
-
     const handleAssign = (projectId, userId) => {
         dispatch(assignProjectDb({ projectId, assignToUserId: userId }));
     };
@@ -163,169 +161,183 @@ function Projects() {
         dispatch(removeAssigneeDb({ projectId, userId }));
     };
 
-
-
     const logout = () => {
-        console.log("logout 1")
         dispatch(logoutUser());
         navigate("/login");
-    }
+    };
+
     const handleKanbanEdit = (p) => {
         startEditing(p);
         setViewMode("list");
     };
-    return (
-        <> 
-         <h1>WELCOME {CURRENT_USER[0].email}
-            <span style={{
-                fontSize: '14px',
-                marginLeft: '10px',
-                padding: '3px 10px',
-                border: '1px solid var(--accent-amber)',
-                borderRadius: '20px'
-            }}>
-                {CURRENT_USER[0].role}
-            </span>
-        </h1 >
 
-            {deleteId && createPortal(
-                <div className="modal-overlay">
-                    <div className="modal-form">
-                        <h1> Are You Sure?</h1>
-                        <p> You want to Delete This Project?</p>
-                        <div style={{ display: "flex", justifyContent: "center", gap: '20px', margin: '10px 0px' }}>
-                            <button style={{ background: 'red', color: 'white' }} onClick={() => {
-                                dispatch(deleteProjectDb(deleteId));
-                                setdeleteId(null);
-                            }}>Yes</button>
-                            <button onClick={() => setdeleteId(0)} style={{ border: '1px solid var(--accent-amber)' }}> Not Sure </button>
+    return (
+        <>
+            <h1 className="projects-welcome-header">
+                WELCOME {CURRENT_USER[0].email}
+                <span className="role-badge">{CURRENT_USER[0].role}</span>
+            </h1>
+
+            {deleteId && (() => {
+                const projectToDelete = createdProjects.find(p => p._id === deleteId);
+                return createPortal(
+                    <div className="modal-overlay">
+                        <div className="modal-form confirm-modal">
+                            <div className="confirm-icon">
+                                <AlertTriangle size={48} color="var(--danger)" />
+                            </div>
+                            <h1>Are You Sure?</h1>
+                            <p>You want to permanently delete this project? This action cannot be undone.</p>
+
+                            {projectToDelete && (
+                                <div className="delete-project-details">
+                                    <div >
+                                        <span className="value" title={projectToDelete.Title}>{projectToDelete.Title}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="modal-actions">
+                                <button className="confirm-btn delete" onClick={() => {
+                                    dispatch(deleteProjectDb(deleteId));
+                                    setdeleteId(null);
+                                }}>
+                                    <Trash2 size={16} /> Delete Project
+                                </button>
+                                <button className="confirm-btn cancel" onClick={() => setdeleteId(null)}>
+                                    <X size={16} /> Cancel
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                , document.getElementById("modal-root"))
-            }
+                    , document.getElementById("modal-root"));
+            })()}
 
             <div className="PROJECTS">
-                <div style={{ display: 'flex ', gap: '20px', maxHeight: '380px' }}>
-                    <div className="projects-btns" >
-                        <button className="logout-btn" onClick={() => navigate("/dashboard")}>DASHBOARD</button >
-                        <button className="logout-btn" onClick={() => navigate("/profile")}>Edit Profile</button>
-                        <button className="logout-btn" onClick={logout}>LOGOUT</button>
-                        <button className="toggle-btn" onClick={() => dispatch(toggleTheme())} style={{ padding: '10px' }}>{themeMode === "dark" ? "Current: Dark Mode " : "Current:Light Mode"}</button>
+                <div className="projects-sidebar">
+                    <div className="sidebar-nav">
+                        <button className="nav-btn dashboard-btn" onClick={() => navigate("/dashboard")}>
+                            <LayoutDashboard size={14} /> DASHBOARD
+                        </button>
+                        <button className="nav-btn" onClick={() => navigate("/profile")}>
+                            <User size={14} /> EDIT PROFILE
+                        </button>
+                        <button className="nav-btn theme-toggle" onClick={() => dispatch(toggleTheme())}>
+                            {themeMode === "dark" ? <Sun size={14} /> : <Moon size={14} />} {themeMode === "dark" ? "LIGHT MODE" : "DARK MODE"}
+                        </button>
+                        <button className="nav-btn logout-action" onClick={logout}>
+                            <LogOut size={14} /> LOGOUT
+                        </button>
+                    </div>
+
+                    <div className="sidebar-tabs">
                         <button
-                            onClick={() => setActiveTab("mine")}
-                            style={{
-                                border: activeTab === "mine" ? '2px solid var(--accent-amber)' : '1px solid gray',
-                                padding: '8px 20px'
-                            }}>
+                            className={`tab-btn${activeTab === "mine" ? " active" : ""}`}
+                            onClick={() => setActiveTab("mine")}>
                             My Projects ({createdProjects.length})
                         </button>
 
                         <button
-                            onClick={() => setActiveTab("assigned")}
-                            style={{
-                                border: activeTab === "assigned" ? '2px solid var(--accent-amber)' : '1px solid gray',
-                            }}>
-                            Assigned to Me({assignedProjects.length})
+                            className={`tab-btn${activeTab === "assigned" ? " active" : ""}`}
+                            onClick={() => setActiveTab("assigned")}>
+                            Assigned to Me ({assignedProjects.length})
                         </button>
                     </div>
 
                     {activeTab === "mine" && (
-                        <div className="project-form" >
+                        <div className="project-form">
+                            <h3>CREATE NEW PROJECT</h3>
                             <form onSubmit={add_Project}>
-                                <label>Title</label>
-                                <input type="text" onChange={(e) => setTitle(e.target.value)} required />
+                                <div className="field-group">
+                                    <label>Title</label>
+                                    <input type="text" value={Title} onChange={(e) => setTitle(e.target.value)} required />
+                                </div>
 
-                                <label>Description</label>
-                                <textarea onChange={(e) => setDesc(e.target.value)}></textarea>
+                                <div className="field-group">
+                                    <label>Description</label>
+                                    <textarea rows="3" value={Description} onChange={(e) => setDesc(e.target.value)}></textarea>
+                                </div>
 
-                                <label>Status</label>
-                                <select onChange={(e) => setStatus(e.target.value)} value={Status}>
-                                    {STATUS_OPTIONS.map(s => (
-                                        <option key={s} value={s}>{s}</option>
-                                    ))}
-                                </select>
+                                <div className="form-row">
+                                    <div className="field-group">
+                                        <label>Status</label>
+                                        <select onChange={(e) => setStatus(e.target.value)} value={Status}>
+                                            {STATUS_OPTIONS.map(s => (
+                                                <option key={s} value={s}>{s}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Priority</label>
+                                        <select onChange={(e) => setPriority(e.target.value)} value={Priority}>
+                                            {PRIORITY_OPTIONS.map(p => (
+                                                <option key={p} value={p}>{p}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
 
-                                <label>Priority</label>
-                                <select onChange={(e) => setPriority(e.target.value)} value={Priority}>
-                                    {PRIORITY_OPTIONS.map(p => (
-                                        <option key={p} value={p}>{p}</option>
-                                    ))}
-                                </select>
+                                <div className="field-group">
+                                    <label>Tags (comma separated)</label>
+                                    <input type="text" value={Tags} placeholder="e.g. design, frontend" onChange={(e) => setTags(e.target.value)} />
+                                </div>
 
-                                <label>Tags (comma separated)</label>
-                                <input type="text" placeholder="e.g. design, frontend" onChange={(e) => setTags(e.target.value)} />
+                                <div className="form-row">
+                                    <div className="field-group sprint-field">
+                                        <label>Sprint</label>
+                                        <input type="number" min="1"  value={Sprint} onChange={(e) => setSprint(Number(e.target.value))} />
+                                    </div>
+                                    <div className="field-group">
+                                        <label>Due Date</label>
+                                        <input type="date" value={Due_Date} onChange={(e) => setDate(e.target.value)} required />
+                                    </div>
+                                </div>
 
-                                <label>Sprint</label>
-                                <input type="number" min="1" defaultValue={1} onChange={(e) => setSprint(Number(e.target.value))} />
-
-                                <label>Due Date</label>
-                                <input type="date" onChange={(e) => setDate(e.target.value)} required />
-
-                                <button type="submit" style={{ border: '1px solid var(--accent-amber)' }}>  ADD+ </button>
+                                <button type="submit" className="submit-btn">CREATE PROJECT</button>
                             </form>
-                        </div >)}
+                        </div>
+                    )}
                 </div>
 
-
-                <div >
-
-
-                </div>
-
-                {/* 🆕 VIEW MODE TOGGLE */}
-
-
-                <div style={{ maxWidth: '800px' }}>
-
+                <div className="projects-main-content">
                     <div className="Search-Bar">
-                        <div style={{ display: 'flex', maxHeight: '38px', gap: '10px' }}>
+                        <div className="view-toggle">
                             <button
-                                onClick={() => setViewMode("list")}
-                                style={{
-                                    border: viewMode === "list" ? '2px solid var(--accent-amber)' : '1px solid gray',
-
-
-                                    background: viewMode === "list" ? 'var(--accent-amber)' : 'transparent',
-                                    color: viewMode === "list" ? 'black' : 'inherit',
-
-                                    cursor: 'pointer'
-                                }}>
-                                List
+                                className={`view-btn${viewMode === "list" ? " active" : ""}`}
+                                onClick={() => setViewMode("list")}>
+                                <List size={14} /> List View
                             </button>
                             <button
-                                onClick={() => setViewMode("kanban")}
-                                style={{
-                                    border: viewMode === "kanban" ? '2px solid var(--accent-amber)' : '1px solid gray',
-
-
-                                    background: viewMode === "kanban" ? 'var(--accent-amber)' : 'transparent',
-                                    color: viewMode === "kanban" ? 'black' : 'inherit',
-
-                                    cursor: 'pointer'
-                                }}>
-                                Kanban
+                                className={`view-btn${viewMode === "kanban" ? " active" : ""}`}
+                                onClick={() => setViewMode("kanban")}>
+                                <KanbanSquare size={14} /> Kanban
                             </button>
                         </div>
-                        <input
-                            style={{ width: '40%' }}
-                            placeholder="Search title..."
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                        <select onChange={(e) => setSearch_Status(e.target.value)}>
-                            <option value="all">All Statuses</option>
-                            {STATUS_OPTIONS.map(s => (
-                                <option key={s} value={s}>{s}</option>
-                            ))}
-                        </select>
-                        <select onChange={(e) => setSearch_Priority(e.target.value)}>
-                            <option value="all">All Priorities</option>
-                            {PRIORITY_OPTIONS.map(p => (
-                                <option key={p} value={p}>{p}</option>
-                            ))}
-                        </select>
+                        <div className="search-inputs">
+                            <div className="search-input-wrapper">
+                                <Search className="search-icon" size={14} />
+                                <input
+                                    className="search-field"
+                                    placeholder="Search projects..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <select className="filter-select" onChange={(e) => setSearch_Status(e.target.value)} value={Search_Status}>
+                                <option value="all">All Statuses</option>
+                                {STATUS_OPTIONS.map(s => (
+                                    <option key={s} value={s}>{s}</option>
+                                ))}
+                            </select>
+                            <select className="filter-select" onChange={(e) => setSearch_Priority(e.target.value)} value={Search_Priority}>
+                                <option value="all">All Priorities</option>
+                                {PRIORITY_OPTIONS.map(p => (
+                                    <option key={p} value={p}>{p}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                    {/* 🆕 CONDITIONAL VIEW RENDERING */}
+
                     {viewMode === "kanban" ? (
                         <KanbanBoard
                             projects={Filtered_Projects}
@@ -335,252 +347,184 @@ function Projects() {
                         />
                     ) : (
                         <div className="user-projects">
-                            {Filtered_Projects.length === 0 && <div>No projects found</div>}
-                            <ol>
-                                {Filtered_Projects.map((p, i) =>
-                                    EditId != p._id ? (
-                                        <li key={p._id}>
-                                            <NavLink to={`/projects/${p._id}`}>
-                                                <strong>{p.Title}</strong>
-                                                <br />
-                                                {p.date}
-                                            </NavLink>
-
-                                            {/* Status badge */}
-                                            <span style={{
-                                                background: STATUS_COLORS[p.status] || 'gray',
-                                                color: 'white',
-                                                marginLeft: '10px'
-                                            }}>
-                                                {p.status}
-                                            </span>
-
-                                            {/* Priority badge */}
-                                            <span style={{
-                                                background: PRIORITY_COLORS[p.priority] || 'gray',
-                                                color: 'white',
-                                                padding: '2px 10px',
-                                                borderRadius: '12px',
-                                                fontSize: '12px',
-                                                marginLeft: '6px'
-                                            }}>
-                                                {p.priority}
-                                            </span>
-
-                                            {/* Sprint badge */}
-                                            <span style={{
-                                                border: '1px solid var(--accent-amber)',
-                                                padding: '2px 8px',
-                                                borderRadius: '12px',
-                                                fontSize: '12px',
-                                                marginLeft: '6px'
-                                            }}>
-                                                Sprint {p.sprint}
-                                            </span>
-
-                                            {/* Tags */}
-                                            {p.tags && p.tags.map((tag, ti) => (
-                                                <span key={ti} style={{
-                                                    background: '#4a5568',
-                                                    color: 'white',
-                                                    padding: '2px 8px',
-                                                    borderRadius: '12px',
-                                                    fontSize: '11px',
-                                                    marginLeft: '4px'
-                                                }}>
-                                                    #{tag}
-                                                </span>
-                                            ))}
-
-
-                                            {activeTab === "mine" && (
-                                                <div style={{ display: "flex", gap: "10px", marginTop: '6px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                                                    <button style={{ border: '1px solid var(--accent-amber)' }} onClick={() => startEditing(p)}>Edit</button>
-                                                    <button style={{ background: 'red', color: 'white' }} onClick={() => setdeleteId(p._id)}>Delete</button>
-
-                                                    {/* ASSIGN BUTTON — managers only */}
-                                                    {isManager && (
-                                                        <button
-                                                            onClick={() => assignPanelProjectId === p._id ? closeAssignPanel() : openAssignPanel(p._id)}
-                                                            style={{
-                                                                border: assignPanelProjectId === p._id
-                                                                    ? '2px solid var(--accent-amber)'
-                                                                    : '1px solid #a855f7',
-                                                                color: '#a855f7',
-                                                                padding: '2px 10px'
-                                                            }}>
-                                                            👥 Assign
-                                                        </button>
-                                                    )}
+                            {Filtered_Projects.length === 0 ? (
+                                <div className="empty-projects-state">
+                                    <p>No projects found matching your criteria.</p>
+                                </div>
+                            ) : (
+                                <ol className="project-list">
+                                    {Filtered_Projects.map((p) =>
+                                        EditId !== p._id ? (
+                                            <li key={p._id} className="project-list-card">
+                                                <div className="card-content-side">
+                                                    <div className="card-title-row">
+                                                        <NavLink to={`/projects/${p._id}`} className="project-link" title={p.Title}>
+                                                            {p.Title}
+                                                        </NavLink>
+                                                    </div>
+                                                    <div className="project-meta-row">
+                                                        <span className="project-date">
+                                                            <Calendar size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                                                            Due: {p.date}
+                                                        </span>
+                                                        <div className="inline-tags" title={p.tags ? p.tags.map(t => `#${t}`).join(', ') : ''}>
+                                                            {p.tags && p.tags.map((tag, ti) => (
+                                                                <span key={ti} className="kanban-tag small">
+                                                                    #{tag}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                        <div className="project-card-description" title={p.Description}>
+                                                            {p.Description || "No description provided."}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            )}
 
-
-
-                                            {/* Assigned tab shows who assigned it */}
-                                            {activeTab === "assigned" && (
-                                                <div style={{ fontSize: '12px', color: 'gray', marginTop: '4px' }}>
-                                                    Assigned by: {p.createdBy}
-                                                </div>
-                                            )}
-
-                                            {/* ASSIGN PANEL — inline under the project card */}
-                                            {assignPanelProjectId === p._id && (
-                                                <div style={{
-                                                    marginTop: '10px',
-                                                    padding: '12px',
-                                                    border: '1px solid #a855f7',
-                                                    borderRadius: '8px',
-                                                    background: '#0d0d1a',
-                                                    maxWidth: '420px'
-                                                }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                                        <strong style={{ color: '#a855f7' }}>Assign Members</strong>
-                                                        <button
-                                                            onClick={closeAssignPanel}
-                                                            style={{ background: 'none', border: 'none', color: 'gray', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>
-                                                            ×
-                                                        </button>
+                                                <div className="card-meta-side">
+                                                    <div className="card-badges">
+                                                        <span className={`details-badge ${STATUS_CLASSES[p.status] || 'status-backlog'}`}>
+                                                            {p.status}
+                                                        </span>
+                                                        <span className={`details-badge ${PRIORITY_CLASSES[p.priority] || 'priority-medium'}`}>
+                                                            {p.priority}
+                                                        </span>
+                                                        <span className="details-badge sprint">
+                                                            Sprint {p.sprint}
+                                                        </span>
                                                     </div>
 
-                                                    {/* Current assignees */}
-                                                    {p.assignedTo && p.assignedTo.length > 0 && (
-                                                        <div style={{ marginBottom: '10px' }}>
-                                                            <div style={{ fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Currently assigned:</div>
-                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                                                {p.assignedTo.map((uid) => (
-                                                                    <span key={uid} style={{
-                                                                        display: 'flex', alignItems: 'center', gap: '4px',
-                                                                        background: '#1a1a2e',
-                                                                        border: '1px solid #333',
-                                                                        borderRadius: '12px',
-                                                                        padding: '2px 8px',
-                                                                        fontSize: '12px'
-                                                                    }}>
-                                                                        <span style={{ color: '#a855f7' }}>●</span>
-                                                                        <span style={{ color: 'gray' }}>{String(uid).slice(-6)}</span>
-                                                                        <button
-                                                                            onClick={() => handleRemoveAssignee(p._id, uid)}
-                                                                            style={{
-                                                                                background: 'none', border: 'none',
-                                                                                color: 'gray', cursor: 'pointer',
-                                                                                fontSize: '14px', lineHeight: 1, padding: 0
-                                                                            }}>
-                                                                            ×
-                                                                        </button>
-                                                                    </span>
-                                                                ))}
+                                                    <div className="card-actions">
+                                                        {activeTab === "mine" ? (
+                                                            <>
+                                                                <button className="action-btn edit" onClick={() => startEditing(p)}>Edit</button>
+                                                                <button className="action-btn delete" onClick={() => setdeleteId(p._id)}>Delete</button>
+                                                                {isManager && (
+                                                                    <button
+                                                                        onClick={() => assignPanelProjectId === p._id ? closeAssignPanel() : openAssignPanel(p._id)}
+                                                                        className="action-btn assign">
+                                                                        <Users size={14} /> Assign
+                                                                    </button>
+                                                                )}
+                                                            </>
+                                                        ) : (
+                                                            <div className="assigned-info">
+                                                                Assigned by: {p.createdBy}
                                                             </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* ASSIGN PANEL stays inside LI, usually below or absolute */}
+                                                {assignPanelProjectId === p._id && (
+                                                    <div className="assign-panel">
+                                                        <div className="panel-header">
+                                                            <strong>Assign Members</strong>
+                                                            <button onClick={closeAssignPanel} className="close-panel"><X size={16} /></button>
                                                         </div>
-                                                    )}
-
-                                                    {/* Search input */}
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Search by email..."
-                                                        value={assignSearchQ}
-                                                        onChange={handleAssignSearch}
-                                                        style={{ width: '100%', padding: '6px 10px', boxSizing: 'border-box', marginBottom: '8px' }}
-                                                    />
-
-                                                    {/* Search results */}
-                                                    {userSearchResults.length > 0 && (
-                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                            {userSearchResults
-                                                                .filter(u => u._id !== CURRENTUSER_ID)
-                                                                .map(u => {
-                                                                    const alreadyAssigned = p.assignedTo?.some(uid => String(uid) === String(u._id));
-                                                                    return (
-                                                                        <div key={u._id} style={{
-                                                                            display: 'flex', justifyContent: 'space-between',
-                                                                            alignItems: 'center', padding: '6px 8px',
-                                                                            background: '#1a1a2e', borderRadius: '6px',
-                                                                            border: '1px solid #333'
-                                                                        }}>
-                                                                            <div>
-                                                                                <span style={{ fontSize: '13px' }}>{u.email}</span>
-                                                                                <span style={{
-                                                                                    fontSize: '11px', marginLeft: '6px',
-                                                                                    color: u.role === 'manager' ? '#f2aa4d' : '#4a9eff'
-                                                                                }}>
-                                                                                    {u.role}
-                                                                                </span>
+                                                        {p.assignedTo && p.assignedTo.length > 0 && (
+                                                            <div className="current-assignees">
+                                                                <span className="label">Currently assigned:</span>
+                                                                <div className="assignee-tags">
+                                                                    {p.assignedTo.map((uid) => (
+                                                                        <span key={uid} className="assignee-tag">
+                                                                            {String(uid).slice(-6)}
+                                                                            <button onClick={() => handleRemoveAssignee(p._id, uid)}><X size={12} /></button>
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Search member..."
+                                                            value={assignSearchQ}
+                                                            onChange={handleAssignSearch}
+                                                            className="assign-search"
+                                                        />
+                                                        {userSearchResults.length > 0 && (
+                                                            <div className="search-results">
+                                                                {userSearchResults
+                                                                    .filter(u => u._id !== CURRENTUSER_ID)
+                                                                    .map(u => {
+                                                                        const alreadyAssigned = p.assignedTo?.some(uid => String(uid) === String(u._id));
+                                                                        return (
+                                                                            <div key={u._id} className="result-item">
+                                                                                <div className="user-info">
+                                                                                    <div className="email">{u.email}</div>
+                                                                                    <div className={`role ${u.role}`}>{u.role}</div>
+                                                                                </div>
+                                                                                {alreadyAssigned ? (
+                                                                                    <span className="assigned-check"><Check size={16} /></span>
+                                                                                ) : (
+                                                                                    <button onClick={() => handleAssign(p._id, u._id)} className="assign-add-btn">Add</button>
+                                                                                )}
                                                                             </div>
-                                                                            {alreadyAssigned ? (
-                                                                                <span style={{ fontSize: '12px', color: 'gray' }}>assigned ✓</span>
-                                                                            ) : (
-                                                                                <button
-                                                                                    onClick={() => handleAssign(p._id, u._id)}
-                                                                                    style={{
-                                                                                        border: '1px solid #a855f7',
-                                                                                        color: '#a855f7',
-                                                                                        padding: '2px 10px',
-                                                                                        fontSize: '12px',
-                                                                                        cursor: 'pointer',
-                                                                                        background: 'transparent'
-                                                                                    }}>
-                                                                                    + Assign
-                                                                                </button>
-                                                                            )}
-                                                                        </div>
-                                                                    );
-                                                                })
-                                                            }
+                                                                        );
+                                                                    })
+                                                                }
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </li>
+                                        ) : (
+                                            <li key={p._id} className="project-edit-card">
+                                                <h3>EDIT PROJECT</h3>
+                                                <form onSubmit={edit_Project}>
+                                                    <div className="field-group">
+                                                        <label>Title</label>
+                                                        <input type="text" value={Title_2} onChange={(e) => setEditTitle(e.target.value)} required />
+                                                    </div>
+
+                                                    <div className="field-group">
+                                                        <label>Description</label>
+                                                        <textarea value={Description_2} rows="2" onChange={(e) => setEditDesc(e.target.value)}></textarea>
+                                                    </div>
+
+                                                    <div className="form-row">
+                                                        <div className="field-group">
+                                                            <label>Status</label>
+                                                            <select value={Status_2} onChange={(e) => setEditStatus(e.target.value)}>
+                                                                {STATUS_OPTIONS.map(s => (
+                                                                    <option key={s} value={s}>{s}</option>
+                                                                ))}
+                                                            </select>
                                                         </div>
-                                                    )}
+                                                        <div className="field-group">
+                                                            <label>Priority</label>
+                                                            <select value={Priority_2} onChange={(e) => setEditPriority(e.target.value)}>
+                                                                {PRIORITY_OPTIONS.map(pr => (
+                                                                    <option key={pr} value={pr}>{pr}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </div>
 
-                                                    {assignSearchQ.length >= 1 && userSearchResults.length === 0 && (
-                                                        <div style={{ fontSize: '13px', color: 'gray' }}>No users found</div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </li>
-                                    )
-                                        : (<div key={p._id} className="edit-form">
-                                            <form>
-                                                <label>Title</label>
-                                                <input type="text" defaultValue={Title_2} onChange={(e) => setEditTitle(e.target.value)} required />
+                                                    <div className="form-row">
+                                                        <div className="field-group sprint-field">
+                                                            <label>Sprint</label>
+                                                            <input type="number" min="1" value={Sprint_2} onChange={(e) => setEditSprint(Number(e.target.value))} />
+                                                        </div>
+                                                        <div className="field-group">
+                                                            <label>Due Date</label>
+                                                            <input type="date" value={Due_Date_2} onChange={(e) => setEditDate(e.target.value)} required />
+                                                        </div>
+                                                    </div>
 
-                                                <label>Description</label>
-                                                <textarea defaultValue={p.Description} onChange={(e) => setEditDesc(e.target.value)}></textarea>
-
-                                                <label>Status</label>
-                                                <select defaultValue={p.status} onChange={(e) => setEditStatus(e.target.value)}>
-                                                    {STATUS_OPTIONS.map(s => (
-                                                        <option key={s} value={s}>{s}</option>
-                                                    ))}
-                                                </select>
-
-                                                <label>Priority</label>
-                                                <select defaultValue={p.priority} onChange={(e) => setEditPriority(e.target.value)}>
-                                                    {PRIORITY_OPTIONS.map(pr => (
-                                                        <option key={pr} value={pr}>{pr}</option>
-                                                    ))}
-                                                </select>
-
-                                                <label>Tags (comma separated)</label>
-                                                <input type="text" defaultValue={p.tags ? p.tags.join(', ') : ''} onChange={(e) => setEditTags(e.target.value)} />
-
-                                                <label>Sprint</label>
-                                                <input type="number" min="1" defaultValue={p.sprint} onChange={(e) => setEditSprint(Number(e.target.value))} />
-
-                                                <label>Due Date</label>
-                                                <input type="date" defaultValue={p.date} onChange={(e) => setEditDate(e.target.value)} required />
-
-                                                <div style={{ display: "flex", justifyContent: "center", gap: '20px', margin: '10px 0px' }}>
-                                                    <button style={{ background: 'lime', color: 'white' }} type="submit" onClick={edit_Project}>SAVE</button>
-                                                    <button style={{ border: '1px solid var(--accent-amber)' }} onClick={() => setEditId(null)}>Cancel</button>
-                                                </div>
-                                            </form>
-                                        </div>
+                                                    <div className="edit-actions">
+                                                        <button className="save-btn" type="submit">SAVE CHANGES</button>
+                                                        <button className="cancel-btn" type="button" onClick={() => setEditId(null)}>CANCEL</button>
+                                                    </div>
+                                                </form>
+                                            </li>
                                         )
-                                )}
-                            </ol>
-
+                                    )}
+                                </ol>
+                            )}
                         </div>
                     )}
                 </div>
-            </div >
+            </div>
         </>
     );
 }

@@ -1,16 +1,34 @@
-# React + Vite
+# AlianHub Frontend — React & Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains the user interface for AlianHub Task OS, featuring a premium glassmorphic design and integrated time tracking tools.
 
-Currently, two official plugins are available:
+## 🛠️ Tech Stack
+- **Library**: React 18
+- **Build Tool**: Vite
+- **State Management**: Redux Toolkit
+- **Routing**: React Router v6
+- **Styling**: Vanilla CSS (Custom Glassmorphism framework)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ UI Features
+- **Glassmorphic Navigation**: Sidebar and header with translucent blur effects.
+- **Dynamic Dashboard**: Personalized stats and progress tracking.
+- **Subtask Time Tracker**: Fixed-position widget for recording work sessions with visual feedback.
+- **Kanban & Gantt**: Specialized views for project lifecycle management.
+- **Premium Cards**: Standardized project cards with automatic text truncation and tooltips.
 
-## React Compiler
+## 📂 Key Components
+- `src/Components/TrackerWidget.jsx`: The core time tracking engine.
+- `src/Components/Redux.jsx`: The unified state slice for the entire app.
+- `src/Components/Details.jsx`: The master view for project deep-dives.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Development
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🎨 Styling Conventions
+The app uses a suite of CSS variables defined in central stylesheets to maintain the "Premium OS" aesthetic:
+- `--glass-blur`: 12px blur for translucent panels.
+- `--accent-amber`: #f2aa4d for branding and primary actions.
+- `--card-bg`: Dark translucent background for containers.

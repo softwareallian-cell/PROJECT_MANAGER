@@ -1,39 +1,67 @@
 .gantt-wrapper {
-
-    padding: 20px;
-    border: 1px solid var(--input-border);
-    margin-top: 30px;
+    padding: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: 16px;
+    margin-top: 32px;
     overflow-x: auto;
-    /* Allows scrolling if many days */
+    box-shadow: var(--shadow-main);
+}
+
+.gantt-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+    text-wrap: balance;
 }
 
 .gantt-grid {
     display: flex;
     flex-direction: column;
-    min-width: 800px;
-    /* Ensures days don't get too squished */
+    min-width: 1000px;
 }
 
 .gantt-days {
     display: grid;
     grid-template-columns: repeat(31, 1fr);
-    margin-left: 120px;
-    margin-bottom: 20px;
-    /* Matches label width */
+    margin-left: 160px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 8px;
+}
+
+.gantt-day-num {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
 }
 
 .gantt-row {
     display: flex;
     align-items: center;
-    height: 40px;
+    height: 48px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gantt-row:last-child {
+    border-bottom: none;
 }
 
 .gantt-label {
-    width: 120px;
+    width: 160px;
     font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding-right: 16px;
 }
 
 .gantt-bar-container {
@@ -42,28 +70,41 @@
     flex-grow: 1;
     height: 100%;
     align-items: center;
+    background-image: linear-gradient(to right, var(--card-border) 1px, transparent 1px);
+    background-size: calc(100% / 31) 100%;
 }
 
 .gantt-bar {
-    height: 20px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: transform 0.2s;
 }
 
-/* Use your existing status colors */
+.gantt-bar:hover {
+    transform: scaleY(1.1);
+    z-index: 1;
+}
+
+/* Theme-consistent status colors */
 .gantt-bar.active {
-    background-color: cyan;
-    color: #000;
+    background: linear-gradient(135deg, #4a9eff, #3b82f6);
+    color: white;
 }
 
 .gantt-bar.completed {
-    background-color: lime;
-    color: #000;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
 }
 
 .gantt-bar.hold {
-    background-color: var(--accent-amber);
-    color: #000;
+    background: linear-gradient(135deg, var(--accent-amber), #d97706);
+    color: black;
 }

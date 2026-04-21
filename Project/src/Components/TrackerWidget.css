@@ -13,7 +13,7 @@
     color: var(--accent-amber, #f2aa4d);
     font-size: 22px;
     cursor: pointer;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.6);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -22,7 +22,7 @@
 
 .tracker-toggle-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 24px rgba(242,170,77,0.35);
+    box-shadow: 0 6px 24px rgba(242, 170, 77, 0.35);
 }
 
 .tracker-toggle-btn.pulse {
@@ -30,8 +30,15 @@
 }
 
 @keyframes trackerPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(242,170,77,0.55); }
-    50%       { box-shadow: 0 0 0 10px rgba(242,170,77,0); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(242, 170, 77, 0.55);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(242, 170, 77, 0);
+    }
 }
 
 /* ── Panel ──────────────────────────────────────────────────────────── */
@@ -43,17 +50,24 @@
     z-index: 9998;
     width: 340px;
     background: rgba(14, 14, 30, 0.97);
-    border: 1px solid rgba(242,170,77,0.25);
+    border: 1px solid rgba(242, 170, 77, 0.25);
     border-radius: 16px;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(12px);
     overflow: hidden;
     animation: slideUp 0.22s ease;
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .tracker-header {
@@ -61,8 +75,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    background: rgba(242,170,77,0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(242, 170, 77, 0.06);
 }
 
 .tracker-header-title {
@@ -83,7 +97,10 @@
     padding: 0 4px;
     transition: color 0.15s;
 }
-.tracker-close-btn:hover { color: #ccc; }
+
+.tracker-close-btn:hover {
+    color: #ccc;
+}
 
 /* ── Body ───────────────────────────────────────────────────────────── */
 
@@ -103,13 +120,14 @@
     color: #e0e0e0;
     margin-bottom: 14px;
     line-height: 1.35;
+    text-wrap: balance;
 }
 
 .tracker-comment-input {
     width: 100%;
     box-sizing: border-box;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     color: #ddd;
     font-size: 13px;
@@ -118,20 +136,26 @@
     outline: none;
     transition: border-color 0.2s;
 }
-.tracker-comment-input:focus { border-color: rgba(242,170,77,0.5); }
-.tracker-comment-input::placeholder { color: #444; }
+
+.tracker-comment-input:focus {
+    border-color: rgba(242, 170, 77, 0.5);
+}
+
+.tracker-comment-input::placeholder {
+    color: #444;
+}
 
 /* ── Timer display ──────────────────────────────────────────────────── */
 
 .tracker-timer {
     text-align: center;
-    font-size: 38px;
+    font-size: 37px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #fff;
     letter-spacing: 2px;
     margin: 8px 0 16px;
-    text-shadow: 0 0 20px rgba(242,170,77,0.3);
+    text-shadow: 0 0 20px rgba(242, 170, 77, 0.3);
 }
 
 /* ── Screenshot thumbnail ───────────────────────────────────────────── */
@@ -149,7 +173,7 @@
     height: 110px;
     object-fit: cover;
     border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     background: #0d0d1a;
     margin-bottom: 16px;
 }
@@ -160,7 +184,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 8px;
     border: 1px dashed #333;
     color: #444;
@@ -177,16 +201,26 @@
 
 .tracker-btn {
     flex: 1;
-    padding: 9px 0;
+    padding: 9px 12px;
     border-radius: 8px;
     border: none;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: opacity 0.15s, transform 0.1s;
 }
-.tracker-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-.tracker-btn:active { transform: translateY(0); }
+
+.tracker-btn:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+.tracker-btn:active {
+    transform: translateY(0);
+}
 
 .tracker-btn-primary {
     background: var(--accent-amber, #f2aa4d);
@@ -194,15 +228,15 @@
 }
 
 .tracker-btn-ghost {
-    background: rgba(255,255,255,0.07);
+    background: rgba(255, 255, 255, 0.07);
     color: #ccc;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tracker-btn-danger {
-    background: rgba(239,68,68,0.15);
+    background: rgba(239, 68, 68, 0.15);
     color: #ef4444;
-    border: 1px solid rgba(239,68,68,0.3);
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 /* ── Summary screen ─────────────────────────────────────────────────── */
@@ -222,6 +256,7 @@
     font-weight: 700;
     color: #22c55e;
     margin-bottom: 6px;
+    text-wrap: balance;
 }
 
 .tracker-summary-stat {
@@ -240,7 +275,8 @@
 
 /* ── Status badge ───────────────────────────────────────────────────── */
 .tracker-status-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     font-size: 10px;
     padding: 2px 8px;
     border-radius: 10px;
@@ -250,5 +286,109 @@
     margin-left: 8px;
     vertical-align: middle;
 }
-.tracker-status-badge.active  { background: rgba(34,197,94,0.15); color: #22c55e; }
-.tracker-status-badge.paused  { background: rgba(242,170,77,0.15); color: #f2aa4d; }
+
+.tracker-status-badge.active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.tracker-status-badge.paused {
+    background: rgba(242, 170, 77, 0.15);
+    color: #f2aa4d;
+}
+
+/* ── Interruption Portal ────────────────────────────────────────────── */
+
+.tracker-interruption-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(4, 4, 12, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.tracker-interruption-card {
+    background: rgba(20, 20, 35, 0.95);
+    border: 1px solid rgba(242, 170, 77, 0.3);
+    border-radius: 24px;
+    width: 480px;
+    max-width: 90%;
+    padding: 40px;
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    text-align: center;
+    animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.92) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.tracker-interruption-icon {
+    font-size: 54px;
+    filter: drop-shadow(0 0 15px rgba(242, 170, 77, 0.5));
+}
+
+.tracker-interruption-title {
+    font-weight: 800;
+    text-wrap: balance;
+}
+
+
+
+.tracker-interruption-instruction {
+    background: rgba(242, 170, 77, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 32px;
+    border: 1px solid rgba(242, 170, 77, 0.15);
+}
+
+.tracker-interruption-instruction strong {
+    display: block;
+    color: var(--accent-amber, #f2aa4d);
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.tracker-interruption-instruction ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.tracker-interruption-instruction li {
+    margin-bottom: 6px;
+}
+
+.tracker-interruption-actions {
+    display: flex;
+    gap: 12px;
+}

@@ -1,5 +1,5 @@
-import React from "react";
 import { useSelector } from "react-redux";
+import { GanttChartSquare } from "lucide-react";
 import "./GanttView.css";
 
 const STATUS_COLORS = {
@@ -30,7 +30,9 @@ function GanttView() {
         <>
 
             <div className="gantt-wrapper">
-                <h2>Gantt Chart of Current Month</h2>
+                <h2 className="gantt-title">
+                    <GanttChartSquare size={22} /> Gantt Chart of {current_Date.toLocaleString('default', { month: 'long' })} {current_Date.getFullYear()}
+                </h2>
                 <div className="gantt-grid">
                     <div className="gantt-days">
                         {

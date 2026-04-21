@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { X, Edit3, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchAllTimeSessions } from "./Redux";
 import "./TimeSheet.css";
 
@@ -26,13 +27,10 @@ function HoverCard({ shot, position }) {
         <div className="hover-card" style={{ top: position.y, left: position.x }}>
             <div className="hover-card-content">
                 <div className="hover-card-header">
-                    <div className="hover-card-path">TAL | Training and Learning (staff) / Vue / React / Node / ...</div>
                     <div className="hover-card-title">{shot.subtaskTitle}</div>
                 </div>
                 <div className="hover-card-body">
                     <div className="hover-card-meta">
-                        <img src="https://ui-avatars.com/api/?name=User&background=random" alt="User" className="user-mini-avatar" />
-                        <span className="user-name">User</span>
                         <span className="capture-time">Continuation • {new Date(shot.capturedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     <img src={`${API}/api/screenshots/${shot.gridfsId}`} alt="Preview" className="hover-preview-img" />
@@ -52,22 +50,16 @@ function FullPreviewPortal({ shot, onClose, currentUser }) {
             <div className="portal-content" onClick={e => e.stopPropagation()}>
                 <div className="portal-header">
                     <h2>Screenshot Preview</h2>
-                    <button className="portal-close-btn" onClick={onClose}>✕</button>
+                    <button className="portal-close-btn" onClick={onClose}><X size={20} /></button>
                 </div>
-                
+
                 <div className="portal-body">
                     <div className="portal-main-section">
-                        <div className="breadcrumb-line">
-                            TAL | Training and Learning (staff) / Vue / React / Node / Typescript / ReactNative / User
-                        </div>
                         <h3 className="portal-subtask-title">{shot.subtaskTitle}</h3>
-                        
+
                         <div className="portal-meta-row">
                             <span className="timestamp">{new Date(shot.capturedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            <div className="user-info">
-                                <img src="https://ui-avatars.com/api/?name=User&background=random" alt="Avatar" />
-                                <span>User</span>
-                            </div>
+
                         </div>
 
                         <div className="portal-comment-box">
@@ -78,23 +70,13 @@ function FullPreviewPortal({ shot, onClose, currentUser }) {
                             <img src={`${API}/api/screenshots/${shot.gridfsId}`} alt="Detail" className="portal-big-img" />
                             {isAdmin && (
                                 <button className="admin-edit-btn" onClick={() => alert("Admin Edit Mode Engaged")}>
-                                    ✏️ Edit Entry
+                                    <Edit3 size={14} /> Edit Entry
                                 </button>
                             )}
                         </div>
                     </div>
 
-                    <div className="portal-footer">
-                        <div className="activity-label">Activity</div>
-                        <div className="activity-stats">
-                            <span>Active 0 of 7 min</span>
-                            <div className="activity-viz">
-                                {Array.from({ length: 12 }).map((_, i) => (
-                                    <div key={i} className="viz-bar" style={{ height: `${Math.random() * 8 + 2}px` }} />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -168,12 +150,8 @@ export default function TimeSheet() {
         <div className="timesheet-wrapper">
             <header className="timesheet-header">
                 <button className="timesheet-back-btn" onClick={() => navigate("/dashboard")}>
-                    ← Back to Dashboard
+                    <ArrowLeft size={16} /> Back to Dashboard
                 </button>
-                <div style={{ marginLeft: '10px' }}>
-                    <h1 style={{ margin: 0, fontSize: '20px', color: '#fff' }}>Tracker Timesheet</h1>
-                    <div style={{ fontSize: '12px', color: '#64748b' }}>Project History & Activity Log</div>
-                </div>
             </header>
 
             <div className="timesheet-main-layout">
@@ -181,15 +159,13 @@ export default function TimeSheet() {
                 <div className="timesheet-top-bar">
                     <div className="date-picker-row">
                         <div className="date-nav">
-                            <button onClick={() => changeDate(-1)}>{"<"}</button>
-                            <span>📅 {selectedDate.toLocaleDateString('en-GB')}</span>
-                            <button onClick={() => changeDate(1)}>{">"}</button>
+                             <button onClick={() => changeDate(-1)}><ChevronLeft size={18} /></button>
+                            <span>{selectedDate.toLocaleDateString('en-GB')}</span>
+                             <button onClick={() => changeDate(1)}><ChevronRight size={18} /></button>
                         </div>
-                        <div className="filter-dropdown">
-                            Filter by <span className="chevron">▼</span>
-                        </div>
+
                     </div>
-                    
+
                     <div className="activity-range-bar">
                         <div className="hours-labels">
                             {HOURS.filter((_, i) => i % 1 === 0).map(h => (
@@ -198,8 +174,8 @@ export default function TimeSheet() {
                         </div>
                         <div className="range-track">
                             {timelineSlots.map(slot => (
-                                <div 
-                                    key={slot.hour} 
+                                <div
+                                    key={slot.hour}
                                     className={`range-segment ${slot.hasWork ? 'active' : ''}`}
                                 />
                             ))}
@@ -214,14 +190,13 @@ export default function TimeSheet() {
                                 <div className="hour-title">
                                     {formatHour(hour.val)} - {formatHour((hour.val + 1) % 24)}
                                 </div>
-                                <div className="hour-expand-icon">▶</div>
                             </div>
-                            
+
                             {hour.screenshots.length > 0 && (
                                 <div className="screenshot-row">
                                     {hour.screenshots.map((shot, idx) => (
-                                        <div 
-                                            key={idx} 
+                                        <div
+                                            key={idx}
                                             className="shot-card"
                                             onMouseEnter={(e) => handleMouseEnter(e, shot)}
                                             onMouseLeave={handleMouseLeave}
@@ -230,7 +205,6 @@ export default function TimeSheet() {
                                             <img src={`${API}/api/screenshots/${shot.gridfsId}`} alt="Shot" />
                                             <div className="shot-card-meta">
                                                 <span className="shot-time">{new Date(shot.capturedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                <div className="user-dot">👤</div>
                                             </div>
                                         </div>
                                     ))}
@@ -246,10 +220,10 @@ export default function TimeSheet() {
 
             {/* Full Preview Portal */}
             {selectedShot && (
-                <FullPreviewPortal 
-                    shot={selectedShot} 
+                <FullPreviewPortal
+                    shot={selectedShot}
                     currentUser={currentUser}
-                    onClose={() => setSelectedShot(null)} 
+                    onClose={() => setSelectedShot(null)}
                 />
             )}
         </div>

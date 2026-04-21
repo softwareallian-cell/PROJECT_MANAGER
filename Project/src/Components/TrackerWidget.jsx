@@ -1,4 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
+import {
+    Timer,
+    X,
+    Play,
+    Pause,
+    Square,
+    CheckCircle,
+    Camera,
+    Radio,
+    AlertTriangle,
+    Activity,
+    CirclePause,
+    Folder
+} from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { stopGlobalTracker, setTrackerPanelOpen, fetchTimeSessions } from "./Redux";
 import "./TrackerWidget.css";
@@ -29,8 +44,8 @@ export default function TrackerWidget() {
     const assignedProjects = useSelector((s) => s.registration.assignedProjects);
 
     // Find full project data from Redux
-    const project = activeTracker 
-        ? [...createdProjects, ...assignedProjects].find(p => p._id === activeTracker.projectId) 
+    const project = activeTracker
+        ? [...createdProjects, ...assignedProjects].find(p => p._id === activeTracker.projectId)
         : null;
 
     const subtaskIndex = activeTracker?.subtaskIndex;
@@ -68,7 +83,7 @@ export default function TrackerWidget() {
             setComment(data.comment || "Restored");
             setLatestThumbUrl(data.latestThumbUrl);
             setScreenshotCount(data.screenshotCount || 0);
-            
+
             if (data.screen === "ACTIVE") {
                 // Determine time elapsed since the last tick
                 const elapsedSinceLastTick = data.lastTickTime ? Math.floor((Date.now() - data.lastTickTime) / 1000) : 0;
@@ -219,7 +234,7 @@ export default function TrackerWidget() {
         try {
             const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
             streamRef.current = stream;
-            
+
             startTick();
             scheduleNextCapture(sessionId);
             setScreen("ACTIVE");
@@ -271,7 +286,7 @@ export default function TrackerWidget() {
                 onClick={togglePanel}
                 title={panelOpen ? "Hide Tracker" : "Show Tracker"}
             >
-                ⏱
+                <Timer size={24} />
             </button>
 
             {/* Main panel */}
@@ -282,13 +297,22 @@ export default function TrackerWidget() {
                         <span className="tracker-header-title">
                             Time Tracker
                             {screen === "ACTIVE" && (
-                                <span className="tracker-status-badge active">● Live</span>
+                                <span className="tracker-status-badge active">
+                                    <Activity size={10} style={{ marginRight: 4 }} />
+                                    Live
+                                </span>
                             )}
                             {screen === "PAUSED" && (
-                                <span className="tracker-status-badge paused">⏸ Paused</span>
+                                <span className="tracker-status-badge paused">
+                                    <CirclePause size={10} style={{ marginRight: 4 }} />
+                                    Paused
+                                </span>
                             )}
                             {screen === "INTERRUPTED" && (
-                                <span className="tracker-status-badge paused" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>⚠️ Stream Lost</span>
+                                <span className="tracker-status-badge paused" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>
+                                    <AlertTriangle size={10} style={{ marginRight: 4 }} />
+                                    Stream Lost
+                                </span>
                             )}
                         </span>
                         <button
@@ -300,7 +324,7 @@ export default function TrackerWidget() {
                             }}
                             title="Close"
                         >
-                            ✕
+                            <X size={18} />
                         </button>
                     </div>
 
@@ -310,7 +334,7 @@ export default function TrackerWidget() {
                         {/* ════════ CONFIRM SCREEN ════════ */}
                         {screen === "CONFIRM" && (
                             <>
-                                <div className="tracker-meta">📁 {project.Title}</div>
+                                <div className="tracker-meta"><Folder size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} /> {project.Title}</div>
                                 {project.sprint && (
                                     <div className="tracker-meta">Sprint {project.sprint}</div>
                                 )}
@@ -327,7 +351,7 @@ export default function TrackerWidget() {
                                         Cancel
                                     </button>
                                     <button id="tracker-start-btn" className="tracker-btn tracker-btn-primary" onClick={handleStart}>
-                                        ▶ Start
+                                        <Play size={14} fill="currentColor" style={{ marginRight: 6 }} /> Start
                                     </button>
                                 </div>
                             </>
@@ -336,7 +360,7 @@ export default function TrackerWidget() {
                         {/* ════════ ACTIVE SCREEN ════════ */}
                         {(screen === "ACTIVE" || screen === "PAUSED" || screen === "INTERRUPTED") && (
                             <>
-                                <div className="tracker-meta">📁 {project.Title}</div>
+                                <div className="tracker-meta"><Folder size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} /> {project.Title}</div>
                                 <div className="tracker-task-title">{subtaskTitle}</div>
                                 <div className="tracker-timer">{formatTime(totalSeconds)}</div>
 
@@ -350,26 +374,26 @@ export default function TrackerWidget() {
                                     />
                                 ) : (
                                     <div className="tracker-screenshot-placeholder">
-                                        📷 Capture pending…
+                                        <Camera size={16} style={{ marginRight: 8, opacity: 0.6 }} /> Capture pending…
                                     </div>
                                 )}
 
                                 <div className="tracker-btn-row">
                                     {screen === "INTERRUPTED" ? (
                                         <button id="tracker-resume-stream-btn" className="tracker-btn tracker-btn-primary" onClick={handleResumeStream}>
-                                             📡 Resume Capture
+                                            <Radio size={14} style={{ marginRight: 6 }} /> Resume Capture
                                         </button>
                                     ) : screen === "ACTIVE" ? (
                                         <button id="tracker-pause-btn" className="tracker-btn tracker-btn-ghost" onClick={handlePause}>
-                                            ⏸ Pause
+                                            <Pause size={14} fill="currentColor" style={{ marginRight: 6 }} /> Pause
                                         </button>
                                     ) : (
                                         <button id="tracker-resume-btn" className="tracker-btn tracker-btn-ghost" onClick={handleResume}>
-                                            ▶ Resume
+                                            <Play size={14} fill="currentColor" style={{ marginRight: 6 }} /> Resume
                                         </button>
                                     )}
                                     <button id="tracker-stop-btn" className="tracker-btn tracker-btn-danger" onClick={handleStop}>
-                                        ■ Stop &amp; Save
+                                        <Square size={14} fill="currentColor" style={{ marginRight: 6 }} /> Stop &amp; Save
                                     </button>
                                 </div>
                             </>
@@ -378,7 +402,9 @@ export default function TrackerWidget() {
                         {/* ════════ SUMMARY SCREEN ════════ */}
                         {screen === "SUMMARY" && (
                             <div className="tracker-summary">
-                                <div className="tracker-summary-icon">✅</div>
+                                <div className="tracker-summary-icon">
+                                    <CheckCircle size={48} color="#22c55e" strokeWidth={2.5} />
+                                </div>
                                 <div className="tracker-summary-title">Session Saved</div>
                                 <div className="tracker-summary-total">{formatTime(totalSeconds)}</div>
                                 <div className="tracker-summary-stat">
@@ -397,6 +423,46 @@ export default function TrackerWidget() {
 
                     </div>
                 </div>
+            )}
+
+            {/* Interruption Portal — High Visibility Warning */}
+            {screen === "INTERRUPTED" && createPortal(
+                <div className="tracker-interruption-overlay">
+                    <div className="tracker-interruption-card">
+
+                        <h1 className="tracker-interruption-title"> <div className="tracker-interruption-icon">
+                            <AlertTriangle size={190} color="#f2aa4d" strokeWidth={1.5} />
+                        </div>Tracking Interrupted</h1>
+                        <p >
+                            Your time-tracking session was interrupted (likely due to a page reload or crash).
+                            The timer is currently paused.
+                        </p>
+
+                        <div className="tracker-interruption-instruction">
+                            <strong>To continue tracking:</strong>
+                            <ul>
+                                <li>The system needs you to re-grant screen recording permission to continue capturing screenshots.</li>
+                                <li>Your progress so far has been saved locally.</li>
+                            </ul>
+                        </div>
+
+                        <div className="tracker-interruption-actions">
+                            <button
+                                className="tracker-btn tracker-btn-primary tracker-btn-large"
+                                onClick={handleResumeStream}
+                            >
+                                <Radio size={16} style={{ marginRight: 8 }} /> Resume Tracking & Capture
+                            </button>
+                            <button
+                                className="tracker-btn tracker-btn-danger"
+                                onClick={handleStop}
+                            >
+                                <Square size={16} fill="currentColor" style={{ marginRight: 8 }} /> Stop & Save Session
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.getElementById("modal-root")
             )}
         </>
     );

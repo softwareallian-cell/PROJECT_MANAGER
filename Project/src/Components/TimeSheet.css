@@ -1,53 +1,61 @@
 .timesheet-wrapper {
-    padding: 20px 40px;
-    background: #f8fafc;
+    padding: 24px 40px;
+    background: var(--bg-main);
     min-height: 100vh;
-    color: #1e293b;
+    color: var(--text-primary);
     font-family: 'Inter', sans-serif;
 }
 
 .timesheet-header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 32px;
 }
 
 .timesheet-back-btn {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.timesheet-back-btn:hover {
+    border-color: var(--accent-amber);
+    color: var(--accent-amber);
 }
 
 /* --- Top Activity Bar (SS1) --- */
 .timesheet-top-bar {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 25px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow-main);
 }
 
 .date-picker-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .date-nav {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    padding: 4px 12px;
-    border-radius: 6px;
+    gap: 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    padding: 6px 16px;
+    border-radius: 10px;
 }
 
 .date-nav button {
@@ -55,22 +63,32 @@
     background: transparent;
     cursor: pointer;
     font-weight: bold;
-    padding: 0 5px;
+    color: var(--text-primary);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.date-nav button:hover {
+    color: var(--accent-amber);
 }
 
 .date-nav span {
     font-size: 14px;
-    font-weight: 600;
-    color: #334155;
+    font-weight: 700;
+    color: var(--text-primary);
 }
 
 .filter-dropdown {
     font-size: 14px;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
-    padding: 6px 14px;
-    border-radius: 6px;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    padding: 8px 16px;
+    border-radius: 10px;
     cursor: pointer;
+    outline: none;
 }
 
 .activity-range-bar {
@@ -81,79 +99,91 @@
 .hours-labels {
     display: flex;
     justify-content: space-between;
-    font-size: 9px;
-    color: #94a3b8;
-    margin-bottom: 6px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
     text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
 .range-track {
     display: flex;
-    height: 34px;
-    background: #eff6ff;
-    border-radius: 4px;
+    height: 36px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
     overflow: hidden;
 }
 
 .range-segment {
     flex: 1;
-    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    border-right: 1px solid var(--card-border);
 }
 
 .range-segment.active {
-    background: #6366f1;
-    opacity: 0.7;
+    background: linear-gradient(to bottom, var(--accent-amber), #d97706);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
 }
 
 /* --- Timeline Grid View --- */
 .timeline-grid-view {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
 }
 
 .hour-row {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
     overflow: hidden;
+    transition: all 0.2s;
 }
 
 .hour-row-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
+    padding: 16px 24px;
     cursor: pointer;
 }
 
 .hour-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #334155;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-wrap: balance;
 }
 
 .hour-row.has-data .hour-row-header {
-    background: #f1f7ff;
+    background: rgba(242, 170, 77, 0.03);
 }
 
 .screenshot-row {
     display: flex;
-    gap: 15px;
-    padding: 0 20px 20px;
+    gap: 16px;
+    padding: 0 24px 24px;
     overflow-x: auto;
 }
 
 .shot-card {
     position: relative;
-    width: 140px;
-    height: 90px;
-    background: #f1f5f9;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    width: 160px;
+    height: 100px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
     cursor: pointer;
     overflow: hidden;
     flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.shot-card:hover {
+    transform: scale(1.05);
+    border-color: var(--accent-amber);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
 
 .shot-card img {
@@ -164,50 +194,53 @@
 
 .shot-card-meta {
     position: absolute;
-    bottom: 5px;
-    left: 5px;
-    right: 5px;
+    top: 8px;
+    left: 8px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 2px 6px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    padding: 2px 8px;
     border-radius: 4px;
-    font-size: 10px;
-    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
 }
 
-/* --- Hover Detail Card (SS2) --- */
+/* --- Hover Detail Card --- */
 .hover-card {
     position: fixed;
     z-index: 1000;
     width: 320px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-main);
+    border-radius: 16px;
     pointer-events: none;
     transform: translateY(-100%) translateY(-10px);
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
 }
 
 .hover-card-content {
-    padding: 15px;
+    padding: 16px;
 }
 
 .hover-card-path {
-    font-size: 9px;
-    color: #64748b;
-    margin-bottom: 4px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 600;
 }
 
 .hover-card-title {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--text-primary);
     margin-bottom: 12px;
 }
 
@@ -215,171 +248,216 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     font-size: 11px;
 }
 
 .user-mini-avatar {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
+    border: 1px solid var(--accent-amber);
 }
 
 .capture-time {
-    color: #94a3b8;
+    color: var(--text-secondary);
     margin-left: auto;
 }
 
 .hover-preview-img {
     width: 100%;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* --- Portal Modal (SS3 Replacement) --- */
+/* --- Portal Modal --- */
 .portal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(4px);
+    background: rgba(4, 4, 12, 0.85);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: var(--z-modal);
     padding: 40px;
 }
 
 .portal-content {
-    background: #fff;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     width: 100%;
-    max-width: 1000px;
+    max-width: 1200px;
     max-height: 90vh;
-    border-radius: 12px;
+    border-radius: 24px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
 }
 
 .portal-header {
-    padding: 15px 25px;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--card-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .portal-header h2 {
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: 700;
     margin: 0;
+    color: var(--text-primary);
+    text-wrap: balance;
 }
 
 .portal-close-btn {
-    background: #f1f5f9;
-    border: none;
-    width: 32px;
-    height: 32px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.portal-close-btn:hover {
+    background: var(--danger);
+    color: white;
 }
 
 .portal-body {
-    padding: 25px;
+    padding: 32px;
     overflow-y: auto;
 }
 
 .breadcrumb-line {
     font-size: 11px;
-    color: #64748b;
+    font-weight: 600;
+    color: var(--text-secondary);
     margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .portal-subtask-title {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 800;
-    margin: 0 0 15px;
+    margin: 0 0 20px;
+    color: var(--text-primary);
 }
 
 .portal-meta-row {
     display: flex;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 20px;
+    gap: 24px;
+    margin-bottom: 24px;
+    background: var(--bg-secondary);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
 }
 
 .portal-meta-row .timestamp {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--accent-amber);
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    font-weight: 600;
 }
 
 .user-info img {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
+    border: 1.5px solid var(--accent-amber);
 }
 
 .portal-comment-box {
-    color: #64748b;
-    font-style: italic;
-    margin-bottom: 20px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(242, 170, 77, 0.05);
+    border-radius: 12px;
+    border-left: 4px solid var(--accent-amber);
 }
 
 .portal-big-img {
     width: 100%;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
 }
 
 .admin-edit-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #f2aa4d;
-    color: #000;
+    top: 20px;
+    right: 20px;
+    background: var(--accent-amber);
+    color: black;
     border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
     cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.admin-edit-btn:hover {
+    transform: scale(1.05);
 }
 
 .portal-footer {
-    margin-top: 30px;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 20px;
+    margin-top: 40px;
+    border-top: 1px solid var(--card-border);
+    padding-top: 32px;
 }
 
 .activity-label {
     font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 10px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .activity-stats {
     display: flex;
     align-items: center;
-    gap: 15px;
-    color: #64748b;
+    gap: 20px;
+    color: var(--text-secondary);
     font-size: 13px;
+    font-weight: 600;
 }
 
 .activity-viz {
     display: flex;
     align-items: flex-end;
-    gap: 3px;
+    gap: 4px;
 }
 
 .viz-bar {
-    width: 12px;
-    background: #e2e8f0;
-    border-radius: 2px;
+    width: 14px;
+    background: var(--card-border);
+    border-radius: 3px;
+    transition: height 0.3s ease;
+}
+
+.viz-bar.active {
+    background: var(--accent-amber);
 }

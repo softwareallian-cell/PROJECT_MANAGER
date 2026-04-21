@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import "./LoginPage.css"
 import { Link, useNavigate } from "react-router-dom"
+import { Mail, Lock, LogIn } from "lucide-react";
 import { loginUser } from "./Redux";
 import { useDispatch } from "react-redux";
 
@@ -22,20 +23,45 @@ function LoginPage() {
         }
     };
 
-    return (<div style={{ padding: '10px' }}>
-        <div className="login_page">
-            <h1>Login Page</h1>
-            <form onSubmit={handleSubmit}>
-                <label>Email</label>
-                <input type="email" onChange={(e) => setEmail(e.target.value)} required />
+    return (
+        <div className="login-container">
+            <div className="login_page">
+                <h1>Log In</h1>
+                <p className="login-subtitle">Enter your credentials to access your projects</p>
+                
+                <form onSubmit={handleSubmit} className="auth-form">
+                    <div className="input-group">
+                        <label><Mail size={16} /> Email Address</label>
+                        <input 
+                            type="email" 
+                            placeholder="name@company.com"
+                            onChange={(e) => setEmail(e.target.value)} 
+                            required 
+                        />
+                    </div>
 
-                <label>Password</label>
-                <input type="password" onChange={(e) => setPassword(e.target.value)} required />
-                <p>No account ?<Link to="/">Signup Here</Link></p>
-                <button type="submit" style={{ border: '1px solid var(--accent-amber)' }} >Submit</button>
-            </form>
-        </div ></div>
-    )
+                    <div className="input-group">
+                        <label><Lock size={16} /> Password</label>
+                        <input 
+                            type="password" 
+                            placeholder="••••••••"
+                            onChange={(e) => setPassword(e.target.value)} 
+                            required 
+                        />
+                    </div>
+
+                    <button type="submit" className="submit-btn">
+                        <LogIn size={18} /> Sign In
+                    </button>
+
+                    <div className="auth-footer">
+                        Don't have an account? 
+                        <Link to="/">Create one</Link>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
 }
 
 export default LoginPage

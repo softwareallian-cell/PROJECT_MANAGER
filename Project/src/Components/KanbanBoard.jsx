@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { Calendar } from "lucide-react";
 import "./KanbanBoard.css";
 import { useDispatch } from "react-redux";
 import { editProjectDb } from "./Redux";
@@ -146,6 +147,7 @@ function KanbanBoard({ projects, activeTab, onEdit, onDelete }) {
                                             to={`/projects/${p._id}`}
                                             className="kanban-card-title"
                                             draggable={false}
+                                            title={p.Title}
                                             onClick={(e) => { if (draggingId) e.preventDefault(); }}
                                         >
                                             {p.Title}
@@ -182,7 +184,7 @@ function KanbanBoard({ projects, activeTab, onEdit, onDelete }) {
                                         )}
 
                                         {/* Due date */}
-                                        <div className="kanban-card-due">📅 {p.date}</div>
+                                        <div className="kanban-card-due"><Calendar size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> {p.date}</div>
 
                                         {/* Description preview */}
                                         {p.Description && (

@@ -1,64 +1,103 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  --bg-dark: #101820;
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Shared Defaults */
   --accent-amber: #f2aa4d;
-  --card-bg: #1c252e;
-  --text-white: #ffffff;
-  --text-gray: #a0aec0;
+  --accent-amber-hover: #d97706;
+  --danger: #ef4444;
+  --success: #22c55e;
+  
+  /* Z-Index Scale */
+  --z-base: 1;
+  --z-nav: 100;
+  --z-modal: 2000;
+  --z-portal: 10000;
+}
+
+.dark {
+  --bg-main: #0a0a1a;
+  --bg-secondary: #16213e;
+  --card-bg: rgba(26, 26, 46, 0.95);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --shadow-main: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --glass-blur: blur(12px);
+}
+
+.light {
+  --bg-main: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(15, 23, 42, 0.08);
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --input-border: #cbd5e0;
+  --accent-amber: #d97706; /* High-contrast amber for light backgrounds */
+  --shadow-main: 0 10px 40px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
+  --glass-blur: blur(20px);
 }
 
 body {
   background-color: var(--bg-main);
   color: var(--text-primary);
   margin: 0;
+  font-family: var(--font-main);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
-  /* Smooth transition */
-}
-
-.dark {
-  --bg-main: #101820;
-  --card-bg: #1c252e;
-  --text-primary: #ffffff;
-  --input-bg: #2d3748;
-  --input-border: #4a5568;
-}
-
-/* Light Theme Variables */
-.light {
-  --bg-main: #f7f9fc;
-  --card-bg: #ffffff;
-  --text-primary: #1a202c;
-  --input-bg: #edf2f7;
-  --input-border: #cbd5e0;
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: var(--accent-amber);
+  text-decoration: none;
+  transition: color 0.2s;
 }
 
 a:hover {
-  color: #535bf2;
+  opacity: 0.8;
 }
 
+h1, h2, h3 {
+  color: var(--text-primary);
+  margin-top: 0;
+  text-wrap: balance;
+}
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 button {
   background-color: var(--accent-amber);
-  color: #101820;
-  /* Keep button text dark for contrast */
+  color: #0a0a1a;
   border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-weight: bold;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 700;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(242, 170, 77, 0.2);
+}
+
+button:active {
+  transform: translateY(0);
 }
 
 input,
@@ -67,15 +106,72 @@ select {
   background: var(--input-bg);
   border: 1px solid var(--input-border);
   color: var(--text-primary);
-  padding: 8px;
-  border-radius: 4px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-button:hover {
-  opacity: 0.9;
+input:focus,
+textarea:focus {
+  border-color: var(--accent-amber);
 }
 
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--input-border);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+
+/* Modal & Portal Styles */
+#modal-root {
+  position: relative;
+  z-index: var(--z-portal);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(4, 4, 12, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-portal);
+  padding: 20px;
+}
+
+.modal-form {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  padding: 32px;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }

@@ -28,6 +28,7 @@ function App() {
     }
   }, [currentUser?._id]);
 
+    const activeTracker = useSelector((state) => state.registration.activeTracker);
   return (<>
     <BrowserRouter>
       <Routes>
@@ -52,7 +53,7 @@ function App() {
         <Route path="/*" element={<h1>404 NOT FOUND</h1>} />
       </Routes>
 
-      <TrackerWidget />
+      <TrackerWidget key={activeTracker ? `${activeTracker.projectId}-${activeTracker.subtaskIndex}` : "idle"} />
     </BrowserRouter >
   </>
   )

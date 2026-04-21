@@ -2,8 +2,8 @@ import React, { useState } from "react"
 import "./LoginPage.css"
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux";
+import { Mail, Lock, Save, Trash2, X } from "lucide-react";
 import { deleteProfile, updateProfile } from "./Redux";
-// NEW LINE
 
 function EditProfile() {
     const CURRENT_USER = JSON.parse(localStorage.getItem("CURRENTUSER"));
@@ -38,28 +38,61 @@ function EditProfile() {
         }
     };
 
-    return (<div style={{ padding: '10px' }}>
-        <div className="edit_profile" style={{ padding: '10px' }}>
-
-            <div style={{ maxWidth: '360px', padding: '40px', margin: '20px auto ', border: '2px solid #4a5568' }}>
-                <h1>Provide New Profile</h1>
-                <form >
-                    <label>Email</label>
-                    <input type="email" defaultValue={CURRENT_USER[0].email} onChange={(e) => setEmail(e.target.value)} required />
-
-                    <label>Password</label>
-                    <input type="password" defaultValue={CURRENT_USER[0].password} onChange={(e) => setPassword(e.target.value)} required />
-
-                    <div style={{ display: "flex", justifyContent: "center", gap: '20px', margin: '10px 0px' }}>
-                        <button onClick={handleSubmit} style={{ background: 'lime', color: 'white' }}  > SAVE </button>
-                        <button style={{ background: 'red', color: 'white' }} onClick={delete_profile}>Delete</button>
-                        <button style={{ border: '1px solid var(--accent-amber)' }} onClick={() => navigate("/projects")}> Cancel </button>
+    return (
+        <div className="login-container">
+            <div className="login_page">
+                <h1>Edit Profile</h1>
+                <p className="login-subtitle">Update your account credentials</p>
+                
+                <form className="auth-form">
+                    <div className="input-group">
+                        <label><Mail size={16} /> Email Address</label>
+                        <input 
+                            type="email" 
+                            defaultValue={CURRENT_USER[0].email} 
+                            onChange={(e) => setEmail(e.target.value)} 
+                            required 
+                        />
                     </div>
-                </form >
+
+                    <div className="input-group">
+                        <label><Lock size={16} /> Password</label>
+                        <input 
+                            type="password" 
+                            defaultValue={CURRENT_USER[0].password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            required 
+                        />
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: '12px', marginTop: '10px' }}>
+                        <button onClick={handleSubmit} className="submit-btn" type="submit">
+                            <Save size={18} /> Save Changes
+                        </button>
+                        
+                        <div style={{ display: "flex", gap: "12px" }}>
+                            <button 
+                                type="button"
+                                onClick={() => navigate("/projects")} 
+                                className="tracker-btn-ghost"
+                                style={{ flex: 1, padding: "12px", borderRadius: "12px", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                            >
+                                <X size={16} /> Cancel
+                            </button>
+                            <button 
+                                type="button"
+                                onClick={delete_profile} 
+                                className="tracker-btn-danger"
+                                style={{ flex: 1, padding: "12px", borderRadius: "12px", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                            >
+                                <Trash2 size={16} /> Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </div >
-    </div>
-    )
+        </div>
+    );
 }
 
 export default EditProfile

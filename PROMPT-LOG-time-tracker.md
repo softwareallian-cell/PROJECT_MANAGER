@@ -358,23 +358,56 @@ did u update .md files? PROJECT-CONTEXT.md — updated / TASK-PLAN-[name].md —
 
 ---
 
-## Total Prompts: 10 (6 design + 4 execution)
+## Total Prompts: 13 (6 initial design + 7 execution/refinement)
 
 ---
 
-# Retrospective — Time Tracker Feature Build
+## Prompt 11 — Premium Theme Standardization
 
-**Date:** 2026-04-20  
-**Time to complete:** ~1 hour (design session prior day + execution session today)  
-**Honest assessment:**
+**Prompt Summary:**
+```
+Propagate the new glassmorphic navy/amber theme across Projects, Details, and Dashboard.
+Update CSS variables for --glass-blur, --accent-amber, and --card-bg.
+Ensure consistent backdrop-filter and border-radius usage.
+```
+**Result:** ✅ Global CSS updated, component stylesheets synchronized.
 
-The planning phase was genuinely strong — the TASK-PLAN was detailed enough that execution had no ambiguity about what to build. Choosing to reuse the existing GridFS bucket instead of adding new infrastructure was the right call, and it meant zero new env vars, zero new dependencies, and a screenshot upload that works identically to the existing file attachment system. That design decision alone saved at least 30 minutes of debugging.
+---
 
-The execution phase had real friction from the multi-replace tool: when two replacement chunks overlapped in the same call, the tool silently dropped one and generated broken code. This happened twice — once in Redux.jsx (producing a dangling try/catch block) and once in Details.jsx (dropping the uploading state). The fix was always a follow-up call, but it meant 3–4 extra prompts that shouldn't have been needed if I had used single-contiguous replacements instead of trying to be clever with multi-chunk edits across wide line ranges.
+## Prompt 12 — UI Layout & Text Truncation
 
-The JSX fragment issue was a predictable mistake: placing `<TrackerWidget>` outside the single root `<div>` is a classic React error, and I should have designed the return structure with a fragment from the start rather than retrofitting it. The subsequent chain of fixes (fragment replaces wrapper → wrapper missing → extra closing div) was fiddly and reflected poor initial JSX planning for a multi-sibling return.
+**Prompt Summary:**
+```
+Resolve text overflow issues in project cards.
+Implement CSS ellipsis for long Titles and Descriptions.
+Add HTML 'title' attributes (tooltips) for truncated elements.
+Fix sidebar wrapping in Details view.
+```
+**Result:** ✅ Clean layout with improved readability on long names.
 
-What went well: the `TrackerWidget.jsx` state machine is clean and complete — CONFIRM/ACTIVE/PAUSED/SUMMARY are distinct, the stream ref and timer ref are properly cleaned up on unmount, and the random interval scheduling using recursive setTimeout (not setInterval) is the correct pattern because it re-randomises delay on every capture. The CSS is also genuinely premium — the glassmorphism panel with amber glow, the pulsing toggle button, the smooth slide-up animation, all match the existing app aesthetic without any Tailwind dependency.
+---
 
-If I were doing this again: I would write the JSX return structure with the fragment on the very first draft, use only single-contiguous replacements when modifying files with complex JSX, and run the Vite dev server in the background from the start so I get real-time error feedback instead of reasoning about div counts manually. The build is solid and ready to test — every acceptance criterion from the plan is implemented.
+## Prompt 13 — Tracker Widget UX Refinements
 
+**Prompt Summary:**
+```
+1. Fix: Disable [▶ Track] buttons on all subtasks if a session is already active.
+2. Fix: Reset internal widget state (session saved summary) when starting a new task.
+3. UI: Add translucent interruption overlay for active capturing feedback.
+```
+**Result:** ✅ Robust state management and preventing concurrent sessions.
+
+---
+
+# Retrospective — Final Polish Phase
+
+**Date:** 2026-04-21  
+**Assessment:** 
+
+The transition from a functional "Feature Build" to a "Premium Product" was successful. The core infrastructure (GridFS + getDisplayMedia) remained stable, allowing focus to shift entirely to UX and Aesthetics. The biggest challenge was CSS specificity and ensuring the glassmorphism worked across varying background depths (Sidebar vs. Main Content). 
+
+Lessons learned: Standardizing on CSS Variables early would have made the theme rollout even faster. The "Track" button logic was a critical fix—allowing multiple sessions would have caused data corruption in the TimeSession model.
+
+---
+
+> Documentation updated by Antigravity AI.
