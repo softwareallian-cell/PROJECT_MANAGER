@@ -25,6 +25,11 @@ mongoose.deleteModel(/.*Project.*/);
 const Project = require('./models/Projects.js');
 const User = require('./models/User.js');
 const TimeSession = require('./models/TimeSession.js');
+const Workspace = require('./models/Workspace.js');
+const Team = require('./models/Team.js');
+const Task = require('./models/Task.js');
+const Cycle = require('./models/Cycle.js');
+const AuditLog = require('./models/AuditLog.js');
 let gridfsBucket;
 // Connection
 mongoose.connect(process.env.MONGO_URI)
@@ -141,6 +146,80 @@ app.put('/api/users/:id/notifications/read', async (req, res) => {
     }
 });
 
+
+// --- WORKSPACE ROUTES ---
+
+app.get('/api/workspaces', async (req, res) => {
+    try {
+        const workspaces = await Workspace.find();
+        res.json(workspaces);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.post('/api/workspaces', async (req, res) => {
+    try {
+        const workspace = new Workspace(req.body);
+        const saved = await workspace.save();
+        res.status(201).json(saved);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// --- TEAM ROUTES ---
+
+app.get('/api/workspaces/:workspaceId/teams', async (req, res) => {
+    try {
+        const teams = await Team.find({ workspaceId: req.params.workspaceId });
+        res.json(teams);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.post('/api/teams', async (req, res) => {
+    try {
+        const team = new Team(req.body);
+        const saved = await team.save();
+        res.status(201).json(saved);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// --- TASK ROUTES ---
+
+app.get('/api/teams/:teamId/tasks', async (req, res) => {
+    try {
+        const tasks = await Task.find({ teamId: req.params.teamId })
+            .populate('assignee', 'email role')
+            .sort({ createdAt: -1 });
+        res.json(tasks);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.post('/api/tasks', async (req, res) => {
+    try {
+        const task = new Task(req.body);
+        const saved = await task.save();
+        res.status(201).json(saved);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.put('/api/tasks/:id', async (req, res) => {
+    try {
+        const updated = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updated);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.delete('/api/tasks/:id', async (req, res) => {
+    try {
+        await Task.findByIdAndDelete(req.params.id);
+        res.json({ message: "Task deleted" });
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.get('/api/teams/:teamId/projects', async (req, res) => {
+    try {
+        const projects = await Project.find({ teamId: req.params.teamId });
+        res.json(projects);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
 
 // --- PROJECT ROUTES ---
 

@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { editProjectDb, deleteProjectDb, fetchCreatedProjects, fetchAssignedProjects } from './Redux';
-import { X, Edit2, Trash2, Layout, Plus, Filter, ChevronDown, CheckCircle2, Circle, CircleDashed, ArrowUp, ArrowRight, ArrowDown } from 'lucide-react';
+import {
+  fetchWorkspaces, fetchTeams, fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, addProjectByTeam, setActiveWorkspace, setActiveTeam, setActiveProject
+} from './Redux';
+import {
+  X, Edit2, Trash2, Layout, Plus, Filter, ChevronDown, CheckCircle2, Circle, CircleDashed, ArrowUp, ArrowRight, ArrowDown, Hash, Users, Zap
+} from 'lucide-react';
 import './Project_1.css';
+import NewIssueModal from './NewIssueModal';
+import IssueDetailView from './IssueDetailView';
 
 const STATUS_COLUMNS = [
   { id: 'backlog', label: 'Backlog', icon: <CircleDashed size={14} /> },
@@ -13,9 +19,11 @@ const STATUS_COLUMNS = [
 ];
 
 const PRIORITY_ICONS = {
+  urgent: <Zap size={12} color="#ff4d4d" />,
   high: <ArrowUp size={12} />,
   medium: <ArrowRight size={12} />,
-  low: <ArrowDown size={12} />
+  low: <ArrowDown size={12} />,
+  none: <Circle size={12} color="#8C8C8C" />
 };
 
 function Project_1() {
@@ -23,30 +31,82 @@ function Project_1() {
   const storedUser = localStorage.getItem("CURRENTUSER");
   const CURRENTUSER = storedUser ? JSON.parse(storedUser)[0] : {};
 
-  const createdProjects = useSelector((state) => state.registration.createdProjects);
-  const assignedProjects = useSelector((state) => state.registration.assignedProjects);
+  // Linear Architecture State
+  const workspaces = useSelector(state => state.registration.workspaces);
+  const teams = useSelector(state => state.registration.teams);
+  const tasks = useSelector(state => state.registration.tasks);
+  const linearProjects = useSelector(state => state.registration.linearProjects);
 
-  const [activeTab, setActiveTab] = useState("mine"); // 'mine' or 'assigned'
-  const projects = activeTab === "mine" ? createdProjects : assignedProjects;
+  const activeWorkspaceId = useSelector(state => state.registration.activeWorkspaceId);
+  const activeTeamId = useSelector(state => state.registration.activeTeamId);
+  const activeProjectId = useSelector(state => state.registration.activeProjectId);
 
   const [draggingId, setDraggingId] = useState(null);
   const [overColumn, setOverColumn] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [customViews, setCustomViews] = useState([]);
-
+  // Initial data fetch
   useEffect(() => {
-    if (CURRENTUSER?._id) {
-      dispatch(fetchCreatedProjects(CURRENTUSER._id));
-      dispatch(fetchAssignedProjects(CURRENTUSER._id));
+    dispatch(fetchWorkspaces());
+  }, [dispatch]);
+
+  // Bootstrap: Create default Workspace/Team if empty
+  useEffect(() => {
+    if (workspaces.length === 0 && CURRENTUSER?._id) {
+      const setup = async () => {
+        try {
+          const wsRes = await fetch('http://localhost:5000/api/workspaces', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: 'My Workspace', slug: 'my-ws', owner: CURRENTUSER._id })
+          });
+          const ws = await wsRes.json();
+
+          await fetch('http://localhost:5000/api/teams', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ workspaceId: ws._id, name: 'Engineering', key: 'ENG', members: [CURRENTUSER._id] })
+          });
+          dispatch(fetchWorkspaces());
+        } catch (e) { console.error("Bootstrap error", e); }
+      };
+      setup();
     }
-  }, [dispatch, CURRENTUSER?._id]);
+  }, [workspaces.length, CURRENTUSER?._id, dispatch]);
+
+  // Fetch teams when workspace changes
+  useEffect(() => {
+    if (activeWorkspaceId) {
+      dispatch(fetchTeams(activeWorkspaceId));
+    }
+  }, [dispatch, activeWorkspaceId]);
+
+  // Fetch tasks and projects when team changes
+  useEffect(() => {
+    if (activeTeamId) {
+      dispatch(fetchTasks(activeTeamId));
+      dispatch(fetchProjectsByTeam(activeTeamId));
+    }
+  }, [dispatch, activeTeamId]);
+
+  const activeWorkspace = workspaces.find(w => w._id === activeWorkspaceId);
+  const activeTeam = teams.find(t => t._id === activeTeamId);
+
+  // Filter tasks by selected project and search term
+  const filteredTasks = tasks.filter(t => {
+    const matchesProject = activeProjectId ? t.projectId === activeProjectId : true;
+    const matchesSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase()) || getTaskId(t).toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesProject && matchesSearch;
+  });
 
   // --- Drag and Drop Logic ---
-  const onDragStart = (e, projectId) => {
-    setDraggingId(projectId);
+  const onDragStart = (e, taskId) => {
+    setDraggingId(taskId);
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', projectId);
+    e.dataTransfer.setData('text/plain', taskId);
   };
 
   const onDragOver = (e, status) => {
@@ -59,13 +119,11 @@ function Project_1() {
     e.preventDefault();
     if (!draggingId) return;
 
-    const project = projects.find(p => p._id === draggingId);
-    if (project && project.status !== status) {
-      // In a real app we might immediately optimistically update local state here, 
-      // but dispatching to Redux works.
-      dispatch(editProjectDb({
+    const task = tasks.find(t => t._id === draggingId);
+    if (task && task.status !== status) {
+      dispatch(editTaskDb({
         id: draggingId,
-        updatedData: { ...project, status: status }
+        updatedData: { ...task, status: status }
       }));
     }
     setDraggingId(null);
@@ -78,14 +136,29 @@ function Project_1() {
   };
 
   // --- Helpers ---
-  const getShortId = (id) => {
-    if (!id) return 'PRJ-000';
-    return `PRJ-${id.substring(id.length - 4).toUpperCase()}`;
+  const getTaskId = (task) => {
+    const key = activeTeam?.key || 'TASK';
+    const num = task._id.substring(task._id.length - 3);
+    return `${key}-${parseInt(num, 16) % 1000}`;
   };
 
-  const saveCurrentView = () => {
-    const newView = { id: Date.now(), name: `View ${customViews.length + 1}` };
-    setCustomViews([...customViews, newView]);
+  const handleCreateTask = (taskData) => {
+    dispatch(addTaskDb(taskData)).then(action => {
+      if (action.payload) setSelectedTask(action.payload);
+    });
+  };
+
+
+  const handleCreateProject = () => {
+    if (!activeTeamId || !activeWorkspaceId) return;
+    const newProj = {
+      Title: "New Project",
+      Description: "",
+      teamId: activeTeamId,
+      createdBy: CURRENTUSER._id,
+      date: new Date().toISOString().substring(0, 10)
+    };
+    dispatch(addProjectByTeam(newProj));
   };
 
   return (
@@ -93,37 +166,80 @@ function Project_1() {
 
       {/* LEFT PANEL */}
       <div className="linear-sidebar">
-        <div className="linear-sidebar-header">
+        <div className="linear-sidebar-header" onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}>
           <div className="workspace-name">
-            <div className="workspace-icon">A</div>
-            {CURRENTUSER?.email || 'Alian Workspace'}
+            <div className="workspace-icon">
+              {activeWorkspace?.name?.charAt(0) || 'A'}
+            </div>
+            {activeWorkspace?.name || 'Select Workspace'}
             <ChevronDown size={14} color="#8C8C8C" style={{ marginLeft: 'auto' }} />
           </div>
+
+          {showWorkspaceMenu && (
+            <div className="workspace-dropdown">
+              {workspaces.map(w => (
+                <div key={w._id} className="dropdown-item" onClick={() => dispatch(setActiveWorkspace(w._id))}>
+                  {w.name}
+                </div>
+              ))}
+              <div className="dropdown-divider"></div>
+              <div className="dropdown-item secondary"><Plus size={12} /> Create Workspace</div>{/*this button dosnt do shit */}
+            </div>
+          )}
         </div>
 
-        <button className="new-issue-btn">
+        <button className="new-issue-btn" onClick={() => setIsCreateModalOpen(true)}>
           <Edit2 size={14} /> New Issue
         </button>
 
+
         <div className="sidebar-section">
-          <div className="section-title">Your Views</div>
-          <div className={`sidebar-item ${activeTab === 'mine' ? 'active' : ''}`} onClick={() => setActiveTab('mine')}>
-            <Layout size={14} /> My Issues
+          <div className="section-title">Views</div>
+          <div className="sidebar-item active">
+            <Layout size={14} /> Active Issues
           </div>
-          <div className={`sidebar-item ${activeTab === 'assigned' ? 'active' : ''}`} onClick={() => setActiveTab('assigned')}>
-            <Layout size={14} /> Assigned to me
+          <div className="sidebar-item">
+            <CheckCircle2 size={14} /> All Issues
           </div>
-          {customViews.map(view => (
-            <div key={view.id} className="sidebar-item">
-              <Filter size={14} /> {view.name}
+        </div>
+
+        <div className="sidebar-section">
+          <div className="section-title">Teams</div>
+          {teams.map(team => (
+            <div
+              key={team._id}
+              className={`sidebar-item ${activeTeamId === team._id ? 'active' : ''}`}
+              onClick={() => dispatch(setActiveTeam(team._id))}
+            >
+              <div className="team-key-badge">{team.key}</div>
+              {team.name}
             </div>
           ))}
+          <div className="sidebar-item secondary">
+            <Plus size={14} /> Add Team
+          </div>
         </div>
 
         <div className="sidebar-section">
           <div className="section-title">Projects</div>
-          <div className="sidebar-item">Sprint 1</div>
-          <div className="sidebar-item">Sprint 2</div>
+          <div
+            className={`sidebar-item ${!activeProjectId ? 'active' : ''}`}
+            onClick={() => dispatch(setActiveProject(null))}
+          >
+            <Hash size={14} /> All Projects
+          </div>
+          {linearProjects.map(proj => (
+            <div
+              key={proj._id}
+              className={`sidebar-item ${activeProjectId === proj._id ? 'active' : ''}`}
+              onClick={() => dispatch(setActiveProject(proj._id))}
+            >
+              <Hash size={14} /> {proj.Title}
+            </div>
+          ))}
+          <div className="sidebar-item secondary" onClick={handleCreateProject}>
+            <Plus size={14} /> Add Project
+          </div>
         </div>
       </div>
 
@@ -131,22 +247,31 @@ function Project_1() {
       <div className="linear-main">
         <div className="board-header">
           <div className="board-title">
-            <Layout size={18} color="#8C8C8C" />
-            {activeTab === 'mine' ? 'My Issues' : 'Assigned to me'}
+            <Users size={18} color="#8C8C8C" />
+            {activeTeam ? `${activeTeam.name} Board` : 'Select a Team'}
           </div>
           <div className="board-actions">
-            <button className="icon-btn" onClick={saveCurrentView} title="Save current view">
-              <Plus size={14} /> Save View
-            </button>
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="board-search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
             <button className="icon-btn">
               <Filter size={14} /> Filter
+            </button>
+            <button className="icon-btn">
+              <Plus size={14} /> Display
             </button>
           </div>
         </div>
 
         <div className="kanban-container">
           {STATUS_COLUMNS.map(col => {
-            const columnProjects = projects.filter(p => p.status === col.id);
+            const columnTasks = filteredTasks.filter(t => t.status === col.id);
             const isOver = overColumn === col.id;
 
             return (
@@ -164,38 +289,38 @@ function Project_1() {
                 <div className="column-header">
                   {col.icon}
                   <span>{col.label}</span>
-                  <span className="col-count">{columnProjects.length}</span>
+                  <span className="col-count">{columnTasks.length}</span>
                 </div>
 
                 <div className="column-body">
-                  {columnProjects.map(p => (
+                  {columnTasks.map(t => (
                     <div
-                      key={p._id}
+                      key={t._id}
                       className="linear-card"
                       draggable
-                      onDragStart={(e) => onDragStart(e, p._id)}
+                      onDragStart={(e) => onDragStart(e, t._id)}
                       onDragEnd={onDragEnd}
-                      onClick={() => setSelectedProject(p)}
-                      style={{ opacity: draggingId === p._id ? 0.4 : 1 }}
+                      onClick={() => setSelectedTask(t)}
+                      style={{ opacity: draggingId === t._id ? 0.4 : 1 }}
                     >
                       <div className="card-top">
-                        <span className="issue-id">{getShortId(p._id)}</span>
+                        <span className="issue-id">{getTaskId(t)}</span>
                       </div>
-                      <div className="card-title">{p.Title}</div>
+                      <div className="card-title">{t.title}</div>
 
                       <div className="card-meta">
-                        <span className={`badge priority-${p.priority}`}>
-                          {PRIORITY_ICONS[p.priority]} {p.priority}
+                        <span className={`badge priority-${t.priority}`}>
+                          {PRIORITY_ICONS[t.priority] || PRIORITY_ICONS.none}
                         </span>
-                        {p.sprint && <span className="badge">S{p.sprint}</span>}
+                        {t.tags && t.tags.map(tag => (
+                          <span key={tag} className="badge tag-badge">#{tag}</span>
+                        ))}
                       </div>
 
-                      {activeTab === 'mine' && (
-                        <div className="card-actions" onClick={e => e.stopPropagation()}>
-                          <div className="action-icon" onClick={() => setSelectedProject(p)}><Edit2 size={12} /></div>
-                          <div className="action-icon" onClick={() => dispatch(deleteProjectDb(p._id))}><Trash2 size={12} /></div>
-                        </div>
-                      )}
+                      <div className="card-actions" onClick={e => e.stopPropagation()}>
+                        <div className="action-icon" onClick={() => setSelectedTask(t)}><Edit2 size={12} /></div>
+                        <div className="action-icon" onClick={() => dispatch(deleteTaskDb(t._id))}><Trash2 size={12} /></div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -203,91 +328,30 @@ function Project_1() {
             );
           })}
         </div>
-
-        {/* RIGHT PANEL (DETAILS) */}
-        <div className={`right-panel ${selectedProject ? 'open' : ''}`}>
-          {selectedProject && (
-            <>
-              <div className="panel-header">
-                <span className="issue-id" style={{ color: '#8C8C8C', fontSize: '13px' }}>
-                  {getShortId(selectedProject._id)}
-                </span>
-                <button className="panel-close" onClick={() => setSelectedProject(null)}>
-                  <X size={16} />
-                </button>
-              </div>
-              <div className="panel-content">
-                <textarea
-                  className="panel-title-input"
-                  value={selectedProject.Title}
-                  onChange={(e) => setSelectedProject({ ...selectedProject, Title: e.target.value })}
-                  onBlur={() => dispatch(editProjectDb({ id: selectedProject._id, updatedData: { ...selectedProject } }))}
-                />
-
-                <div className="panel-meta-grid">
-                  <div className="meta-label">Status</div>
-                  <div className="meta-value">
-                    <select
-                      className="meta-select"
-                      value={selectedProject.status}
-                      onChange={(e) => {
-                        const updated = { ...selectedProject, status: e.target.value };
-                        setSelectedProject(updated);
-                        dispatch(editProjectDb({ id: selectedProject._id, updatedData: updated }));
-                      }}
-                    >
-                      {STATUS_COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                    </select>
-                  </div>
-
-                  <div className="meta-label">Priority</div>
-                  <div className="meta-value">
-                    <select
-                      className="meta-select"
-                      value={selectedProject.priority}
-                      onChange={(e) => {
-                        const updated = { ...selectedProject, priority: e.target.value };
-                        setSelectedProject(updated);
-                        dispatch(editProjectDb({ id: selectedProject._id, updatedData: updated }));
-                      }}
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-
-                  <div className="meta-label">Sprint</div>
-                  <div className="meta-value">
-                    <input
-                      type="number"
-                      className="meta-select"
-                      value={selectedProject.sprint || 1}
-                      onChange={(e) => {
-                        const updated = { ...selectedProject, sprint: Number(e.target.value) };
-                        setSelectedProject(updated);
-                        dispatch(editProjectDb({ id: selectedProject._id, updatedData: updated }));
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="meta-label" style={{ marginBottom: '8px' }}>Description</div>
-                <textarea
-                  className="panel-desc-input"
-                  placeholder="Add a description..."
-                  value={selectedProject.Description || ''}
-                  onChange={(e) => setSelectedProject({ ...selectedProject, Description: e.target.value })}
-                  onBlur={() => dispatch(editProjectDb({ id: selectedProject._id, updatedData: { ...selectedProject } }))}
-                />
-              </div>
-            </>
-          )}
-        </div>
+        {/* FULL PAGE ISSUE DETAIL VIEW */}
+        <IssueDetailView
+          task={selectedTask}
+          team={activeTeam}
+          project={linearProjects.find(p => p._id === selectedTask?.projectId)}
+          user={CURRENTUSER}
+          onClose={() => setSelectedTask(null)}
+          onUpdate={(updatedData) => dispatch(editTaskDb({ id: updatedData._id, updatedData }))}
+        />
 
       </div>
+
+      <NewIssueModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreate={handleCreateTask}
+        team={activeTeam}
+        project={linearProjects.find(p => p._id === activeProjectId)}
+        user={CURRENTUSER}
+      />
+
     </div>
   );
 }
+
 
 export default Project_1;

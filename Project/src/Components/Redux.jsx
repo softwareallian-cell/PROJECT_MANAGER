@@ -3,6 +3,9 @@ import axios from "axios";
 
 const USERS_URL = "http://localhost:5000/api/users";
 const API_URL = "http://localhost:5000/api/projects";
+const WORKSPACES_URL = "http://localhost:5000/api/workspaces";
+const TEAMS_URL = "http://localhost:5000/api/teams";
+const TASKS_URL = "http://localhost:5000/api/tasks";
 
 
 // --- USER THUNKS ---
@@ -195,6 +198,67 @@ export const fetchAllTimeSessions = createAsyncThunk(
     }
 );
 
+// --- LINEAR ARCHITECTURE THUNKS ---
+
+export const fetchWorkspaces = createAsyncThunk("workspaces/fetchAll", async (_, { rejectWithValue }) => {
+    try {
+        const res = await axios.get(WORKSPACES_URL);
+        return res.data;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+export const fetchTeams = createAsyncThunk("teams/fetchByWorkspace", async (workspaceId, { rejectWithValue }) => {
+    try {
+        const res = await axios.get(`${WORKSPACES_URL}/${workspaceId}/teams`);
+        return res.data;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+export const fetchTasks = createAsyncThunk("tasks/fetchByTeam", async (teamId, { rejectWithValue }) => {
+    try {
+        const res = await axios.get(`${TEAMS_URL}/${teamId}/tasks`);
+        return res.data;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+export const addTaskDb = createAsyncThunk("tasks/add", async (taskData, { rejectWithValue }) => {
+    try {
+        const res = await axios.post(TASKS_URL, taskData);
+        return res.data;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+export const editTaskDb = createAsyncThunk("tasks/edit", async ({ id, updatedData }, { rejectWithValue }) => {
+    try {
+        const res = await axios.put(`${TASKS_URL}/${id}`, updatedData);
+        return res.data;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+export const deleteTaskDb = createAsyncThunk("tasks/delete", async (id, { rejectWithValue }) => {
+    try {
+        await axios.delete(`${TASKS_URL}/${id}`);
+        return id;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+// Linear Project Thunks
+export const fetchProjectsByTeam = createAsyncThunk("linearProjects/fetchByTeam", async (teamId, { rejectWithValue }) => {
+    try {
+        const res = await axios.get(`${TEAMS_URL}/${teamId}/projects`);
+        return res.data;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+export const addProjectByTeam = createAsyncThunk("linearProjects/add", async (projectData, { rejectWithValue }) => {
+    try {
+        const res = await axios.post(API_URL, projectData);
+        return res.data;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+
+
 
 
 const FORMSLICE = createSlice({
@@ -211,7 +275,16 @@ const FORMSLICE = createSlice({
         status: 'idle',
         error: null,
         activeTracker: JSON.parse(localStorage.getItem("activeTracker")) || null, // { projectId, subtaskIndex, subtaskTitle }
-        trackerPanelOpen: true
+        trackerPanelOpen: true,
+
+        // Linear Architecture State
+        workspaces: [],
+        teams: [],
+        tasks: [],
+        linearProjects: [],
+        activeWorkspaceId: null,
+        activeTeamId: null,
+        activeProjectId: null
     },
     reducers: {
         toggleTheme: (state) => {
@@ -244,6 +317,15 @@ const FORMSLICE = createSlice({
         },
         setTrackerPanelOpen: (state, action) => {
             state.trackerPanelOpen = action.payload;
+        },
+        setActiveWorkspace: (state, action) => {
+            state.activeWorkspaceId = action.payload;
+        },
+        setActiveTeam: (state, action) => {
+            state.activeTeamId = action.payload;
+        },
+        setActiveProject: (state, action) => {
+            state.activeProjectId = action.payload;
         }
 
     },
@@ -323,6 +405,38 @@ const FORMSLICE = createSlice({
             })
             .addCase(fetchAllTimeSessions.fulfilled, (state, action) => {
                 state.allTimeSessions = action.payload;
+            })
+            // Linear cases
+            .addCase(fetchWorkspaces.fulfilled, (state, action) => {
+                state.workspaces = action.payload;
+                if (action.payload.length > 0 && !state.activeWorkspaceId) {
+                    state.activeWorkspaceId = action.payload[0]._id;
+                }
+            })
+            .addCase(fetchTeams.fulfilled, (state, action) => {
+                state.teams = action.payload;
+                if (action.payload.length > 0) {
+                    state.activeTeamId = action.payload[0]._id;
+                }
+            })
+            .addCase(fetchTasks.fulfilled, (state, action) => {
+                state.tasks = action.payload;
+            })
+            .addCase(addTaskDb.fulfilled, (state, action) => {
+                state.tasks.unshift(action.payload);
+            })
+            .addCase(editTaskDb.fulfilled, (state, action) => {
+                const idx = state.tasks.findIndex(t => t._id === action.payload._id);
+                if (idx !== -1) state.tasks[idx] = action.payload;
+            })
+            .addCase(deleteTaskDb.fulfilled, (state, action) => {
+                state.tasks = state.tasks.filter(t => t._id !== action.payload);
+            })
+            .addCase(fetchProjectsByTeam.fulfilled, (state, action) => {
+                state.linearProjects = action.payload;
+            })
+            .addCase(addProjectByTeam.fulfilled, (state, action) => {
+                state.linearProjects.push(action.payload);
             });
     }
 });
@@ -333,6 +447,9 @@ export const {
     clearUserSearch,
     startGlobalTracker,
     stopGlobalTracker,
-    setTrackerPanelOpen
+    setTrackerPanelOpen,
+    setActiveWorkspace,
+    setActiveTeam,
+    setActiveProject
 } = FORMSLICE.actions;
 export const store = configureStore({ reducer: { registration: FORMSLICE.reducer } });

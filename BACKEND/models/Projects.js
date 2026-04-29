@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const ProjectSchema = new mongoose.Schema({
     Title: { type: String, required: true },
     Description: { type: String, default: '' },
+    teamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team' }, // Link to Team
 
     status: {
         type: String,
