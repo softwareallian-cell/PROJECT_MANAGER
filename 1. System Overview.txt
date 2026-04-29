@@ -1,0 +1,2301 @@
+1. System Overview
+2. Requirements (Functional & Non-Functional)
+3. Use Case Diagram
+4. System Architecture Diagram
+5. Database Schema (ERD)
+6. Component Diagram
+7. Sequence Diagrams
+8. Activity Diagrams
+9. Class Diagram
+10. API Design (REST)
+11. State Diagrams
+12. Deployment Diagram
+13. Data Flow Diagram
+14. Security Architecture
+15. MERN Stack Technical Breakdown
+
+┌─────────────────────────────────────────────────────────────┐
+│           PROJECT MANAGEMENT TOOL — SYSTEM OVERVIEW          │
+│                    MERN STACK WEB APPLICATION                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  APPLICATION NAME:  ProManage (Your PM Tool)                │
+│  STACK:             MongoDB + Express.js + React + Node.js  │
+│  ARCHITECTURE:      3-Tier (Client/Server/Database)         │
+│  PATTERN:           MVC + REST API + Component-Based UI     │
+│  AUTH:              JWT (JSON Web Tokens)                   │
+│  REAL-TIME:         Socket.io (WebSockets)                  │
+│  HOSTING:           AWS / Vercel + MongoDB Atlas            │
+│                                                             │
+│  CORE MODULES:                                              │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │  1. Authentication & Authorization                  │    │
+│  │  2. Project Management                              │    │
+│  │  3. Task/Issue Management                           │    │
+│  │  4. Scrum Board (Kanban)                            │    │
+│  │  5. Backlog Management                              │    │
+│  │  6. Sprint Management                               │    │
+│  │  7. Team Management                                 │    │
+│  │  8. Reporting & Analytics Dashboard                 │    │
+│  │  9. Real-Time Notifications                         │    │
+│  │  10. File Management                                │    │
+│  │  11. Comments & Collaboration                       │    │
+│  │  12. Automation Rules Engine                        │    │
+│  └────────────────────────────────────────────────────┘    │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│           PROJECT MANAGEMENT TOOL — SYSTEM OVERVIEW          │
+│                    MERN STACK WEB APPLICATION                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  APPLICATION NAME:  ProManage (Your PM Tool)                │
+│  STACK:             MongoDB + Express.js + React + Node.js  │
+│  ARCHITECTURE:      3-Tier (Client/Server/Database)         │
+│  PATTERN:           MVC + REST API + Component-Based UI     │
+│  AUTH:              JWT (JSON Web Tokens)                   │
+│  REAL-TIME:         Socket.io (WebSockets)                  │
+│  HOSTING:           AWS / Vercel + MongoDB Atlas            │
+│                                                             │
+│  CORE MODULES:                                              │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │  1. Authentication & Authorization                  │    │
+│  │  2. Project Management                              │    │
+│  │  3. Task/Issue Management                           │    │
+│  │  4. Scrum Board (Kanban)                            │    │
+│  │  5. Backlog Management                              │    │
+│  │  6. Sprint Management                               │    │
+│  │  7. Team Management                                 │    │
+│  │  8. Reporting & Analytics Dashboard                 │    │
+│  │  9. Real-Time Notifications                         │    │
+│  │  10. File Management                                │    │
+│  │  11. Comments & Collaboration                       │    │
+│  │  12. Automation Rules Engine                        │    │
+│  └────────────────────────────────────────────────────┘    │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                NON-FUNCTIONAL REQUIREMENTS                   │
+├────┬────────────────────────────────────┬──────────────────┤
+│ ID │ Requirement                        │ Target           │
+├────┼────────────────────────────────────┼──────────────────┤
+│NF1 │ Performance: API Response Time     │ < 200ms          │
+│NF2 │ Performance: Page Load Time        │ < 2 seconds      │
+│NF3 │ Scalability: Concurrent Users      │ 10,000+          │
+│NF4 │ Availability: System Uptime        │ 99.9%            │
+│NF5 │ Security: Data Encryption          │ AES-256 + HTTPS  │
+│NF6 │ Security: Password Hashing         │ bcrypt (12 salt) │
+│NF7 │ Security: JWT Token Expiry         │ 24hrs + Refresh  │
+│NF8 │ Usability: Mobile Responsive       │ All screen sizes │
+│NF9 │ Maintainability: Code Coverage     │ > 80% tests      │
+│NF10│ Database: Query Response           │ < 100ms          │
+│NF11│ Real-Time: WebSocket Latency       │ < 50ms           │
+│NF12│ File Upload: Max Size              │ 25MB per file    │
+│NF13│ Compliance: GDPR                   │ Full compliance  │
+│NF14│ Backup: Database Backup            │ Every 24 hours   │
+│NF15│ Browser Support                    │ Chrome/FF/Safari │
+
+└────┴────────────────────────────────────┴──────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                        USE CASE DIAGRAM                              │
+│                    PROJECT MANAGEMENT TOOL                           │
+└─────────────────────────────────────────────────────────────────────┘
+
+ACTORS:
+━━━━━━━
+👤 Admin          → Full system access
+👤 Project Manager → Project + team management
+👤 Developer      → Task management + updates
+👤 Viewer         → Read-only access
+🤖 System         → Automated processes
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                     │
+│  👤 ADMIN              ┌──────────────────────────────────┐        │
+│  │                     │         SYSTEM BOUNDARY           │        │
+│  ├──────────────────►  │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC1: Manage Users        │    │        │
+│  ├──────────────────►  │  └─────────────────────────┘    │        │
+│  │                     │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC2: Manage Roles        │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│  │                     │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC3: View All Projects   │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│                         │                                  │        │
+│  👤 PROJECT MANAGER     │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC4: Create Project      │    │        │
+│  ├──────────────────►  │  └─────────────────────────┘    │        │
+│  │                     │  ┌─────────────────────────┐    │        │
+│  ├──────────────────►  │  │ UC5: Manage Sprint       │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│  ├──────────────────►  │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC6: Assign Tasks        │    │        │
+│  ├──────────────────►  │  └─────────────────────────┘    │        │
+│  │                     │  ┌─────────────────────────┐    │        │
+│  ├──────────────────►  │  │ UC7: View Reports        │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│  ├──────────────────►  │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC8: Manage Backlog      │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│  ├──────────────────►  │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC9: Invite Team Members │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│                         │                                  │        │
+│  👤 DEVELOPER           │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC10: Create Task        │    │        │
+│  ├──────────────────►  │  └─────────────────────────┘    │        │
+│  │                     │  ┌─────────────────────────┐    │        │
+│  ├──────────────────►  │  │ UC11: Update Task Status │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│  ├──────────────────►  │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC12: Add Comments       │    │        │
+│  ├──────────────────►  │  └─────────────────────────┘    │        │
+│  │                     │  ┌─────────────────────────┐    │        │
+│  ├──────────────────►  │  │ UC13: Upload Files       │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│  ├──────────────────►  │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC14: Log Time           │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│  ├──────────────────►  │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC15: View Notifications │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│                         │                                  │        │
+│  👤 VIEWER              │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC16: View Projects      │    │        │
+│  ├──────────────────►  │  └─────────────────────────┘    │        │
+│  ├──────────────────►  │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC17: View Dashboards    │    │        │
+│  │                     │  └─────────────────────────┘    │        │
+│                         │                                  │        │
+│  🤖 SYSTEM              │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC18: Send Notifications │    │        │
+│  ├──────────────────►  │  └─────────────────────────┘    │        │
+│  ├──────────────────►  │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC19: Run Automations    │    │        │
+│  ├──────────────────►  │  └─────────────────────────┘    │        │
+│  │                     │  ┌─────────────────────────┐    │        │
+│  │                     │  │ UC20: Generate Reports   │    │        │
+│  └──────────────────►  │  └─────────────────────────┘    │        │
+│                         └──────────────────────────────────┘        │
+└─────────────────────────────────────────────────────────────────────┘
+
+INCLUDE/EXTEND RELATIONSHIPS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UC4 (Create Project)    <<include>>  UC1 (Login)
+UC10 (Create Task)      <<include>>  UC1 (Login)
+UC11 (Update Status)    <<extend>>   UC18 (Send Notification)
+UC5 (Manage Sprint)     <<include>>  UC8 (Manage Backlog)
+UC6 (Assign Task)       <<extend>>   UC18 (Send Notification)
+UC13 (Upload Files)     <<include>>  UC10 (Create Task)
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                 MERN STACK SYSTEM ARCHITECTURE                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│                        CLIENT LAYER                               │
+│                    (React.js Frontend)                            │
+│                                                                  │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌─────────────┐  │
+│  │   Pages    │ │ Components │ │   Redux    │ │   Axios     │  │
+│  │            │ │            │ │   Store    │ │   HTTP      │  │
+│  │ /dashboard │ │ KanbanBoard│ │            │ │   Client    │  │
+│  │ /projects  │ │ TaskCard   │ │ authSlice  │ │             │  │
+│  │ /board     │ │ SprintPanel│ │ taskSlice  │ │  Socket.io  │  │
+│  │ /backlog   │ │ Gantt Chart│ │ projSlice  │ │  Client     │  │
+│  │ /reports   │ │ Dashboard  │ │ notifSlice │ │             │  │
+│  └────────────┘ └────────────┘ └────────────┘ └─────────────┘  │
+│                         │                              │         │
+│                    React Router                   WebSocket      │
+└─────────────────────────┼──────────────────────────────┼────────┘
+                          │ HTTPS REST API               │ WS
+                          ▼                              ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                        SERVER LAYER                               │
+│               (Node.js + Express.js Backend)                     │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                    EXPRESS.JS APP                         │   │
+│  │                                                          │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────┐  │   │
+│  │  │  Auth    │  │ Project  │  │  Task    │  │ Sprint │  │   │
+│  │  │  Router  │  │  Router  │  │  Router  │  │ Router │  │   │
+│  │  └──────────┘  └──────────┘  └──────────┘  └────────┘  │   │
+│  │                                                          │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────┐  │   │
+│  │  │  Team    │  │ Report   │  │  Notif   │  │  File  │  │   │
+│  │  │  Router  │  │  Router  │  │  Router  │  │ Router │  │   │
+│  │  └──────────┘  └──────────┘  └──────────┘  └────────┘  │   │
+│  │                                                          │   │
+│  │  MIDDLEWARE LAYER:                                       │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────┐  │   │
+│  │  │  JWT     │  │  CORS    │  │  Rate    │  │ Error  │  │   │
+│  │  │  Auth    │  │  Policy  │  │  Limiter │  │Handler │  │   │
+│  │  └──────────┘  └──────────┘  └──────────┘  └────────┘  │   │
+│  │                                                          │   │
+│  │  SERVICES LAYER:                                         │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────┐  │   │
+│  │  │  Email   │  │ Socket   │  │  File    │  │ Report │  │   │
+│  │  │  Service │  │  Service │  │  Service │  │Service │  │   │
+│  │  │(Nodemailer│ │(Socket.io│  │  (AWS S3)│  │(Chart.js│  │   │
+│  │  └──────────┘  └──────────┘  └──────────┘  └────────┘  │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                  SOCKET.IO SERVER                         │   │
+│  │  Real-time: Task updates, Notifications, Comments         │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────┬────────────────────────────────┘
+                                  │ Mongoose ODM
+                                  ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                       DATABASE LAYER                              │
+│                    (MongoDB Atlas)                                │
+│                                                                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
+│  │  Users   │ │ Projects │ │  Tasks   │ │ Sprints  │           │
+│  │Collection│ │Collection│ │Collection│ │Collection│           │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
+│  │ Comments │ │  Teams   │ │  Files   │ │  Notifs  │           │
+│  │Collection│ │Collection│ │Collection│ │Collection│           │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │  Redis Cache (Sessions + Frequently Accessed Data)        │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                    EXTERNAL SERVICES                              │
+│                                                                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
+│  │  AWS S3  │ │ SendGrid │ │  Google  │ │  GitHub  │           │
+│  │  Files   │ │  Email   │ │  OAuth   │ │  OAuth   │           │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
+└──────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ENTITY RELATIONSHIP DIAGRAM                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────┐         ┌───────────────────────┐
+│      USERS        │         │       PROJECTS         │
+├───────────────────┤         ├───────────────────────┤
+│ _id: ObjectId (PK)│         │ _id: ObjectId (PK)    │
+│ name: String      │ 1    *  │ name: String          │
+│ email: String     ├─────────┤ description: String   │
+│ password: String  │ CREATES │ owner: ObjectId (FK)  │
+│ avatar: String    │         │ members: [ObjectId]   │
+│ role: String      │         │ status: String        │
+│ isVerified: Bool  │         │ startDate: Date       │
+│ createdAt: Date   │         │ endDate: Date         │
+│ lastLogin: Date   │         │ category: String      │
+│ preferences: Obj  │         │ visibility: String    │
+└───────┬───────────┘         │ createdAt: Date       │
+        │                     └──────────┬────────────┘
+        │                                │
+        │ BELONGS TO                     │ HAS MANY
+        │                                │
+        ▼                                ▼
+┌───────────────────┐         ┌───────────────────────┐
+│    TEAM MEMBERS   │         │        SPRINTS         │
+├───────────────────┤         ├───────────────────────┤
+│ _id: ObjectId(PK) │         │ _id: ObjectId (PK)    │
+│ project:ObjectId  │         │ name: String          │
+│ user: ObjectId    │  1    * │ project: ObjectId(FK) │
+│ role: String      ├─────────┤ goal: String          │
+│ joinedAt: Date    │ HAS     │ startDate: Date       │
+│ permissions:[]    │         │ endDate: Date         │
+└───────────────────┘         │ status: String        │
+                              │ velocity: Number      │
+                              │ capacity: Number      │
+                              │ createdAt: Date       │
+                              └──────────┬────────────┘
+                                         │
+                                         │ CONTAINS
+                                         │
+                                         ▼
+┌───────────────────┐         ┌───────────────────────┐
+│    COMMENTS       │         │         TASKS          │
+├───────────────────┤         ├───────────────────────┤
+│ _id: ObjectId(PK) │         │ _id: ObjectId (PK)    │
+│ task: ObjectId(FK)│         │ title: String         │
+│ author:ObjectId   │  *    1 │ description: String   │
+│ content: String   ├─────────┤ project: ObjectId(FK) │
+│ mentions: []      │ BELONGS │ sprint: ObjectId(FK)  │
+│ attachments: []   │         │ assignee: ObjectId(FK)│
+│ createdAt: Date   │         │ reporter: ObjectId(FK)│
+│ updatedAt: Date   │         │ status: String        │
+└───────────────────┘         │ priority: String      │
+                              │ type: String          │
+                              │ storyPoints: Number   │
+                              │ dueDate: Date         │
+                              │ startDate: Date       │
+                              │ labels: [String]      │
+                              │ attachments: [Object] │
+                              │ timeLogged: Number    │
+                              │ timeEstimate: Number  │
+                              │ order: Number         │
+                              │ parentTask: ObjectId  │
+                              │ subtasks: [ObjectId]  │
+                              │ watchers: [ObjectId]  │
+                              │ createdAt: Date       │
+                              │ updatedAt: Date       │
+                              └──────────┬────────────┘
+                                         │
+                        ┌────────────────┼────────────────┐
+                        │                │                │
+                        ▼                ▼                ▼
+            ┌───────────────┐ ┌──────────────┐ ┌───────────────┐
+            │  ATTACHMENTS  │ │  ACTIVITIES  │ │  AUTOMATIONS  │
+            ├───────────────┤ ├──────────────┤ ├───────────────┤
+            │ _id:ObjectId  │ │ _id:ObjectId │ │ _id:ObjectId  │
+            │ task:ObjectId │ │ task:ObjectId│ │ project:ObjId │
+            │ uploader:ObjId│ │ user:ObjectId│ │ trigger:String│
+            │ fileName:Str  │ │ action:String│ │ condition:Obj │
+            │ fileUrl:String│ │ oldValue:Mix │ │ actions:[]    │
+            │ fileSize:Num  │ │ newValue:Mix │ │ isActive:Bool │
+            │ fileType:Str  │ │ createdAt:Dt │ │ runCount:Num  │
+            │ createdAt:Date│ └──────────────┘ │ createdAt:Dt  │
+            └───────────────┘                  └───────────────┘
+
+┌───────────────────────────────────────────────────────────────┐
+│                    NOTIFICATIONS                               │
+├───────────────────────────────────────────────────────────────┤
+│ _id: ObjectId (PK)                                            │
+│ recipient: ObjectId (FK → Users)                              │
+│ sender: ObjectId (FK → Users)                                 │
+│ type: String (task_assigned/comment/mention/deadline)         │
+│ message: String                                               │
+│ link: String (deep link to resource)                          │
+│ isRead: Boolean                                               │
+│ createdAt: Date                                               │
+└───────────────────────────────────────────────────────────────┘
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// USER SCHEMA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const UserSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    maxLength: 100
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true
+  },
+  password: {
+    type: String,
+    required: true,
+    minLength: 8
+  },
+  avatar: {
+    type: String,
+    default: null
+  },
+  role: {
+    type: String,
+    enum: ['admin', 'user'],
+    default: 'user'
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  oauthProvider: {
+    type: String,
+    enum: ['google', 'github', null],
+    default: null
+  },
+  preferences: {
+    theme: { type: String, default: 'light' },
+    notifications: { type: Boolean, default: true },
+    timezone: { type: String, default: 'UTC' }
+  },
+  lastLogin: Date
+}, { timestamps: true });
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PROJECT SCHEMA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const ProjectSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: String,
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  members: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    role: {
+      type: String,
+      enum: ['admin', 'manager', 'developer', 'viewer'],
+      default: 'developer'
+    },
+    joinedAt: { type: Date, default: Date.now }
+  }],
+  status: {
+    type: String,
+    enum: ['active', 'completed', 'archived', 'on-hold'],
+    default: 'active'
+  },
+  category: {
+    type: String,
+    enum: ['software', 'marketing', 'design', 'operations', 'other']
+  },
+  startDate: Date,
+  endDate: Date,
+  visibility: {
+    type: String,
+    enum: ['private', 'public', 'team'],
+    default: 'private'
+  },
+  settings: {
+    sprintDuration: { type: Number, default: 14 },
+    storyPointScale: {
+      type: String,
+      enum: ['fibonacci', 'linear'],
+      default: 'fibonacci'
+    }
+  }
+}, { timestamps: true });
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// TASK SCHEMA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const TaskSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: String,
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Project',
+    required: true
+  },
+  sprint: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Sprint',
+    default: null
+  },
+  assignee: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  reporter: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['backlog','todo','in-progress',
+           'in-review','testing','done'],
+    default: 'backlog'
+  },
+  priority: {
+    type: String,
+    enum: ['critical', 'high', 'medium', 'low'],
+    default: 'medium'
+  },
+  type: {
+    type: String,
+    enum: ['story', 'bug', 'task', 'epic', 'subtask'],
+    default: 'task'
+  },
+  storyPoints: {
+    type: Number,
+    min: 0,
+    max: 100
+  },
+  dueDate: Date,
+  startDate: Date,
+  timeEstimate: Number,
+  timeLogged: { type: Number, default: 0 },
+  labels: [String],
+  order: { type: Number, default: 0 },
+  parentTask: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Task',
+    default: null
+  },
+  subtasks: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Task'
+  }],
+  watchers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  attachments: [{
+    fileName: String,
+    fileUrl: String,
+    fileSize: Number,
+    fileType: String,
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    uploadedAt: { type: Date, default: Date.now }
+  }]
+}, { timestamps: true });
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SPRINT SCHEMA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const SprintSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Project',
+    required: true
+  },
+  goal: String,
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  status: {
+    type: String,
+    enum: ['planning', 'active', 'completed', 'cancelled'],
+    default: 'planning'
+  },
+  totalStoryPoints: { type: Number, default: 0 },
+  completedStoryPoints: { type: Number, default: 0 },
+  velocity: Number,
+  capacity: Number,
+  burndownData: [{
+    date: Date,
+    remainingPoints: Number,
+    completedPoints: Number
+  }]
+}, { timestamps: true });
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                   REACT COMPONENT HIERARCHY                          │
+└─────────────────────────────────────────────────────────────────────┘
+
+App.jsx
+│
+├── 🔐 AuthLayout
+│   ├── LoginPage
+│   │   ├── LoginForm
+│   │   ├── OAuthButtons (Google/GitHub)
+│   │   └── ForgotPassword
+│   └── RegisterPage
+│       ├── RegisterForm
+│       └── EmailVerification
+│
+├── 🏠 MainLayout
+│   ├── Navbar
+│   │   ├── Logo
+│   │   ├── ProjectSelector
+│   │   ├── SearchBar
+│   │   ├── NotificationBell
+│   │   │   └── NotificationDropdown
+│   │   └── UserMenu
+│   │       ├── UserAvatar
+│   │       └── ProfileDropdown
+│   │
+│   ├── Sidebar
+│   │   ├── ProjectNav
+│   │   ├── BoardLink
+│   │   ├── BacklogLink
+│   │   ├── SprintLink
+│   │   ├── ReportsLink
+│   │   └── TeamLink
+│   │
+│   └── MainContent (React Router Outlet)
+│
+├── 📊 DashboardPage
+│   ├── ProjectSummaryCards
+│   │   └── ProjectCard (×n)
+│   ├── TaskStatusChart (Chart.js)
+│   ├── RecentActivity
+│   │   └── ActivityItem (×n)
+│   ├── UpcomingDeadlines
+│   │   └── DeadlineItem (×n)
+│   └── TeamWorkload
+│       └── WorkloadBar (×n)
+│
+├── 📋 BoardPage (Kanban)
+│   ├── BoardHeader
+│   │   ├── SprintInfo
+│   │   ├── SprintActions
+│   │   └── BoardFilters
+│   ├── KanbanBoard (react-beautiful-dnd)
+│   │   ├── KanbanColumn (×5)
+│   │   │   ├── ColumnHeader
+│   │   │   ├── TaskCard (×n)
+│   │   │   │   ├── TaskTitle
+│   │   │   │   ├── TaskMeta
+│   │   │   │   │   ├── PriorityBadge
+│   │   │   │   │   ├── AssigneAvatar
+│   │   │   │   │   ├── StoryPoints
+│   │   │   │   │   └── DueDate
+│   │   │   │   └── TaskLabels
+│   │   │   └── AddTaskButton
+│   │   └── ColumnAddButton
+│   └── TaskDetailModal
+│       ├── TaskHeader
+│       ├── TaskDescription
+│       ├── TaskSidebar
+│       │   ├── StatusSelector
+│       │   ├── AssigneeSelector
+│       │   ├── PrioritySelector
+│       │   ├── SprintSelector
+│       │   ├── StoryPointInput
+│       │   ├── DueDatePicker
+│       │   └── LabelSelector
+│       ├── SubtaskList
+│       │   └── SubtaskItem (×n)
+│       ├── AttachmentSection
+│       │   ├── FileUploader
+│       │   └── AttachmentItem (×n)
+│       ├── CommentSection
+│       │   ├── CommentInput
+│       │   └── CommentItem (×n)
+│       └── ActivityLog
+│           └── ActivityItem (×n)
+│
+├── 📝 BacklogPage
+│   ├── BacklogHeader
+│   │   ├── CreateSprintButton
+│   │   └── BacklogFilters
+│   ├── SprintSection (×n)
+│   │   ├── SprintHeader
+│   │   │   ├── SprintName
+│   │   │   ├── SprintDates
+│   │   │   ├── StoryPointsSummary
+│   │   │   └── SprintActions
+│   │   └── BacklogTaskList
+│   │       └── BacklogTaskItem (×n)
+│   └── ProductBacklogSection
+│       └── BacklogTaskItem (×n)
+│
+├── 📈 ReportsPage
+│   ├── ReportNav
+│   ├── BurndownChart (Chart.js)
+│   │   ├── ChartHeader
+│   │   ├── LineChart
+│   │   └── ChartLegend
+│   ├── VelocityChart (Chart.js)
+│   │   └── BarChart
+│   ├── CumulativeFlowChart
+│   │   └── AreaChart
+│   └── SprintReport
+│       ├── CompletedTasks
+│       └── IncompleteTasks
+│
+├── 👥 TeamPage
+│   ├── TeamHeader
+│   ├── InviteMemberForm
+│   ├── MemberList
+│   │   └── MemberCard (×n)
+│   │       ├── MemberAvatar
+│   │       ├── MemberInfo
+│   │       ├── RoleSelector
+│   │       └── RemoveButton
+│   └── WorkloadView
+│
+└── ⚙️ SettingsPage
+    ├── ProfileSettings
+    ├── ProjectSettings
+    ├── NotificationSettings
+    ├── AutomationSettings
+    │   ├── AutomationList
+    │   └── AutomationBuilder
+    └── SecuritySettings
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                   REACT COMPONENT HIERARCHY                          │
+└─────────────────────────────────────────────────────────────────────┘
+
+App.jsx
+│
+├── 🔐 AuthLayout
+│   ├── LoginPage
+│   │   ├── LoginForm
+│   │   ├── OAuthButtons (Google/GitHub)
+│   │   └── ForgotPassword
+│   └── RegisterPage
+│       ├── RegisterForm
+│       └── EmailVerification
+│
+├── 🏠 MainLayout
+│   ├── Navbar
+│   │   ├── Logo
+│   │   ├── ProjectSelector
+│   │   ├── SearchBar
+│   │   ├── NotificationBell
+│   │   │   └── NotificationDropdown
+│   │   └── UserMenu
+│   │       ├── UserAvatar
+│   │       └── ProfileDropdown
+│   │
+│   ├── Sidebar
+│   │   ├── ProjectNav
+│   │   ├── BoardLink
+│   │   ├── BacklogLink
+│   │   ├── SprintLink
+│   │   ├── ReportsLink
+│   │   └── TeamLink
+│   │
+│   └── MainContent (React Router Outlet)
+│
+├── 📊 DashboardPage
+│   ├── ProjectSummaryCards
+│   │   └── ProjectCard (×n)
+│   ├── TaskStatusChart (Chart.js)
+│   ├── RecentActivity
+│   │   └── ActivityItem (×n)
+│   ├── UpcomingDeadlines
+│   │   └── DeadlineItem (×n)
+│   └── TeamWorkload
+│       └── WorkloadBar (×n)
+│
+├── 📋 BoardPage (Kanban)
+│   ├── BoardHeader
+│   │   ├── SprintInfo
+│   │   ├── SprintActions
+│   │   └── BoardFilters
+│   ├── KanbanBoard (react-beautiful-dnd)
+│   │   ├── KanbanColumn (×5)
+│   │   │   ├── ColumnHeader
+│   │   │   ├── TaskCard (×n)
+│   │   │   │   ├── TaskTitle
+│   │   │   │   ├── TaskMeta
+│   │   │   │   │   ├── PriorityBadge
+│   │   │   │   │   ├── AssigneAvatar
+│   │   │   │   │   ├── StoryPoints
+│   │   │   │   │   └── DueDate
+│   │   │   │   └── TaskLabels
+│   │   │   └── AddTaskButton
+│   │   └── ColumnAddButton
+│   └── TaskDetailModal
+│       ├── TaskHeader
+│       ├── TaskDescription
+│       ├── TaskSidebar
+│       │   ├── StatusSelector
+│       │   ├── AssigneeSelector
+│       │   ├── PrioritySelector
+│       │   ├── SprintSelector
+│       │   ├── StoryPointInput
+│       │   ├── DueDatePicker
+│       │   └── LabelSelector
+│       ├── SubtaskList
+│       │   └── SubtaskItem (×n)
+│       ├── AttachmentSection
+│       │   ├── FileUploader
+│       │   └── AttachmentItem (×n)
+│       ├── CommentSection
+│       │   ├── CommentInput
+│       │   └── CommentItem (×n)
+│       └── ActivityLog
+│           └── ActivityItem (×n)
+│
+├── 📝 BacklogPage
+│   ├── BacklogHeader
+│   │   ├── CreateSprintButton
+│   │   └── BacklogFilters
+│   ├── SprintSection (×n)
+│   │   ├── SprintHeader
+│   │   │   ├── SprintName
+│   │   │   ├── SprintDates
+│   │   │   ├── StoryPointsSummary
+│   │   │   └── SprintActions
+│   │   └── BacklogTaskList
+│   │       └── BacklogTaskItem (×n)
+│   └── ProductBacklogSection
+│       └── BacklogTaskItem (×n)
+│
+├── 📈 ReportsPage
+│   ├── ReportNav
+│   ├── BurndownChart (Chart.js)
+│   │   ├── ChartHeader
+│   │   ├── LineChart
+│   │   └── ChartLegend
+│   ├── VelocityChart (Chart.js)
+│   │   └── BarChart
+│   ├── CumulativeFlowChart
+│   │   └── AreaChart
+│   └── SprintReport
+│       ├── CompletedTasks
+│       └── IncompleteTasks
+│
+├── 👥 TeamPage
+│   ├── TeamHeader
+│   ├── InviteMemberForm
+│   ├── MemberList
+│   │   └── MemberCard (×n)
+│   │       ├── MemberAvatar
+│   │       ├── MemberInfo
+│   │       ├── RoleSelector
+│   │       └── RemoveButton
+│   └── WorkloadView
+│
+└── ⚙️ SettingsPage
+    ├── ProfileSettings
+    ├── ProjectSettings
+    ├── NotificationSettings
+    ├── AutomationSettings
+    │   ├── AutomationList
+    │   └── AutomationBuilder
+    └── SecuritySettings
+
+7.1 User Login Sequence
+┌────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│  User  │    │  React   │    │  Express │    │  bcrypt  │    │  MongoDB │
+│        │    │  Client  │    │  Server  │    │          │    │          │
+└───┬────┘    └────┬─────┘    └────┬─────┘    └────┬─────┘    └────┬─────┘
+    │              │               │               │               │
+    │ Enter email  │               │               │               │
+    │ & password   │               │               │               │
+    │─────────────►│               │               │               │
+    │              │               │               │               │
+    │              │ POST /auth    │               │               │
+    │              │ /login        │               │               │
+    │              │ {email,pass}  │               │               │
+    │              │──────────────►│               │               │
+    │              │               │               │               │
+    │              │               │ findOne       │               │
+    │              │               │ {email}       │               │
+    │              │               │───────────────────────────────►
+    │              │               │               │               │
+    │              │               │◄───────────────────────────────
+    │              │               │ userDocument  │               │
+    │              │               │               │               │
+    │              │               │ compare()     │               │
+    │              │               │ (password,hash│               │
+    │              │               │───────────────►               │
+    │              │               │               │               │
+    │              │               │◄──────────────│               │
+    │              │               │ true/false    │               │
+    │              │               │               │               │
+    │              │               │ [IF TRUE]     │               │
+    │              │               │ sign JWT token│               │
+    │              │               │ {userId,role} │               │
+    │              │               │               │               │
+    │              │◄──────────────│               │               │
+    │              │ {token,user}  │               │               │
+    │              │               │               │               │
+    │              │ Store in      │               │               │
+    │              │ Redux store   │               │               │
+    │              │ & localStorage│               │               │
+    │              │               │               │               │
+    │◄─────────────│               │               │               │
+    │ Redirect to  │               │               │               │
+    │ /dashboard   │               │               │               │
+    │              │               │               │               │
+    │              │               │ [IF FALSE]    │               │
+    │              │◄──────────────│               │               │
+    │◄─────────────│ 401 Error     │               │               │
+    │ Show error   │               │               │               │
+    │ message      │               │               │               │
+└───┴──────────────┴───────────────┴───────────────┴───────────────┘
+7.2 Create Task & Real-Time Update Sequence
+
+┌────────┐  ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│  User  │  │ React   │  │ Express  │  │ MongoDB  │  │ Socket   │
+│(Manager│  │ Client  │  │ Server   │  │          │  │  .io     │
+└───┬────┘  └────┬────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘
+    │             │            │              │              │
+    │ Fill task   │            │              │              │
+    │ form & click│            │              │              │
+    │ "Create"    │            │              │              │
+    │────────────►│            │              │              │
+    │             │            │              │              │
+    │             │ POST /api  │              │              │
+    │             │ /tasks     │              │              │
+    │             │ {taskData} │              │              │
+    │             │ Authorization: Bearer JWT │              │
+    │             │───────────►│              │              │
+    │             │            │              │              │
+    │             │            │ Verify JWT   │              │
+    │             │            │ token        │              │
+    │             │            │              │              │
+    │             │            │ Validate     │              │
+    │             │            │ taskData     │              │
+    │             │            │              │              │
+    │             │            │ Task.create()│              │
+    │             │            │─────────────►│              │
+    │             │            │              │              │
+    │             │            │◄─────────────│              │
+    │             │            │ savedTask    │              │
+    │             │            │              │              │
+    │             │            │ Create       │              │
+    │             │            │ Activity Log │              │
+    │             │            │─────────────►│              │
+    │             │            │              │              │
+    │             │◄───────────│              │              │
+    │             │ 201 Created│              │              │
+    │             │ {taskData} │              │              │
+    │             │            │              │              │
+    │             │ Update     │              │              │
+    │             │ Redux Store│              │              │
+    │             │ Add task   │              │              │
+    │             │ to board   │              │              │
+    │◄────────────│            │              │              │
+    │ Task appears│            │              │              │
+    │ on board    │            │              │              │
+    │             │            │              │              │
+    │             │            │ Emit Socket  │              │
+    │             │            │ Event:       │              │
+    │             │            │ 'task:created│              │
+    │             │            │ {taskData}   │              │
+    │             │            │──────────────────────────►  │
+    │             │            │              │              │
+    │             │            │              │   Broadcast  │
+    │             │            │              │   to project │
+    │             │            │              │   room       │
+    │             │◄───────────────────────────────────────  │
+    │             │ All team   │              │              │
+    │             │ members see│              │              │
+    │             │ new task   │              │              │
+    │             │ INSTANTLY  │              │              │
+└───┴─────────────┴────────────┴──────────────┴──────────────┘
+
+7.3 Drag & Drop Task (Kanban) Sequence
+┌────────┐  ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│  User  │  │ React   │  │ Express  │  │ MongoDB  │  │ Socket   │
+│(Manager│  │ Client  │  │ Server   │  │          │  │  .io     │
+└───┬────┘  └────┬────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘
+    │             │            │              │              │
+    │ Fill task   │            │              │              │
+    │ form & click│            │              │              │
+    │ "Create"    │            │              │              │
+    │────────────►│            │              │              │
+    │             │            │              │              │
+    │             │ POST /api  │              │              │
+    │             │ /tasks     │              │              │
+    │             │ {taskData} │              │              │
+    │             │ Authorization: Bearer JWT │              │
+    │             │───────────►│              │              │
+    │             │            │              │              │
+    │             │            │ Verify JWT   │              │
+    │             │            │ token        │              │
+    │             │            │              │              │
+    │             │            │ Validate     │              │
+    │             │            │ taskData     │              │
+    │             │            │              │              │
+    │             │            │ Task.create()│              │
+    │             │            │─────────────►│              │
+    │             │            │              │              │
+    │             │            │◄─────────────│              │
+    │             │            │ savedTask    │              │
+    │             │            │              │              │
+    │             │            │ Create       │              │
+    │             │            │ Activity Log │              │
+    │             │            │─────────────►│              │
+    │             │            │              │              │
+    │             │◄───────────│              │              │
+    │             │ 201 Created│              │              │
+    │             │ {taskData} │              │              │
+    │             │            │              │              │
+    │             │ Update     │              │              │
+    │             │ Redux Store│              │              │
+    │             │ Add task   │              │              │
+    │             │ to board   │              │              │
+    │◄────────────│            │              │              │
+    │ Task appears│            │              │              │
+    │ on board    │            │              │              │
+    │             │            │              │              │
+    │             │            │ Emit Socket  │              │
+    │             │            │ Event:       │              │
+    │             │            │ 'task:created│              │
+    │             │            │ {taskData}   │              │
+    │             │            │──────────────────────────►  │
+    │             │            │              │              │
+    │             │            │              │   Broadcast  │
+    │             │            │              │   to project │
+    │             │            │              │   room       │
+    │             │◄───────────────────────────────────────  │
+    │             │ All team   │              │              │
+    │             │ members see│              │              │
+    │             │ new task   │              │              │
+    │             │ INSTANTLY  │              │              │
+└───┴─────────────┴────────────┴──────────────┴──────────────┘
+8.1 Sprint Lifecycle Activity Diagram
+┌─────────────────────────────────────────────────────────────┐
+│               SPRINT LIFECYCLE ACTIVITY DIAGRAM              │
+└─────────────────────────────────────────────────────────────┘
+
+                         ●  START
+                         │
+                         ▼
+              ┌─────────────────────┐
+              │  Create Sprint      │
+              │  (Name, Dates,Goal) │
+              └──────────┬──────────┘
+                         │
+                         ▼
+              ┌─────────────────────┐
+              │  Add Tasks from     │
+              │  Product Backlog    │
+              └──────────┬──────────┘
+                         │
+                         ▼
+              ┌─────────────────────┐
+              │  Estimate Story     │
+              │  Points per Task    │
+              └──────────┬──────────┘
+                         │
+                         ▼
+              ┌─────────────────────┐
+              │  Check Team         │◄────────────┐
+              │  Capacity           │             │
+              └──────────┬──────────┘             │
+                         │                        │
+              ┌──────────▼──────────┐             │
+              │  Capacity OK?       │             │
+              └──────────┬──────────┘             │
+                    YES  │    NO                  │
+                    │    └──────────────────────► │
+                    │     Remove/Add Tasks        │
+                    ▼
+              ┌─────────────────────┐
+              │  START SPRINT       │
+              │  (Status: Active)   │
+              └──────────┬──────────┘
+                         │
+                         ▼
+              ┌─────────────────────┐
+         ┌───►│  Daily Development  │
+         │    │  Work on Tasks      │
+         │    └──────────┬──────────┘
+         │               │
+         │               ▼
+         │    ┌─────────────────────┐
+         │    │  Update Task Status │
+         │    │  (Drag on Board)    │
+         │    └──────────┬──────────┘
+         │               │
+         │               ▼
+         │    ┌─────────────────────┐
+         │    │  Daily Standup      │
+         │    │  Check Burndown     │
+         │    └──────────┬──────────┘
+         │               │
+         │    ┌──────────▼──────────┐
+         │    │  Blockers Exist?    │
+         │    └──────────┬──────────┘
+         │          YES  │    NO
+         │          │    │
+         │          ▼    └──────────────┐
+         │    ┌─────────────────┐       │
+         │    │ Resolve Blocker │       │
+         │    │ or Escalate     │       │
+         │    └─────────┬───────┘       │
+         │              │               │
+         │              └───────────────┘
+         │                      │
+         │               ┌──────▼──────────┐
+         │               │  Sprint End     │
+         └───────────────│  Date Reached?  │
+              NOT YET    └──────┬──────────┘
+                           YES  │
+                                ▼
+                   ┌─────────────────────────┐
+                   │  Sprint Review Meeting  │
+                   │  Demo completed work    │
+                   └──────────┬──────────────┘
+                              │
+                              ▼
+                   ┌─────────────────────────┐
+                   │  All Tasks Complete?    │
+                   └──────────┬──────────────┘
+                         YES  │    NO
+                         │    │
+                         │    ▼
+                         │  ┌──────────────────────┐
+                         │  │ Move incomplete tasks │
+                         │  │ to next sprint/backlog│
+                         │  └──────────┬────────────┘
+                         │             │
+                         └─────────────┘
+                                │
+                                ▼
+                   ┌─────────────────────────┐
+                   │  COMPLETE SPRINT        │
+                   │  Generate Reports       │
+                   │  Calculate Velocity     │
+                   └──────────┬──────────────┘
+                              │
+                              ▼
+                   ┌─────────────────────────┐
+                   │  Sprint Retrospective   │
+                   │  (What went well/wrong) │
+                   └──────────┬──────────────┘
+                              │
+                              ▼
+                   ┌─────────────────────────┐
+                   │  Start New Sprint?      │
+                   └──────────┬──────────────┘
+                         YES  │    NO
+                         │    │
+                         ▼    ▼
+                   Create    ●  END
+                   New Sprint
+
+8.2 Task Creation Activity Diagram
+┌─────────────────────────────────────────────────────────────┐
+│               TASK CREATION ACTIVITY DIAGRAM                 │
+└─────────────────────────────────────────────────────────────┘
+
+         ●  START
+         │
+         ▼
+┌─────────────────────┐
+│  Click "Create Task"│
+│  Button             │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  Open Task Form     │
+│  Modal              │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐     ┌──────────────────────┐
+│  Fill Task Details  │────►│  • Title (required)  │
+│                     │     │  • Description       │
+│                     │     │  • Type (Bug/Story)  │
+│                     │     │  • Priority          │
+│                     │     │  • Assignee          │
+│                     │     │  • Story Points      │
+│                     │     │  • Due Date          │
+│                     │     │  • Labels            │
+│                     │     │  • Sprint/Backlog    │
+└──────────┬──────────┘     └──────────────────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  Validate Form      │
+└──────────┬──────────┘
+           │
+┌──────────▼──────────┐
+│  Title Empty?       │
+└──────────┬──────────┘
+      YES  │    NO
+      │    │
+      ▼    ▼
+   Show   ┌──────────────────────┐
+   Error  │  Send POST to API   │
+          └──────────┬───────────┘
+                     │
+                     ▼
+          ┌──────────────────────┐
+          │  Server Validates    │
+          │  JWT & Permissions   │
+          └──────────┬───────────┘
+                     │
+          ┌──────────▼───────────┐
+          │  Authorized?         │
+          └──────────┬───────────┘
+               YES   │    NO
+               │     │
+               │     ▼
+               │   Return 403
+               │   Forbidden
+               ▼
+          ┌──────────────────────┐
+          │  Save to MongoDB     │
+          └──────────┬───────────┘
+                     │
+                     ▼
+          ┌──────────────────────┐
+          │  Create Activity Log │
+          └──────────┬───────────┘
+                     │
+                     ▼
+          ┌──────────────────────┐
+          │  Assignee Exists?    │
+          └──────────┬───────────┘
+               YES   │    NO
+               │     │
+               ▼     └──────────┐
+          ┌────────────────┐    │
+          │  Send Email    │    │
+          │  Notification  │    │
+          │  to Assignee   │    │
+          └────────┬───────┘    │
+                   │            │
+                   └────────────┘
+                        │
+                        ▼
+          ┌──────────────────────┐
+          │  Emit Socket Event   │
+          │  to Project Room     │
+          └──────────┬───────────┘
+                     │
+                     ▼
+          ┌──────────────────────┐
+          │  Update Kanban Board │
+          │  (All team members)  │
+          └──────────┬───────────┘
+                     │
+                     ▼
+          ┌──────────────────────┐
+          │  Close Modal         │
+          │  Show Success Toast  │
+          └──────────┬───────────┘
+                     │
+                     ▼
+                  ●  END
+
+9️⃣ CLASS DIAGRAM
+
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                         CLASS DIAGRAM                                │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────┐
+│            <<Model>>             │
+│              User                │
+├──────────────────────────────────┤
+│ - _id: ObjectId                  │
+│ - name: String                   │
+│ - email: String                  │
+│ - password: String               │
+│ - avatar: String                 │
+│ - role: UserRole                 │
+│ - isVerified: Boolean            │
+│ - preferences: Object            │
+│ - createdAt: Date                │
+├──────────────────────────────────┤
+│ + register(): Promise<User>      │
+│ + login(): Promise<String>       │
+│ + updateProfile(): Promise<User> │
+│ + hashPassword(): String         │
+│ + comparePassword(): Boolean     │
+│ + generateToken(): String        │
+│ + sendVerificationEmail(): void  │
+└────────────────┬─────────────────┘
+                 │
+         ┌───────┴────────┐
+         │                │
+         ▼                ▼
+┌──────────────────┐  ┌──────────────────────────────────┐
+│   <<Model>>      │  │            <<Model>>             │
+│    Team          │  │             Project              │
+├──────────────────┤  ├──────────────────────────────────┤
+│ - project:ObjId  │  │ - _id: ObjectId                  │
+│ - user: ObjectId │  │ - name: String                   │
+│ - role: TeamRole │  │ - description: String            │
+│ - joinedAt: Date │  │ - owner: ObjectId                │
+├──────────────────┤  │ - members: TeamMember[]          │
+│ + addMember()    │  │ - status: ProjectStatus          │
+│ + removeMember() │  │ - startDate: Date                │
+│ + updateRole()   │  │ - endDate: Date                  │
+└──────────────────┘  │ - settings: Object               │
+                      ├──────────────────────────────────┤
+                      │ + create(): Promise<Project>     │
+                      │ + update(): Promise<Project>     │
+                      │ + delete(): Promise<void>        │
+                      │ + addMember(): Promise<Project>  │
+                      │ + getStats(): Promise<Object>    │
+                      └──────────────┬───────────────────┘
+                                     │
+                        ┌────────────┴────────────┐
+                        │                         │
+                        ▼                         ▼
+┌──────────────────────────────────┐  ┌──────────────────────────────┐
+│           <<Model>>              │  │          <<Model>>           │
+│            Sprint                │  │            Task              │
+├──────────────────────────────────┤  ├──────────────────────────────┤
+│ - _id: ObjectId                  │  │ - _id: ObjectId              │
+│ - name: String                   │  │ - title: String              │
+│ - project: ObjectId              │  │ - description: String        │
+│ - goal: String                   │  │ - project: ObjectId          │
+│ - startDate: Date                │  │ - sprint: ObjectId           │
+│ - endDate: Date                  │  │ - assignee: ObjectId         │
+│ - status: SprintStatus           │  │ - reporter: ObjectId         │
+│ - totalPoints: Number            │  │ - status: TaskStatus         │
+│ - completedPoints: Number        │  │ - priority: Priority         │
+│ - burndownData: Array            │  │ - type: TaskType             │
+├──────────────────────────────────┤  │ - storyPoints: Number        │
+│ + create(): Promise<Sprint>      │  │ - dueDate: Date              │
+│ + start(): Promise<Sprint>       │  │ - timeLogged: Number         │
+│ + complete(): Promise<Sprint>    │  │ - labels: String[]           │
+│ + addTask(): Promise<Sprint>     │  │ - attachments: Object[]      │
+│ + getBurndown(): Promise<Array>  │  │ - subtasks: ObjectId[]       │
+│ + calculateVelocity(): Number    │  │ - order: Number              │
+└──────────────────────────────────┘  ├──────────────────────────────┤
+                                      │ + create(): Promise<Task>    │
+                                      │ + update(): Promise<Task>    │
+                                      │ + delete(): Promise<void>    │
+                                      │ + move(): Promise<Task>      │
+                                      │ + assign(): Promise<Task>    │
+                                      │ + addComment(): Promise<Task>│
+                                      │ + logTime(): Promise<Task>   │
+                                      └──────────────┬───────────────┘
+                                                     │
+                                      ┌──────────────┴──────────────┐
+                                      │                             │
+                                      ▼                             ▼
+                          ┌───────────────────┐       ┌────────────────────┐
+                          │    <<Model>>      │       │     <<Model>>      │
+                          │    Comment        │       │    Notification    │
+                          ├───────────────────┤       ├────────────────────┤
+                          │ - task: ObjectId  │       │ - recipient: ObjId │
+                          │ - author: ObjId   │       │ - sender: ObjectId │
+                          │ - content: String │       │ - type: String     │
+                          │ - mentions: []    │       │ - message: String  │
+                          │ - createdAt: Date │       │ - link: String     │
+                          ├───────────────────┤       │ - isRead: Boolean  │
+                          │ + create()        │       ├────────────────────┤
+                          │ + update()        │       │ + create()         │
+                          │ + delete()        │       │ + markRead()       │
+                          │ + getMentions()   │       │ + markAllRead()    │
+                          └───────────────────┘       └────────────────────┘
+
+<<Enumerations>>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UserRole:     admin | user
+TeamRole:     admin | manager | developer | viewer
+ProjectStatus: active | completed | archived | on-hold
+SprintStatus:  planning | active | completed | cancelled
+TaskStatus:    backlog | todo | in-progress |
+               in-review | testing | done
+Priority:      critical | high | medium | low
+TaskType:      story | bug | task | epic | subtask
+
+
+🔟 API DESIGN (REST)
+┌─────────────────────────────────────────────────────────────────────┐
+│                      REST API ENDPOINTS                              │
+└─────────────────────────────────────────────────────────────────────┘
+
+BASE URL: https://api.promanage.com/api/v1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AUTH ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+METHOD  ENDPOINT                    DESCRIPTION           AUTH
+──────  ──────────────────────────  ──────────────────    ────────
+POST    /auth/register              Register new user     ❌ Public
+POST    /auth/login                 Login user            ❌ Public
+POST    /auth/logout                Logout user           ✅ JWT
+POST    /auth/refresh-token         Refresh JWT           ✅ JWT
+POST    /auth/forgot-password       Send reset email      ❌ Public
+POST    /auth/reset-password        Reset password        ❌ Token
+GET     /auth/verify-email/:token   Verify email          ❌ Token
+GET     /auth/google                Google OAuth          ❌ Public
+GET     /auth/github                GitHub OAuth          ❌ Public
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+USER ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GET     /users/me                   Get current user      ✅ JWT
+PUT     /users/me                   Update profile        ✅ JWT
+PUT     /users/me/password          Change password       ✅ JWT
+POST    /users/me/avatar            Upload avatar         ✅ JWT
+GET     /users/:id                  Get user by ID        ✅ JWT
+GET     /users/search?q=            Search users          ✅ JWT
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROJECT ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GET     /projects                   Get all projects      ✅ JWT
+POST    /projects                   Create project        ✅ JWT
+GET     /projects/:id               Get project           ✅ JWT+Member
+PUT     /projects/:id               Update project        ✅ JWT+Manager
+DELETE  /projects/:id               Delete project        ✅ JWT+Owner
+GET     /projects/:id/stats         Project statistics    ✅ JWT+Member
+GET     /projects/:id/activity      Activity log          ✅ JWT+Member
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEAM ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GET     /projects/:id/members       Get team members      ✅ JWT+Member
+POST    /projects/:id/members       Invite member         ✅ JWT+Manager
+PUT     /projects/:id/members/:uid  Update member role    ✅ JWT+Manager
+DELETE  /projects/:id/members/:uid  Remove member         ✅ JWT+Manager
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SPRINT ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GET     /projects/:id/sprints       Get all sprints       ✅ JWT+Member
+POST    /projects/:id/sprints       Create sprint         ✅ JWT+Manager
+GET     /sprints/:id                Get sprint            ✅ JWT+Member
+PUT     /sprints/:id                Update sprint         ✅ JWT+Manager
+DELETE  /sprints/:id                Delete sprint         ✅ JWT+Manager
+POST    /sprints/:id/start          Start sprint          ✅ JWT+Manager
+POST    /sprints/:id/complete       Complete sprint       ✅ JWT+Manager
+GET     /sprints/:id/burndown       Burndown data         ✅ JWT+Member
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TASK ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GET     /projects/:id/tasks         Get all tasks         ✅ JWT+Member
+POST    /projects/:id/tasks         Create task           ✅ JWT+Member
+GET     /tasks/:id                  Get task              ✅ JWT+Member
+PUT     /tasks/:id                  Update task           ✅ JWT+Member
+DELETE  /tasks/:id                  Delete task           ✅ JWT+Manager
+PATCH   /tasks/:id/status           Update status         ✅ JWT+Member
+PATCH   /tasks/:id/assign           Assign task           ✅ JWT+Manager
+PATCH   /tasks/:id/move             Move to sprint        ✅ JWT+Manager
+POST    /tasks/:id/time-log         Log time              ✅ JWT+Assignee
+POST    /tasks/bulk-update          Bulk update tasks     ✅ JWT+Manager
+GET     /projects/:id/backlog       Get backlog           ✅ JWT+Member
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMENT ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GET     /tasks/:id/comments         Get comments          ✅ JWT+Member
+POST    /tasks/:id/comments         Add comment           ✅ JWT+Member
+PUT     /comments/:id               Update comment        ✅ JWT+Author
+DELETE  /comments/:id               Delete comment        ✅ JWT+Author
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FILE ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+POST    /tasks/:id/attachments      Upload file           ✅ JWT+Member
+DELETE  /attachments/:id            Delete file           ✅ JWT+Uploader
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NOTIFICATION ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GET     /notifications              Get notifications     ✅ JWT
+PATCH   /notifications/:id/read     Mark as read          ✅ JWT
+PATCH   /notifications/read-all     Mark all read         ✅ JWT
+DELETE  /notifications/:id          Delete notification   ✅ JWT
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REPORT ENDPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GET     /projects/:id/reports       /burndown             ✅ JWT+Member
+GET     /projects/:id/reports       /velocity             ✅ JWT+Member
+GET     /projects/:id/reports       /cumulative-flow      ✅ JWT+Member
+GET     /projects/:id/reports       /sprint-report        ✅ JWT+Member
+GET     /projects/:id/reports       /export/pdf           ✅ JWT+Manager
+GET     /projects/:id/reports       /export/csv           ✅ JWT+Manager
+
+STATE DIAGRAM
+Task State Machine
+┌─────────────────────────────────────────────────────────────────────┐
+│                    TASK STATE DIAGRAM                                │
+└─────────────────────────────────────────────────────────────────────┘
+
+                              ● START
+                              │
+                              │ Task Created
+                              ▼
+                    ┌──────────────────┐
+                    │    BACKLOG       │◄─────────────────┐
+                    │  (Default State) │                  │
+                    └────────┬─────────┘                  │
+                             │                            │
+                             │ Added to Sprint            │
+                             ▼                            │
+                    ┌──────────────────┐                  │
+            ┌──────►│     TO DO        │                  │
+            │       │  (Sprint Ready)  │                  │
+            │       └────────┬─────────┘                  │
+            │                │                            │
+            │                │ Developer starts work      │
+            │                ▼                            │
+            │       ┌──────────────────┐                  │
+            │  ┌───►│  IN PROGRESS     │                  │
+            │  │    │  (Being worked)  │                  │
+            │  │    └────────┬─────────┘                  │
+            │  │             │                            │
+            │  │             │ Work submitted             │
+            │  │             ▼                            │
+            │  │    ┌──────────────────┐                  │
+            │  │    │   IN REVIEW      │                  │
+            │  │    │  (Code Review)   │                  │
+            │  │    └────────┬─────────┘                  │
+            │  │             │                            │
+            │  │     ┌───────┴────────┐                   │
+            │  │     │                │                   │
+            │  │  PASS│            FAIL│                  │
+            │  │     │                │                   │
+            │  │     ▼                ▼                   │
+            │  │  ┌──────────┐  ┌──────────────┐         │
+            │  │  │ TESTING  │  │  Back to     │─────────┘
+            │  │  │(QA phase)│  │  IN PROGRESS │  Moved to
+            │  │  └────┬─────┘  └──────────────┘  backlog
+            │  │       │
+            │  │ ┌─────┴──────┐
+            │  │ │            │
+            │  │PASS        FAIL
+            │  │ │            │
+            │  │ ▼            ▼
+            │  │┌──────────┐  └──────────────►  IN PROGRESS
+            │  ││  DONE    │
+            │  ││(Complete)│
+            │  │└──────────┘
+            │  │     │
+            │  │     │ Reopened
+            │  └─────┘
+            │
+            │ Removed from Sprint
+            └─────────────────────
+                                 ●  END (Task Archived)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STATE TRANSITIONS TABLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FROM           EVENT                  TO              TRIGGER
+────────────── ────────────────────── ─────────────── ───────
+BACKLOG        Added to sprint        TODO            Manual
+TODO           Work started           IN_PROGRESS     Manual
+IN_PROGRESS    Submitted for review   IN_REVIEW       Manual
+IN_REVIEW      Review approved        TESTING         Manual
+IN_REVIEW      Review rejected        IN_PROGRESS     Manual
+TESTING        Tests passed           DONE            Manual
+TESTING        Tests failed           IN_PROGRESS     Manual
+DONE           Reopened               IN_PROGRESS     Manual
+ANY            Removed from sprint    BACKLOG         Manual
+DONE           Sprint completed       DONE(archived)  Auto
+
+1️⃣2️⃣ DEPLOYMENT DIAGRAM
+┌─────────────────────────────────────────────────────────────────────┐
+│                      DEPLOYMENT DIAGRAM                              │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                         INTERNET                                     │
+│                                                                     │
+│  ┌─────────────┐      ┌─────────────┐      ┌─────────────┐         │
+│  │   Chrome    │      │   Firefox   │      │   Safari    │         │
+│  │   Browser   │      │   Browser   │      │   Browser   │         │
+│  │ (React App) │      │ (React App) │      │ (React App) │         │
+│  └──────┬──────┘      └──────┬──────┘      └──────┬──────┘         │
+│         │                    │                    │                 │
+│         └────────────────────┼────────────────────┘                 │
+│                              │ HTTPS (443)                          │
+│                              ▼                                      │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                    CLOUDFLARE CDN                              │  │
+│  │  (DDoS Protection, SSL Termination, Cache Static Assets)       │  │
+│  └───────────────────────────┬───────────────────────────────────┘  │
+│                              │                                      │
+└──────────────────────────────┼──────────────────────────────────────┘
+                               │
+┌──────────────────────────────┼──────────────────────────────────────┐
+│                      AWS CLOUD                │                      │
+│                                              │                      │
+│  ┌───────────────────────────▼─────────────────────────────────┐   │
+│  │                    AWS Application                           │   │
+│  │                  Load Balancer (ALB)                         │   │
+│  └───────────┬────────────────────────────┬─────────────────────┘   │
+│              │                            │                         │
+│   ┌──────────▼──────────┐    ┌────────────▼────────────┐           │
+│   │    EC2 Instance 1   │    │    EC2 Instance 2        │           │
+│   │    (Node.js App)    │    │    (Node.js App)         │           │
+│   │                     │    │                          │           │
+│   │  ┌───────────────┐  │    │  ┌───────────────┐      │           │
+│   │  │ Express Server│  │    │  │ Express Server│      │           │
+│   │  │ Port 5000     │  │    │  │ Port 5000     │      │           │
+│   │  └───────────────┘  │    │  └───────────────┘      │           │
+│   │  ┌───────────────┐  │    │  ┌───────────────┐      │           │
+│   │  │ Socket.io     │  │    │  │ Socket.io     │      │           │
+│   │  │ Server        │  │    │  │ Server        │      │           │
+│   │  └───────────────┘  │    │  └───────────────┘      │           │
+│   └──────────┬──────────┘    └────────────┬────────────┘           │
+│              │                            │                         │
+│              └────────────┬───────────────┘                         │
+│                           │                                         │
+│   ┌───────────────────────▼───────────────────────────────────┐    │
+│   │                   AWS ElastiCache                          │    │
+│   │                (Redis Cluster - Sessions)                  │    │
+│   └───────────────────────┬───────────────────────────────────┘    │
+│                           │                                         │
+│   ┌───────────────────────▼───────────────────────────────────┐    │
+│   │                  MongoDB Atlas                             │    │
+│   │              (M10 Cluster - 3 Replicas)                    │    │
+│   │                                                            │    │
+│   │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │    │
+│   │  │  Primary     │  │  Secondary   │  │  Secondary   │    │    │
+│   │  │  Node        │  │  Node (R)    │  │  Node (R)    │    │    │
+│   │  └──────────────┘  └──────────────┘  └──────────────┘    │    │
+│   └───────────────────────────────────────────────────────────┘    │
+│                                                                     │
+│   ┌──────────────────────────────────────────────────────────────┐  │
+│   │                      AWS S3 Bucket                            │  │
+│   │              (File Attachments Storage)                       │  │
+│   └──────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│   ┌──────────────────┐   ┌──────────────────┐                       │
+│   │   Vercel CDN     │   │  AWS CloudWatch  │                       │
+│   │  (React Build    │   │  (Monitoring &   │                       │
+│   │   Static Files)  │   │   Logging)       │                       │
+│   └──────────────────┘   └──────────────────┘                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+EXTERNAL SERVICES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐
+│   SendGrid   │  │  Google      │  │   GitHub     │  │  Sentry.io  │
+│  (Email      │  │  OAuth API   │  │  OAuth API   │  │  (Error     │
+│   Service)   │  │              │  │              │  │  Tracking)  │
+└──────────────┘  └──────────────┘  └──────────────┘  └─────────────┘
+
+1️⃣3️⃣ DATA FLOW DIAGRAM
+Level 0 — Context Diagram
+┌─────────────────────────────────────────────────────────────┐
+│                    DFD LEVEL 0 (CONTEXT)                     │
+└─────────────────────────────────────────────────────────────┘
+
+                    Login/Register
+👤 USER ──────────────────────────────────►
+                                           ┌────────────────────┐
+         ◄────────────────────────────────  │                    │
+              JWT Token + User Data         │   PROJECT          │
+                                           │   MANAGEMENT       │
+         Task/Project/Sprint Data ────────► │   TOOL SYSTEM      │
+                                           │                    │
+         ◄──────────────── Responses       │                    │
+              Notifications/Reports        └──────────┬─────────┘
+                                                      │
+                              ┌───────────────────────┼──────────────────┐
+                              │                       │                  │
+                              ▼                       ▼                  ▼
+                    ┌──────────────┐       ┌──────────────┐   ┌──────────────┐
+                    │   MongoDB    │       │   AWS S3     │   │  SendGrid    │
+                    │  Database   │       │   Storage    │   │  Email API   │
+                    └──────────────┘       └──────────────┘   └──────────────┘
+Level 1 — Main Processes
+┌─────────────────────────────────────────────────────────────────────┐
+│                         DFD LEVEL 1                                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+👤 USER
+ │
+ ├── Credentials ──────────────────► ┌─────────────────┐
+ │                                   │  1.0             │
+ │   ◄── JWT Token ─────────────────  │  AUTHENTICATION  │──────► Users DB
+ │                                   └─────────────────┘
+ │
+ ├── Project Data ─────────────────► ┌─────────────────┐
+ │                                   │  2.0             │
+ │   ◄── Project Response ──────────  │  PROJECT MGMT    │──────► Projects DB
+ │                                   └─────────────────┘
+ │
+ ├── Task Data ────────────────────► ┌─────────────────┐
+ │                                   │  3.0             │──────► Tasks DB
+ │   ◄── Task Response ─────────────  │  TASK MGMT       │
+ │   ◄── Real-Time Updates ─────────  │  + REAL-TIME     │──────► Socket.io
+ │                                   └─────────────────┘
+ │
+ ├── Sprint Data ──────────────────► ┌─────────────────┐
+ │                                   │  4.0             │
+ │   ◄── Sprint Response ───────────  │  SPRINT MGMT     │──────► Sprints DB
+ │                                   └─────────────────┘
+ │
+ ├── Report Request ───────────────► ┌─────────────────┐
+ │                                   │  5.0             │◄─── Tasks DB
+ │   ◄── Charts/Reports ────────────  │  REPORTING       │◄─── Sprints DB
+ │                                   └─────────────────┘
+ │
+ ├── File Upload ──────────────────► ┌─────────────────┐
+ │                                   │  6.0             │──────► AWS S3
+ │   ◄── File URL ──────────────────  │  FILE MGMT       │──────► Files DB
+ │                                   └─────────────────┘
+ │
+ └── ◄── Notifications ────────────  ┌─────────────────┐
+                                     │  7.0             │──────► Notifs DB
+                                     │  NOTIFICATION    │──────► SendGrid
+                                     │  ENGINE          │◄─── All Processes
+                                     └─────────────────┘
+
+1️⃣4️⃣ SECURITY ARCHITECTURE
+┌─────────────────────────────────────────────────────────────────────┐
+│                     SECURITY ARCHITECTURE                            │
+└─────────────────────────────────────────────────────────────────────┘
+
+LAYER 1: TRANSPORT SECURITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┌──────────────────────────────────────────────────────────────────┐
+│  • HTTPS/TLS 1.3 enforced on all connections                     │
+│  • HTTP → HTTPS automatic redirect                               │
+│  • HSTS (HTTP Strict Transport Security) headers                 │
+│  • SSL Certificate: Let's Encrypt / AWS ACM                      │
+└──────────────────────────────────────────────────────────────────┘
+
+LAYER 2: AUTHENTICATION SECURITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┌──────────────────────────────────────────────────────────────────┐
+│  JWT IMPLEMENTATION:                                             │
+│  • Access Token:  15 minutes expiry                              │
+│  • Refresh Token: 7 days expiry (stored in httpOnly cookie)      │
+│  • Token rotation on every refresh                               │
+│  • Token blacklist for logout (Redis)                            │
+│                                                                  │
+│  PASSWORD SECURITY:                                              │
+│  • bcrypt hashing (12 salt rounds)                               │
+│  • Min 8 chars, uppercase, number, special char                  │
+│  • Password reset via time-limited tokens (1 hour)               │
+│  • Account lockout after 5 failed attempts                       │
+│  • Email verification required                                   │
+└──────────────────────────────────────────────────────────────────┘
+
+LAYER 3: AUTHORIZATION (RBAC)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│  ROLE          CREATE  READ    UPDATE  DELETE  ADMIN             │
+│  ────────────  ──────  ──────  ──────  ──────  ─────            │
+│  Admin         ✅      ✅      ✅      ✅      ✅               │
+│  Manager       ✅      ✅      ✅      ✅      ❌               │
+│  Developer     ✅(own) ✅      ✅(own) ❌      ❌               │
+│  Viewer        ❌      ✅      ❌      ❌      ❌               │
+│                                                                  │
+│  RESOURCE-LEVEL CHECKS:                                          │
+│  • Users can only edit their own tasks                           │
+│  • Only project members can access project data                  │
+│  • Managers can only delete within their projects                │
+└──────────────────────────────────────────────────────────────────┘
+
+LAYER 4: API SECURITY
+━━━━━━━━━━━━━━━━━━━━━
+┌──────────────────────────────────────────────────────────────────┐
+│  • Rate Limiting: 100 requests/15min per IP (express-rate-limit) │
+│  • CORS: Whitelist only frontend domains                         │
+│  • Helmet.js: Security HTTP headers                              │
+│  • Input Sanitization: express-mongo-sanitize                    │
+│  • XSS Protection: xss-clean middleware                          │
+│  • SQL/NoSQL Injection Prevention: Mongoose validation           │
+│  • Request size limit: 10mb                                      │
+└──────────────────────────────────────────────────────────────────┘
+
+LAYER 5: DATA SECURITY
+━━━━━━━━━━━━━━━━━━━━━━
+┌──────────────────────────────────────────────────────────────────┐
+│  • MongoDB Atlas: Encryption at rest (AES-256)                   │
+│  • Sensitive fields excluded from API responses                  │
+│  • File uploads: Virus scan before storage                       │
+│  • S3 bucket: Private (no public access)                         │
+│  • Signed URLs for file access (15 min expiry)                   │
+│  • Environment variables: Never in code (dotenv)                 │
+└──────────────────────────────────────────────────────────────────┘
+1️⃣5️⃣ MERN STACK TECHNICAL BREAKDOWN
+┌─────────────────────────────────────────────────────────────────────┐
+│                   COMPLETE TECHNOLOGY STACK                          │
+└─────────────────────────────────────────────────────────────────────┘
+
+FRONTEND (React.js)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PACKAGE                    VERSION   PURPOSE
+─────────────────────────  ───────   ──────────────────────────────────
+react                      18.2.0    Core UI framework
+react-dom                  18.2.0    DOM rendering
+react-router-dom           6.x       Client-side routing
+redux-toolkit              1.9.x     State management
+react-redux                8.x       Redux React bindings
+axios                      1.4.x     HTTP client for API calls
+socket.io-client           4.6.x     Real-time WebSocket client
+react-beautiful-dnd        13.x      Drag & drop (Kanban board)
+chart.js                   4.x       Charts (Burndown, Velocity)
+react-chartjs-2            5.x       Chart.js React wrapper
+@mui/material              5.x       UI Component library
+react-hook-form            7.x       Form management & validation
+yup                        1.x       Form validation schema
+date-fns                   2.x       Date manipulation
+react-quill                2.x       Rich text editor (descriptions)
+react-dropzone             14.x      File upload drag & drop
+react-toastify             9.x       Toast notifications
+@hello-pangea/dnd          1.x       Alternative DnD (if needed)
+react-datepicker           4.x       Date picker component
+recharts                   2.x       Alternative charts library
+tailwindcss                3.x       Utility CSS framework
+react-avatar               5.x       Avatar generation
+lodash                     4.x       Utility functions
+dayjs                      1.x       Lightweight date library
+
+BACKEND (Node.js + Express.js)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PACKAGE                    VERSION   PURPOSE
+─────────────────────────  ───────   ──────────────────────────────────
+express                    4.18.x    Web framework
+mongoose                   7.x       MongoDB ODM
+socket.io                  4.6.x     Real-time WebSockets
+jsonwebtoken               9.x       JWT authentication
+bcryptjs                   2.4.x     Password hashing
+nodemailer                 6.x       Email sending
+passport                   0.6.x     OAuth strategy
+passport-google-oauth20    2.x       Google OAuth
+passport-github2           0.1.x     GitHub OAuth
+multer                     1.4.x     File upload middleware
+aws-sdk                    2.x       AWS S3 file storage
+express-rate-limit         6.x       API rate limiting
+helmet                     7.x       Security HTTP headers
+cors                       2.x       CORS configuration
+express-mongo-sanitize     2.x       NoSQL injection prevention
+xss-clean                  0.1.x     XSS attack prevention
+compression                1.7.x     Response compression
+morgan                     1.10.x    HTTP request logger
+winston                    3.x       Application logging
+node-cron                  3.x       Scheduled tasks (reminders)
+redis                      4.x       Session/cache storage
+ioredis                    5.x       Redis client
+dotenv                     16.x      Environment variables
+joi                        17.x      Request validation
+express-async-errors       3.x       Async error handling
+pdfkit                     0.13.x    PDF report generation
+csv-writer                 1.6.x     CSV export
+sharp                      0.32.x    Image processing (avatars)
+
+DATABASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TECHNOLOGY    PURPOSE
+────────────  ─────────────────────────────────────────────────────────
+MongoDB Atlas Primary database (projects,tasks,users,sprints)
+Redis         Session storage, token blacklist, rate limit counter
+              Real-time pub/sub for Socket.io scaling
+
+DEVOPS & DEPLOYMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TOOL              PURPOSE
+────────────────  ─────────────────────────────────────────────────────
+Docker            Containerization
+Docker Compose    Local development environment
+GitHub Actions    CI/CD pipeline
+AWS EC2           Backend hosting
+AWS ALB           Load balancing
+AWS S3            File storage
+Vercel            Frontend hosting (React build)
+Cloudflare        CDN + DDoS protection
+MongoDB Atlas     Database hosting
+Sentry            Error tracking & monitoring
+AWS CloudWatch    Server monitoring & logs
+Jest              Unit & integration testing
+Supertest         API endpoint testing
+React Testing     Frontend component testing
+Library
+
+
+📁 Project Folder Structure
+promanage/
+│
+├── 📁 client/                          ← React Frontend
+│   ├── public/
+│   │   ├── index.html
+│   │   └── favicon.ico
+│   ├── src/
+│   │   ├── 📁 assets/                  ← Images, icons, fonts
+│   │   │
+│   │   ├── 📁 components/              ← Reusable components
+│   │   │   ├── common/
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Modal.jsx
+│   │   │   │   ├── Avatar.jsx
+│   │   │   │   ├── Badge.jsx
+│   │   │   │   ├── Dropdown.jsx
+│   │   │   │   ├── Toast.jsx
+│   │   │   │   └── Loader.jsx
+│   │   │   ├── layout/
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   ├── Sidebar.jsx
+│   │   │   │   └── MainLayout.jsx
+│   │   │   ├── board/
+│   │   │   │   ├── KanbanBoard.jsx
+│   │   │   │   ├── KanbanColumn.jsx
+│   │   │   │   ├── TaskCard.jsx
+│   │   │   │   └── TaskDetailModal.jsx
+│   │   │   ├── backlog/
+│   │   │   │   ├── BacklogList.jsx
+│   │   │   │   ├── SprintSection.jsx
+│   │   │   │   └── BacklogItem.jsx
+│   │   │   ├── charts/
+│   │   │   │   ├── BurndownChart.jsx
+│   │   │   │   ├── VelocityChart.jsx
+│   │   │   │   └── CumulativeFlow.jsx
+│   │   │   ├── tasks/
+│   │   │   │   ├── TaskForm.jsx
+│   │   │   │   ├── CommentSection.jsx
+│   │   │   │   ├── AttachmentSection.jsx
+│   │   │   │   └── ActivityLog.jsx
+│   │   │   └── notifications/
+│   │   │       ├── NotificationBell.jsx
+│   │   │       └── NotificationItem.jsx
+│   │   │
+│   │   ├── 📁 pages/                   ← Page components
+│   │   │   ├── auth/
+│   │   │   │   ├── LoginPage.jsx
+│   │   │   │   └── RegisterPage.jsx
+│   │   │   ├── DashboardPage.jsx
+│   │   │   ├── BoardPage.jsx
+│   │   │   ├── BacklogPage.jsx
+│   │   │   ├── ReportsPage.jsx
+│   │   │   ├── TeamPage.jsx
+│   │   │   └── SettingsPage.jsx
+│   │   │
+│   │   ├── 📁 store/                   ← Redux store
+│   │   │   ├── index.js
+│   │   │   └── slices/
+│   │   │       ├── authSlice.js
+│   │   │       ├── projectSlice.js
+│   │   │       ├── taskSlice.js
+│   │   │       ├── sprintSlice.js
+│   │   │       └── notificationSlice.js
+│   │   │
+│   │   ├── 📁 hooks/                   ← Custom React hooks
+│   │   │   ├── useAuth.js
+│   │   │   ├── useSocket.js
+│   │   │   ├── useProject.js
+│   │   │   └── useNotifications.js
+│   │   │
+│   │   ├── 📁 services/                ← API calls
+│   │   │   ├── api.js                  ← Axios instance
+│   │   │   ├── authService.js
+│   │   │   ├── projectService.js
+│   │   │   ├── taskService.js
+│   │   │   └── sprintService.js
+│   │   │
+│   │   ├── 📁 utils/                   ← Helper functions
+│   │   │   ├── dateUtils.js
+│   │   │   ├── chartUtils.js
+│   │   │   └── validators.js
+│   │   │
+│   │   ├── 📁 contexts/                ← React contexts
+│   │   │   └── SocketContext.jsx
+│   │   │
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   │
+│   ├── package.json
+│   └── vite.config.js
+│
+├── 📁 server/                          ← Node.js Backend
+│   ├── 📁 config/
+│   │   ├── database.js                 ← MongoDB connection
+│   │   ├── redis.js                    ← Redis connection
+│   │   ├── passport.js                 ← OAuth config
+│   │   └── socket.js                   ← Socket.io config
+│   │
+│   ├── 📁 models/                      ← Mongoose models
+│   │   ├── User.model.js
+│   │   ├── Project.model.js
+│   │   ├── Task.model.js
+│   │   ├── Sprint.model.js
+│   │   ├── Comment.model.js
+│   │   ├── Notification.model.js
+│   │   └── Activity.model.js
+│   │
+│   ├── 📁 routes/                      ← Express routes
+│   │   ├── auth.routes.js
+│   │   ├── user.routes.js
+│   │   ├── project.routes.js
+│   │   ├── task.routes.js
+│   │   ├── sprint.routes.js
+│   │   ├── comment.routes.js
+│   │   ├── notification.routes.js
+│   │   ├── file.routes.js
+│   │   └── report.routes.js
+│   │
+│   ├── 📁 controllers/                 ← Route handlers
+│   │   ├── auth.controller.js
+│   │   ├── user.controller.js
+│   │   ├── project.controller.js
+│   │   ├── task.controller.js
+│   │   ├── sprint.controller.js
+│   │   ├── comment.controller.js
+│   │   ├── notification.controller.js
+│   │   ├── file.controller.js
+│   │   └── report.controller.js
+│   │
+│   ├── 📁 middleware/                  ← Custom middleware
+│   │   ├── auth.middleware.js          ← JWT verification
+│   │   ├── rbac.middleware.js          ← Role checking
+│   │   ├── upload.middleware.js        ← Multer config
+│   │   ├── validate.middleware.js      ← Request validation
+│   │   ├── rateLimit.middleware.js     ← Rate limiting
+│   │   └── error.middleware.js         ← Error handling
+│   │
+│   ├── 📁 services/                    ← Business logic
+│   │   ├── email.service.js            ← Nodemailer
+│   │   ├── socket.service.js           ← Socket.io events
+│   │   ├── file.service.js             ← AWS S3 operations
+│   │   ├── report.service.js           ← Chart data generation
+│   │   ├── notification.service.js     ← Notification logic
+│   │   └── automation.service.js       ← Automation rules
+│   │
+│   ├── 📁 utils/                       ← Helper utilities
+│   │   ├── logger.js                   ← Winston logger
+│   │   ├── catchAsync.js               ← Async error wrapper
+│   │   ├── ApiError.js                 ← Custom error class
+│   │   └── validators.js               ← Joi schemas
+│   │
+│   ├── 📁 jobs/                        ← Scheduled tasks
+│   │   ├── deadline.reminder.job.js
+│   │   └── sprint.auto.complete.job.js
+│   │
+│   ├── 📁 tests/                       ← Test files
+│   │   ├── auth.test.js
+│   │   ├── project.test.js
+│   │   └── task.test.js
+│   │
+│   ├── app.js                          ← Express app setup
+│   ├── server.js                       ← Server entry point
+│   └── package.json
+│
+├── 📁 docker/
+│   ├── Dockerfile.client
+│   ├── Dockerfile.server
+│   └── docker-compose.yml
+│
+├── 📁 .github/
+│   └── workflows/
+│       └── ci-cd.yml                   ← GitHub Actions
+│
+├── .env.example
+├── .gitignore
+└── README.md
+
+🔌 Socket.io Events Architecture
+┌─────────────────────────────────────────────────────────────────────┐
+│                    SOCKET.IO EVENTS DESIGN                           │
+└─────────────────────────────────────────────────────────────────────┘
+
+CLIENT → SERVER EVENTS (Emit):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EVENT                   PAYLOAD                   PURPOSE
+──────────────────────  ──────────────────────    ─────────────────────
+join:project            {projectId}               Join project room
+leave:project           {projectId}               Leave project room
+task:typing             {taskId, userId}           Show typing indicator
+task:stop-typing        {taskId, userId}           Hide typing indicator
+
+SERVER → CLIENT EVENTS (Listen):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EVENT                   PAYLOAD                   PURPOSE
+──────────────────────  ──────────────────────    ─────────────────────
+task:created            {task}                    New task on board
+task:updated            {taskId, changes}         Task data changed
+task:deleted            {taskId}                  Remove task from board
+task:status-changed     {taskId, newStatus}       Move task on board
+task:assigned           {taskId, assignee}        Task reassigned
+comment:added           {taskId, comment}          New comment
+notification:new        {notification}            New notification
+sprint:started          {sprint}                  Sprint activated
+sprint:completed        {sprint}                  Sprint done
+member:joined           {user}                    New team member
+member:removed          {userId}                  Member removed
+project:updated         {project}                 Project info changed
+
+SOCKET.IO ROOMS:
+━━━━━━━━━━━━━━━━
+• project:{projectId}  → All project members
+• user:{userId}        → Individual user notifications
+• sprint:{sprintId}    → Sprint-specific updates
+
+📊 Burndown Chart Algorithm
+
+// BURNDOWN CHART DATA GENERATION ALGORITHM
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const generateBurndownData = async (sprintId) => {
+
+  // 1. Get sprint details
+  const sprint = await Sprint.findById(sprintId);
+  const { startDate, endDate, totalStoryPoints } = sprint;
+
+  // 2. Get all tasks in sprint
+  const tasks = await Task.find({ sprint: sprintId });
+
+  // 3. Generate ideal burndown line
+  // Total working days in sprint
+  const workingDays = getWorkingDays(startDate, endDate);
+  const pointsPerDay = totalStoryPoints / workingDays;
+
+  const idealBurndown = [];
+  for (let day = 0; day <= workingDays; day++) {
+    idealBurndown.push({
+      day: day,
+      date: addDays(startDate, day),
+      remainingPoints: totalStoryPoints - (pointsPerDay * day)
+    });
+  }
+
+  // 4. Generate actual burndown line
+  const actualBurndown = [];
+  let remainingPoints = totalStoryPoints;
+
+  for (let day = 0; day <= workingDays; day++) {
+    const currentDate = addDays(startDate, day);
+
+    // Find tasks completed on this day
+    const completedToday = tasks.filter(task =>
+      task.status === 'done' &&
+      isSameDay(task.updatedAt, currentDate)
+    );
+
+    // Subtract completed story points
+    const pointsCompleted = completedToday.reduce(
+      (sum, task) => sum + (task.storyPoints || 0), 0
+    );
+    remainingPoints -= pointsCompleted;
+
+    actualBurndown.push({
+      day: day,
+      date: currentDate,
+      remainingPoints: remainingPoints,
+      completedPoints: totalStoryPoints - remainingPoints
+    });
+  }
+
+  return {
+    sprint: {
+      name: sprint.name,
+      startDate,
+      endDate,
+      totalStoryPoints
+    },
+    idealBurndown,   // ← Blue line on chart
+    actualBurndown   // ← Red line on chart
+  };
+};
+
+/*
+CHART.JS RENDERING:
+━━━━━━━━━━━━━━━━━━━
+const data = {
+  labels: burndownData.idealBurndown.map(d => d.date),
+  datasets: [
+    {
+      label: 'Ideal Burndown',
+      data: idealBurndown.map(d => d.remainingPoints),
+      borderColor: 'blue',
+      borderDash: [5, 5]    ← Dashed blue line
+    },
+    {
+      label: 'Actual Burndown',
+      data: actualBurndown.map(d => d.remainingPoints),
+      borderColor: 'red',   ← Solid red line
+      fill: true
+    }
+  ]
+};
+*/
+🧪 Testing Strategy
+┌─────────────────────────────────────────────────────────────────────┐
+│                      TESTING STRATEGY                                │
+└─────────────────────────────────────────────────────────────────────┘
+
+TESTING PYRAMID:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+                    ┌─────────────────┐
+                    │  E2E TESTS      │  ← Fewest (Cypress)
+                    │  (10%)          │     Full user journeys
+                    └────────┬────────┘
+                             │
+                  ┌──────────▼──────────┐
+                  │  INTEGRATION TESTS  │  ← API endpoint tests
+                  │  (30%)              │     (Jest + Supertest)
+                  └──────────┬──────────┘
+                             │
+           ┌─────────────────▼──────────────────┐
+           │           UNIT TESTS                │  ← Most tests
+           │           (60%)                     │     (Jest)
+           └─────────────────────────────────────┘
+
+WHAT TO TEST:
+━━━━━━━━━━━━━
+UNIT TESTS:
+• Mongoose model validation
+• Utility functions (burndown calculator)
+• Middleware functions (auth, validation)
+• Service layer functions
+
+INTEGRATION TESTS:
+• API endpoints (all 50+ routes)
+• Authentication flows
+• Database operations
+• Socket.io events
+
+E2E TESTS (Cypress):
+• User registration → login → create project
+• Create sprint → add tasks → drag to done
+• Real-time: Two browsers, one moves task,
+  other sees instantly
+🚀 Development Phases (Sprint Plan)
+┌─────────────────────────────────────────────────────────────────────┐
+│                    DEVELOPMENT ROADMAP                               │
+└─────────────────────────────────────────────────────────────────────┘
+
+PHASE 1 — FOUNDATION (Weeks 1-2)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Project setup (MERN boilerplate)
+✅ MongoDB Atlas connection
+✅ User authentication (JWT)
+✅ Basic Express routes
+✅ React Router setup
+✅ Redux store configuration
+✅ Login/Register pages
+✅ Protected routes
+
+PHASE 2 — CORE FEATURES (Weeks 3-5)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Project CRUD operations
+✅ Task CRUD operations
+✅ Kanban board (react-beautiful-dnd)
+✅ Backlog management
+✅ Sprint creation & management
+✅ Team member invitation
+✅ Role-based access control
+
+PHASE 3 — COLLABORATION (Weeks 6-7)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Socket.io real-time updates
+✅ Comment system
+✅ File attachments (AWS S3)
+✅ Notification system
+✅ Activity log/audit trail
+✅ @mentions in comments
+
+PHASE 4 — ANALYTICS (Week 8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Burndown chart
+✅ Velocity chart
+✅ Cumulative flow diagram
+✅ Sprint reports
+✅ Dashboard analytics
+✅ PDF/CSV export
+
+PHASE 5 — ADVANCED (Weeks 9-10)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Automation rules engine
+✅ Timeline/Gantt view
+✅ Workload view
+✅ OAuth (Google/GitHub)
+✅ Email notifications
+✅ Performance optimization
+
+PHASE 6 — DEPLOYMENT (Week 11-12)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Docker containerization
+✅ CI/CD pipeline (GitHub Actions)
+✅ AWS EC2 deployment
+✅ Vercel frontend deployment
+✅ Security audit
+✅ Load testing
+✅ Documentation
+
+
+
+
+

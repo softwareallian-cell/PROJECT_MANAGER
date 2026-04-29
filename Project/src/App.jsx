@@ -11,6 +11,8 @@ import EditProfile from "./Components/EditProfile";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAssignedProjects, fetchCreatedProjects, fetchNotifications } from "./Components/Redux"
 import TimeSheet from "./Components/TimeSheet"
+import Project_1 from "./Components/Project_1"
+
 function App() {
   const dispatch = useDispatch();
   const mode = useSelector((state) => state.registration.mode);
@@ -43,6 +45,7 @@ function App() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/profile" element={<EditProfile />} />
           <Route path="/timesheet" element={<TimeSheet />} />
+          <Route path="/linear" element={<Project_1 />} />
 
 
           <Route element={<ProjectGuard />} >

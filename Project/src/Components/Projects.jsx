@@ -29,10 +29,14 @@ const PRIORITY_CLASSES = {
 function Projects() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const CURRENT_USER = JSON.parse(localStorage.getItem("CURRENTUSER"));
-    const CURRENTUSER_ID = CURRENT_USER[0]._id;
-    const themeMode = useSelector((state) => state.registration.mode);
-    const isManager = CURRENT_USER[0].role === 'manager';
+    const storedUser = localStorage.getItem("CURRENTUSER");
+const CURRENT_USER = storedUser ? JSON.parse(storedUser) : [];
+const CURRENTUSER = CURRENT_USER[0] || {};
+const CURRENTUSER_ID = CURRENTUSER._id;
+const CURRENTUSER_EMAIL = CURRENTUSER.email;
+const CURRENTUSER_ROLE = CURRENTUSER.role;
+    const isManager = CURRENTUSER_ROLE === 'manager';
+const themeMode = useSelector((state) => state.registration.mode);
 
     const createdProjects = useSelector((state) => state.registration.createdProjects);
     const assignedProjects = useSelector((state) => state.registration.assignedProjects);
@@ -174,8 +178,8 @@ function Projects() {
     return (
         <>
             <h1 className="projects-welcome-header">
-                WELCOME {CURRENT_USER[0].email}
-                <span className="role-badge">{CURRENT_USER[0].role}</span>
+                {CURRENTUSER_EMAIL}
+                <span className="role-badge">{CURRENTUSER_ROLE}</span>
             </h1>
 
             {deleteId && (() => {
