@@ -21,11 +21,14 @@ const PRIORITY_OPTIONS = [
   { id: 'none', label: 'No Priority', icon: <Circle size={14} color="#8C8C8C" /> }
 ];
 
-const NewIssueModal = ({ isOpen, onClose, onCreate, team, project, user }) => {
+const NewIssueModal = ({ isOpen, onClose, onCreate, team, project, workspaceId, user }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('todo');
   const [priority, setPriority] = useState('medium');
+  const [createMore, setCreateMore] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [activeMenu, setActiveMenu] = useState(null); // 'status', 'priority'
 
   if (!isOpen) return null;
 
@@ -37,17 +40,21 @@ const NewIssueModal = ({ isOpen, onClose, onCreate, team, project, user }) => {
       status,
       priority,
       teamId: team?._id,
+      workspaceId: workspaceId,
       projectId: project?._id,
       createdBy: user?._id
     });
+    
     setTitle('');
     setDescription('');
-    onClose();
+    if (!createMore) {
+      onClose();
+    }
   };
 
   return ReactDOM.createPortal(
     <div className="modal-overlay">
-      <div className="new-issue-card">
+      <div className={`new-issue-card ${isMaximized ? 'maximized' : ''}`}>
         {/* Header */}
         <div className="modal-header">
           <div className="breadcrumb">
@@ -59,7 +66,9 @@ const NewIssueModal = ({ isOpen, onClose, onCreate, team, project, user }) => {
             <span className="current-action">New issue</span>
           </div>
           <div className="header-actions">
-            <button className="icon-btn-small"><Maximize2 size={14} /></button>{/*this button dosnt do shit */}
+            <button className="icon-btn-small" onClick={() => setIsMaximized(!isMaximized)}>
+              <Maximize2 size={14} />
+            </button>
             <button className="icon-btn-small" onClick={onClose}><X size={16} /></button>
           </div>
         </div>
@@ -82,32 +91,67 @@ const NewIssueModal = ({ isOpen, onClose, onCreate, team, project, user }) => {
           />
         </div>
 
+        {/* Quick Suggestions (Simulated for high-end look) */}
+        <div className="quick-suggestions">
+          <Zap size={14} color="#8C8C8C" />
+          <span className="suggestion-label">Quick suggestions</span>
+          <div className="suggestion-pill">
+            <div className="user-avatar-mini">{user?.email?.charAt(0).toUpperCase()}</div>
+            <span>{user?.email?.split('@')[0]}</span>
+          </div>
+          {project && (
+            <div className="suggestion-pill">
+              <Folder size={12} />
+              <span>{project.Title}</span>
+            </div>
+          )}
+        </div>
+
         {/* Property Pills */}
         <div className="modal-properties">
-          <div className="property-pill">
-            {STATUS_OPTIONS.find(s => s.id === status)?.icon}
-            <span>{STATUS_OPTIONS.find(s => s.id === status)?.label}</span>
+          <div className="property-wrapper">
+            <div className="property-pill" onClick={() => setActiveMenu(activeMenu === 'status' ? null : 'status')}>
+              {STATUS_OPTIONS.find(s => s.id === status)?.icon}
+              <span>{STATUS_OPTIONS.find(s => s.id === status)?.label}</span>
+            </div>
+            {activeMenu === 'status' && (
+              <div className="property-dropdown">
+                {STATUS_OPTIONS.map(opt => (
+                  <div key={opt.id} className="dropdown-item" onClick={() => { setStatus(opt.id); setActiveMenu(null); }}>
+                    {opt.icon} {opt.label}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="property-pill">
-            {PRIORITY_OPTIONS.find(p => p.id === priority)?.icon}
-            <span>Priority</span>
+
+          <div className="property-wrapper">
+            <div className="property-pill" onClick={() => setActiveMenu(activeMenu === 'priority' ? null : 'priority')}>
+              {PRIORITY_OPTIONS.find(p => p.id === priority)?.icon}
+              <span>{PRIORITY_OPTIONS.find(p => p.id === priority)?.label}</span>
+            </div>
+            {activeMenu === 'priority' && (
+              <div className="property-dropdown">
+                {PRIORITY_OPTIONS.map(opt => (
+                  <div key={opt.id} className="dropdown-item" onClick={() => { setPriority(opt.id); setActiveMenu(null); }}>
+                    {opt.icon} {opt.label}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="property-pill">
+
+          <div className="property-pill static">
             <UserPlus size={14} />
-            <span>Assignee</span>{/*this button dosnt do shit */}
+            <span>Assignee</span>
           </div>
-          <div className="property-pill">
+          <div className="property-pill static">
             <Folder size={14} />
-            <span>Project</span>{/*this button dosnt do shit */}
+            <span>Project</span>
           </div>
-          <div className="property-pill">
+          <div className="property-pill static">
             <Tag size={14} />
-            <span>Labels</span>{/*this button dosnt do shit */}
-          </div>
-          <div className="property-pill-more">
-            <Circle size={4} fill="#8C8C8C" stroke="none" />
-            <Circle size={4} fill="#8C8C8C" stroke="none" />
-            <Circle size={4} fill="#8C8C8C" stroke="none" />
+            <span>Labels</span>
           </div>
         </div>
 
@@ -119,7 +163,7 @@ const NewIssueModal = ({ isOpen, onClose, onCreate, team, project, user }) => {
           <div className="footer-right">
             <div className="create-more">
               <label className="switch">
-                <input type="checkbox" />
+                <input type="checkbox" checked={createMore} onChange={(e) => setCreateMore(e.target.checked)} />
                 <span className="slider round"></span>
               </label>
               <span>Create more</span>

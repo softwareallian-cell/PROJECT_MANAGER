@@ -1,0 +1,90 @@
+
+.list-view-container {
+  padding: 0 24px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.list-header {
+  display: grid;
+  grid-template-columns: 40px 2fr 1fr 1fr 1fr 80px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #8C8C8C;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.list-row {
+  display: grid;
+  grid-template-columns: 40px 2fr 1fr 1fr 1fr 80px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 13px;
+  align-items: center;
+  color: #ECECEC;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.list-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.list-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-row .issue-id {
+  color: #8C8C8C;
+  font-size: 11px;
+  min-width: 60px;
+}
+
+.list-row .issue-title {
+  font-weight: 500;
+}
+
+.list-row .badge {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.display-menu {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: #262626;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 1000;
+  padding: 8px;
+  min-width: 160px;
+}
+
+.display-option {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.display-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.display-option.active {
+  color: #5E6AD2;
+}

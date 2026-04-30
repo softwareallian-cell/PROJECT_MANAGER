@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  fetchWorkspaces, fetchTeams, fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, addProjectByTeam, setActiveWorkspace, setActiveTeam, setActiveProject
+  fetchWorkspaces, fetchTeams, fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, addProjectByTeam, addTeam, setActiveWorkspace, setActiveTeam, setActiveProject
 } from './Redux';
 import {
   X, Edit2, Trash2, Layout, Plus, Filter, ChevronDown, CheckCircle2, Circle, CircleDashed, ArrowUp, ArrowRight, ArrowDown, Hash, Users, Zap
@@ -9,6 +9,11 @@ import {
 import './Project_1.css';
 import NewIssueModal from './NewIssueModal';
 import IssueDetailView from './IssueDetailView';
+import CreateTeamModal from './CreateTeamModal';
+import CreateProjectModal from './CreateProjectModal';
+import ProjectsBoard from './ProjectsBoard';
+import ProjectDetailView from './ProjectDetailView';
+import './ListView.css';
 
 const STATUS_COLUMNS = [
   { id: 'backlog', label: 'Backlog', icon: <CircleDashed size={14} /> },
@@ -47,6 +52,12 @@ function Project_1() {
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
+  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
+  const [mainView, setMainView] = useState('issues'); // 'issues', 'projects', 'project-detail'
+  const [viewProject, setViewProject] = useState(null);
+  const [viewMode, setViewMode] = useState('kanban'); // 'kanban', 'list'
+  const [showDisplayMenu, setShowDisplayMenu] = useState(false);
 
   // Initial data fetch
   useEffect(() => {
@@ -147,18 +158,29 @@ function Project_1() {
       if (action.payload) setSelectedTask(action.payload);
     });
   };
-
-
   const handleCreateProject = () => {
-    if (!activeTeamId || !activeWorkspaceId) return;
-    const newProj = {
-      Title: "New Project",
-      Description: "",
-      teamId: activeTeamId,
-      createdBy: CURRENTUSER._id,
-      date: new Date().toISOString().substring(0, 10)
+    setIsCreateProjectModalOpen(true);
+  };
+
+  const confirmCreateProject = (projData) => {
+    dispatch(addProjectByTeam(projData));
+    setIsCreateProjectModalOpen(false);
+  };
+
+  const handleCreateTeam = () => {
+    setIsCreateTeamModalOpen(true);
+  };
+
+  const confirmCreateTeam = (teamData) => {
+    if (!activeWorkspaceId) return;
+    const newTeam = {
+      workspaceId: activeWorkspaceId,
+      name: teamData.name,
+      key: teamData.key,
+      members: [CURRENTUSER._id]
     };
-    dispatch(addProjectByTeam(newProj));
+    dispatch(addTeam(newTeam));
+    setIsCreateTeamModalOpen(false);
   };
 
   return (
@@ -191,8 +213,6 @@ function Project_1() {
         <button className="new-issue-btn" onClick={() => setIsCreateModalOpen(true)}>
           <Edit2 size={14} /> New Issue
         </button>
-
-
         <div className="sidebar-section">
           <div className="section-title">Views</div>
           <div className="sidebar-item active">
@@ -215,24 +235,31 @@ function Project_1() {
               {team.name}
             </div>
           ))}
-          <div className="sidebar-item secondary">
+          <div className="sidebar-item secondary" onClick={handleCreateTeam}>
             <Plus size={14} /> Add Team
           </div>
+
         </div>
 
         <div className="sidebar-section">
           <div className="section-title">Projects</div>
           <div
-            className={`sidebar-item ${!activeProjectId ? 'active' : ''}`}
-            onClick={() => dispatch(setActiveProject(null))}
+            className={`sidebar-item ${mainView === 'projects' ? 'active' : ''}`}
+            onClick={() => {
+              setMainView('projects');
+              dispatch(setActiveProject(null));
+            }}
           >
             <Hash size={14} /> All Projects
           </div>
           {linearProjects.map(proj => (
             <div
               key={proj._id}
-              className={`sidebar-item ${activeProjectId === proj._id ? 'active' : ''}`}
-              onClick={() => dispatch(setActiveProject(proj._id))}
+              className={`sidebar-item ${activeProjectId === proj._id && mainView === 'issues' ? 'active' : ''}`}
+              onClick={() => {
+                setMainView('issues');
+                dispatch(setActiveProject(proj._id));
+              }}
             >
               <Hash size={14} /> {proj.Title}
             </div>
@@ -245,89 +272,162 @@ function Project_1() {
 
       {/* MAIN BOARD */}
       <div className="linear-main">
-        <div className="board-header">
-          <div className="board-title">
-            <Users size={18} color="#8C8C8C" />
-            {activeTeam ? `${activeTeam.name} Board` : 'Select a Team'}
-          </div>
-          <div className="board-actions">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="board-search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <button className="icon-btn">
-              <Filter size={14} /> Filter
-            </button>
-            <button className="icon-btn">
-              <Plus size={14} /> Display
-            </button>
-          </div>
-        </div>
-
-        <div className="kanban-container">
-          {STATUS_COLUMNS.map(col => {
-            const columnTasks = filteredTasks.filter(t => t.status === col.id);
-            const isOver = overColumn === col.id;
-
-            return (
-              <div
-                key={col.id}
-                className="linear-column"
-                onDragOver={(e) => onDragOver(e, col.id)}
-                onDrop={(e) => onDrop(e, col.id)}
-                onDragLeave={() => setOverColumn(null)}
-                style={{
-                  background: isOver ? 'rgba(255,255,255,0.02)' : 'transparent',
-                  borderRadius: '8px'
-                }}
-              >
-                <div className="column-header">
-                  {col.icon}
-                  <span>{col.label}</span>
-                  <span className="col-count">{columnTasks.length}</span>
+        {mainView === 'issues' ? (
+          <>
+            <div className="board-header">
+              <div className="board-title">
+                <Users size={18} color="#8C8C8C" />
+                {activeTeam ? `${activeTeam.name} Board` : 'Select a Team'}
+              </div>
+              <div className="board-actions">
+                <div className="search-container">
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="board-search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
-
-                <div className="column-body">
-                  {columnTasks.map(t => (
-                    <div
-                      key={t._id}
-                      className="linear-card"
-                      draggable
-                      onDragStart={(e) => onDragStart(e, t._id)}
-                      onDragEnd={onDragEnd}
-                      onClick={() => setSelectedTask(t)}
-                      style={{ opacity: draggingId === t._id ? 0.4 : 1 }}
-                    >
-                      <div className="card-top">
-                        <span className="issue-id">{getTaskId(t)}</span>
+                <button className="icon-btn">
+                  <Filter size={14} /> Filter
+                </button>
+                <div style={{ position: 'relative' }}>
+                  <button className="icon-btn" onClick={() => setShowDisplayMenu(!showDisplayMenu)}>
+                    <Plus size={14} /> Display
+                  </button>
+                  {showDisplayMenu && (
+                    <div className="display-menu" onMouseLeave={() => setShowDisplayMenu(false)}>
+                      <div className="section-title">Layout</div>
+                      <div 
+                        className={`display-option ${viewMode === 'kanban' ? 'active' : ''}`}
+                        onClick={() => { setViewMode('kanban'); setShowDisplayMenu(false); }}
+                      >
+                        Kanban <span>⌘1</span>
                       </div>
-                      <div className="card-title">{t.title}</div>
-
-                      <div className="card-meta">
-                        <span className={`badge priority-${t.priority}`}>
-                          {PRIORITY_ICONS[t.priority] || PRIORITY_ICONS.none}
-                        </span>
-                        {t.tags && t.tags.map(tag => (
-                          <span key={tag} className="badge tag-badge">#{tag}</span>
-                        ))}
-                      </div>
-
-                      <div className="card-actions" onClick={e => e.stopPropagation()}>
-                        <div className="action-icon" onClick={() => setSelectedTask(t)}><Edit2 size={12} /></div>
-                        <div className="action-icon" onClick={() => dispatch(deleteTaskDb(t._id))}><Trash2 size={12} /></div>
+                      <div 
+                        className={`display-option ${viewMode === 'list' ? 'active' : ''}`}
+                        onClick={() => { setViewMode('list'); setShowDisplayMenu(false); }}
+                      >
+                        List <span>⌘2</span>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+
+            {viewMode === 'kanban' ? (
+              <div className="kanban-container">
+                {STATUS_COLUMNS.map(col => {
+                  const columnTasks = filteredTasks.filter(t => t.status === col.id);
+                  const isOver = overColumn === col.id;
+
+                  return (
+                    <div
+                      key={col.id}
+                      className="linear-column"
+                      onDragOver={(e) => onDragOver(e, col.id)}
+                      onDrop={(e) => onDrop(e, col.id)}
+                      onDragLeave={() => setOverColumn(null)}
+                      style={{
+                        background: isOver ? 'rgba(255,255,255,0.02)' : 'transparent',
+                        borderRadius: '8px'
+                      }}
+                    >
+                      <div className="column-header">
+                        {col.icon}
+                        <span>{col.label}</span>
+                        <span className="col-count">{columnTasks.length}</span>
+                      </div>
+
+                      <div className="column-body">
+                        {columnTasks.map(t => (
+                          <div
+                            key={t._id}
+                            className="linear-card"
+                            draggable
+                            onDragStart={(e) => onDragStart(e, t._id)}
+                            onDragEnd={onDragEnd}
+                            onClick={() => setSelectedTask(t)}
+                            style={{ opacity: draggingId === t._id ? 0.4 : 1 }}
+                          >
+                            <div className="card-top">
+                              <span className="issue-id">{getTaskId(t)}</span>
+                            </div>
+                            <div className="card-title">{t.title}</div>
+
+                            <div className="card-meta">
+                              <span className={`badge priority-${t.priority}`}>
+                                {PRIORITY_ICONS[t.priority] || PRIORITY_ICONS.none}
+                              </span>
+                              {t.tags && t.tags.map(tag => (
+                                <span key={tag} className="badge tag-badge">#{tag}</span>
+                              ))}
+                            </div>
+
+                            <div className="card-actions" onClick={e => e.stopPropagation()}>
+                              <div className="action-icon" onClick={() => setSelectedTask(t)}><Edit2 size={12} /></div>
+                              <div className="action-icon" onClick={() => dispatch(deleteTaskDb(t._id))}><Trash2 size={12} /></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="list-view-container">
+                <div className="list-header">
+                  <div></div>
+                  <div>Name</div>
+                  <div>Status</div>
+                  <div>Priority</div>
+                  <div>Team</div>
+                  <div>Date</div>
+                </div>
+                {filteredTasks.map(t => (
+                  <div key={t._id} className="list-row" onClick={() => setSelectedTask(t)}>
+                    <div className="list-cell"><input type="checkbox" /></div>
+                    <div className="list-cell">
+                      <span className="issue-id">{getTaskId(t)}</span>
+                      <span className="issue-title">{t.title}</span>
+                    </div>
+                    <div className="list-cell">
+                      {STATUS_COLUMNS.find(s => s.id === t.status)?.icon}
+                      <span>{STATUS_COLUMNS.find(s => s.id === t.status)?.label}</span>
+                    </div>
+                    <div className="list-cell">
+                      <span className={`badge priority-${t.priority}`}>
+                        {PRIORITY_ICONS[t.priority] || PRIORITY_ICONS.none}
+                        {t.priority}
+                      </span>
+                    </div>
+                    <div className="list-cell">{activeTeam?.key}</div>
+                    <div className="list-cell" style={{ color: '#8C8C8C', fontSize: '12px' }}>Apr 29</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : mainView === 'projects' ? (
+          <ProjectsBoard
+            projects={linearProjects}
+            onProjectClick={(proj) => {
+              setViewProject(proj);
+              setMainView('project-detail');
+            }}
+          />
+        ) : (
+          <ProjectDetailView
+            project={viewProject}
+            team={teams.find(t => t._id === viewProject?.teamId)}
+            user={CURRENTUSER}
+            onClose={() => setMainView('projects')}
+          />
+        )}
+
         {/* FULL PAGE ISSUE DETAIL VIEW */}
         <IssueDetailView
           task={selectedTask}
@@ -337,7 +437,6 @@ function Project_1() {
           onClose={() => setSelectedTask(null)}
           onUpdate={(updatedData) => dispatch(editTaskDb({ id: updatedData._id, updatedData }))}
         />
-
       </div>
 
       <NewIssueModal
@@ -346,12 +445,23 @@ function Project_1() {
         onCreate={handleCreateTask}
         team={activeTeam}
         project={linearProjects.find(p => p._id === activeProjectId)}
+        workspaceId={activeWorkspaceId}
         user={CURRENTUSER}
       />
 
+      <CreateTeamModal
+        isOpen={isCreateTeamModalOpen}
+        onClose={() => setIsCreateTeamModalOpen(false)}
+        onCreate={confirmCreateTeam}
+      />
+      <CreateProjectModal
+        isOpen={isCreateProjectModalOpen}
+        onClose={() => setIsCreateProjectModalOpen(false)}
+        onCreate={confirmCreateProject}
+        team={activeTeam}
+        user={CURRENTUSER}
+      />
     </div>
   );
 }
-
-
 export default Project_1;

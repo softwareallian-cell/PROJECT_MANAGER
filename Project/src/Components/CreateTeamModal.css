@@ -1,0 +1,222 @@
+.team-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.create-team-card {
+  background-color: black;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.team-modal-header {
+  padding: 32px 32px 16px;
+}
+
+.team-modal-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin: 0 0 8px;
+}
+
+.team-modal-header p {
+  font-size: 14px;
+  color: #8C8C8C;
+  margin: 0;
+}
+
+/* Disabled Banner (Replacement for trial banner) */
+.team-limit-banner {
+  margin: 16px 32px;
+  background-color: #242424;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.banner-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8C8C8C;
+}
+
+.banner-content {
+  flex-grow: 1;
+}
+
+.banner-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ECECEC;
+  margin-bottom: 2px;
+}
+
+.banner-text {
+  font-size: 12px;
+  color: #8C8C8C;
+}
+
+/* Form Section */
+.team-form-section {
+  padding: 16px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.form-group-row:last-child {
+  border-bottom: none;
+}
+
+.label-side {
+  flex: 1;
+}
+
+.input-side {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #ECECEC;
+  margin-bottom: 4px;
+}
+
+.field-desc {
+  font-size: 12px;
+  color: #8C8C8C;
+}
+
+.team-text-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #FFFFFF;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.team-text-input:focus {
+  border-color: #5E6AD2;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 2px rgba(94, 106, 210, 0.2);
+}
+
+.team-icon-placeholder {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8C8C8C;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+/* Footer */
+.team-modal-footer {
+  padding: 24px 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
+  background-color: #1F1F1F;
+}
+
+.submit-team-btn {
+  background-color: #5E6AD2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submit-team-btn:hover:not(:disabled) {
+  background-color: #4A56B8;
+}
+
+.submit-team-btn:disabled {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.2);
+  cursor: not-allowed;
+}
+
+.close-team-modal {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: #8C8C8C;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-team-modal:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+}

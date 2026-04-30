@@ -1,0 +1,115 @@
+
+.projects-board-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 24px;
+  overflow-x: auto;
+}
+
+.board-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.board-columns-wrapper {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+}
+
+.project-column {
+  width: 300px;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.column-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #ECECEC;
+  margin-bottom: 12px;
+}
+
+.column-count {
+  color: #8C8C8C;
+  font-weight: 400;
+}
+
+.project-card {
+  background: #262626;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.project-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: #2A2A2A;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.project-icon-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8C8C8C;
+}
+
+.project-title-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ECECEC;
+}
+
+.project-summary-text {
+  font-size: 12px;
+  color: #8C8C8C;
+  line-height: 1.4;
+}
+
+.card-footer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.footer-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #8C8C8C;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-on-track { background-color: #2ECC71; box-shadow: 0 0 8px rgba(46, 204, 113, 0.4); }
+.status-at-risk { background-color: #F1C40F; box-shadow: 0 0 8px rgba(241, 196, 15, 0.4); }
+.status-off-track { background-color: #E74C3C; box-shadow: 0 0 8px rgba(231, 76, 60, 0.4); }

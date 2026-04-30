@@ -214,6 +214,13 @@ export const fetchTeams = createAsyncThunk("teams/fetchByWorkspace", async (work
     } catch (err) { return rejectWithValue(err.message); }
 });
 
+export const addTeam = createAsyncThunk("teams/add", async (teamData, { rejectWithValue }) => {
+    try {
+        const res = await axios.post(TEAMS_URL, teamData);
+        return res.data;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
 export const fetchTasks = createAsyncThunk("tasks/fetchByTeam", async (teamId, { rejectWithValue }) => {
     try {
         const res = await axios.get(`${TEAMS_URL}/${teamId}/tasks`);
@@ -418,6 +425,10 @@ const FORMSLICE = createSlice({
                 if (action.payload.length > 0) {
                     state.activeTeamId = action.payload[0]._id;
                 }
+            })
+            .addCase(addTeam.fulfilled, (state, action) => {
+                state.teams.push(action.payload);
+                state.activeTeamId = action.payload._id;
             })
             .addCase(fetchTasks.fulfilled, (state, action) => {
                 state.tasks = action.payload;
