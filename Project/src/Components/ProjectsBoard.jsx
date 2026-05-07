@@ -12,7 +12,7 @@ const PROJECT_COLUMNS = [
 ];
 
 
-const ProjectsBoard = ({ projects, onProjectClick }) => {
+const ProjectsBoard = ({ projects, onProjectClick, onContextMenu }) => {
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban', 'list'
   const [showDisplayMenu, setShowDisplayMenu] = useState(false);
 
@@ -67,6 +67,7 @@ const ProjectsBoard = ({ projects, onProjectClick }) => {
                   key={proj._id}
                   className="project-card"
                   onClick={() => onProjectClick(proj)}
+                  onContextMenu={(e) => onContextMenu(e, 'project', proj._id)}
                 >
                   <div className="card-title-row">
                     <div className="project-icon-box">
@@ -112,7 +113,13 @@ const ProjectsBoard = ({ projects, onProjectClick }) => {
             <div>Issues</div>
           </div>
           {projects.map(proj => (
-            <div key={proj._id} className="list-row" style={{ gridTemplateColumns: '40px 2fr 1fr 1fr 1fr 1fr 80px' }} onClick={() => onProjectClick(proj)}>
+            <div 
+              key={proj._id} 
+              className="list-row" 
+              style={{ gridTemplateColumns: '40px 2fr 1fr 1fr 1fr 1fr 80px' }} 
+              onClick={() => onProjectClick(proj)}
+              onContextMenu={(e) => onContextMenu(e, 'project', proj._id)}
+            >
               <div className="list-cell"><input type="checkbox" /></div>
               <div className="list-cell">
                 <div className="project-icon-box"><Layout size={12} /></div>

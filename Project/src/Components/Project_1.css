@@ -496,3 +496,113 @@
   min-height: 200px;
   outline: none;
 }
+
+/* NESTED SIDEBAR STYLES */
+.sidebar-section-header {
+  font-size: 12px;
+  color: #8C8C8C;
+  font-weight: 600;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  user-select: none;
+}
+
+.sidebar-section-header:hover {
+  color: #ECECEC;
+}
+
+.sidebar-section-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.nested-sidebar-item {
+  padding-left: 32px;
+}
+
+.deep-nested-item {
+  padding-left: 48px;
+}
+
+.active-team-header {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ECECEC;
+}
+
+.team-sub-items {
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+
+/* CONTEXT MENU */
+.custom-context-menu {
+  position: fixed;
+  min-width: 180px;
+  background-color: #1c1c1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  animation: contextMenuIn 0.1s ease-out;
+}
+
+@keyframes contextMenuIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.context-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.context-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #ECECEC;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  user-select: none;
+}
+
+.context-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.context-item.danger {
+  color: #ff4d4d;
+}
+
+.context-item.danger:hover {
+  background-color: rgba(255, 77, 77, 0.1);
+}
+
+.context-item.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.05);
+  margin: 6px 4px;
+}
+
+.shortcut {
+  margin-left: auto;
+  font-size: 11px;
+  color: #8C8C8C;
+  padding-left: 16px;
+}

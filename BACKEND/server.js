@@ -33,11 +33,16 @@ const AuditLog = require('./models/AuditLog.js');
 let gridfsBucket;
 // Connection
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => {console.log("✅ DB Connected");
-gridfsBucket = new GridFSBucket(mongoose.connection.db, {
+    .then(() => {
+        console.log("✅ DB Connected");
+        gridfsBucket = new GridFSBucket(mongoose.connection.db, {
             bucketName: 'uploads'
         });
-        console.log("✅ GridFS Bucket Ready");})
+        console.log("✅ GridFS Bucket Ready");
+        
+        const PORT = process.env.PORT || 5000;
+        app.listen(PORT, () => console.log(`🚀 Server on ${PORT}`));
+    })
     .catch(err => console.error("❌ DB Error:", err));
 
 // --- USER ROUTES ---
@@ -617,6 +622,4 @@ app.get('/api/screenshots/:fileId', async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server on ${PORT}`));
+

@@ -4,7 +4,7 @@ import {
   fetchWorkspaces, fetchTeams, fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, addProjectByTeam, addTeam, setActiveWorkspace, setActiveTeam, setActiveProject
 } from './Redux';
 import {
-  X, Edit2, Trash2, Layout, Plus, Filter, ChevronDown, CheckCircle2, Circle, CircleDashed, ArrowUp, ArrowRight, ArrowDown, Hash, Users, Zap
+  X, Edit2, Trash2, Layout, Plus, Filter, ChevronDown, ChevronRight, CheckCircle2, Circle, CircleDashed, ArrowUp, ArrowRight, ArrowDown, Hash, Users, Zap, Inbox, FileText, UserCircle
 } from 'lucide-react';
 import './Project_1.css';
 import NewIssueModal from './NewIssueModal';
@@ -54,39 +54,58 @@ function Project_1() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
-  const [mainView, setMainView] = useState('issues'); // 'issues', 'projects', 'project-detail'
+  const [mainView, setMainView] = useState('issues'); // 'issues', 'projects', 'project-detail', 'all-teams', 'all-members', 'team-members'
   const [viewProject, setViewProject] = useState(null);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban', 'list'
   const [showDisplayMenu, setShowDisplayMenu] = useState(false);
+
+  const [expandedSections, setExpandedSections] = useState({ workspace: true, teams: true });
+  const [expandedTeamIds, setExpandedTeamIds] = useState([]);
+
+  // Context Menu State
+  const [contextMenu, setContextMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    targetType: null, // 'task' or 'project'
+    targetId: null
+  });
+
+  const handleContextMenu = (e, type, id) => {
+    e.preventDefault();
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      targetType: type,
+      targetId: id
+    });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+  };
+
+  useEffect(() => {
+    const handleClick = () => closeContextMenu();
+    window.addEventListener('click', handleClick);
+    return () => window.removeEventListener('click', handleClick);
+  }, []);
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const toggleTeam = (teamId) => {
+    setExpandedTeamIds(prev =>
+      prev.includes(teamId) ? prev.filter(id => id !== teamId) : [...prev, teamId]
+    );
+  };
 
   // Initial data fetch
   useEffect(() => {
     dispatch(fetchWorkspaces());
   }, [dispatch]);
-
-  // Bootstrap: Create default Workspace/Team if empty
-  useEffect(() => {
-    if (workspaces.length === 0 && CURRENTUSER?._id) {
-      const setup = async () => {
-        try {
-          const wsRes = await fetch('http://localhost:5000/api/workspaces', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: 'My Workspace', slug: 'my-ws', owner: CURRENTUSER._id })
-          });
-          const ws = await wsRes.json();
-
-          await fetch('http://localhost:5000/api/teams', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ workspaceId: ws._id, name: 'Engineering', key: 'ENG', members: [CURRENTUSER._id] })
-          });
-          dispatch(fetchWorkspaces());
-        } catch (e) { console.error("Bootstrap error", e); }
-      };
-      setup();
-    }
-  }, [workspaces.length, CURRENTUSER?._id, dispatch]);
 
   // Fetch teams when workspace changes
   useEffect(() => {
@@ -129,7 +148,6 @@ function Project_1() {
   const onDrop = (e, status) => {
     e.preventDefault();
     if (!draggingId) return;
-
     const task = tasks.find(t => t._id === draggingId);
     if (task && task.status !== status) {
       dispatch(editTaskDb({
@@ -191,7 +209,7 @@ function Project_1() {
         <div className="linear-sidebar-header" onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}>
           <div className="workspace-name">
             <div className="workspace-icon">
-              {activeWorkspace?.name?.charAt(0) || 'A'}
+              {activeWorkspace?.name?.charAt(0)}
             </div>
             {activeWorkspace?.name || 'Select Workspace'}
             <ChevronDown size={14} color="#8C8C8C" style={{ marginLeft: 'auto' }} />
@@ -213,60 +231,117 @@ function Project_1() {
         <button className="new-issue-btn" onClick={() => setIsCreateModalOpen(true)}>
           <Edit2 size={14} /> New Issue
         </button>
-        <div className="sidebar-section">
-          <div className="section-title">Views</div>
-          <div className="sidebar-item active">
-            <Layout size={14} /> Active Issues
-          </div>
-          <div className="sidebar-item">
-            <CheckCircle2 size={14} /> All Issues
-          </div>
+
+        <div className="sidebar-section" style={{ marginTop: '12px' }}>
+          <div className="sidebar-item"><Inbox size={14} /> Inbox</div>
+          <div className="sidebar-item"><Layout size={14} /> My issues</div>
+          <div className="sidebar-item"><FileText size={14} /> Drafts</div>
         </div>
 
         <div className="sidebar-section">
-          <div className="section-title">Teams</div>
-          {teams.map(team => (
-            <div
-              key={team._id}
-              className={`sidebar-item ${activeTeamId === team._id ? 'active' : ''}`}
-              onClick={() => dispatch(setActiveTeam(team._id))}
-            >
-              <div className="team-key-badge">{team.key}</div>
-              {team.name}
-            </div>
-          ))}
-          <div className="sidebar-item secondary" onClick={handleCreateTeam}>
-            <Plus size={14} /> Add Team
+          <div className="sidebar-section-header" onClick={() => toggleSection('workspace')}>
+            <span>Workspace</span>
+            {expandedSections.workspace ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </div>
-
+          {expandedSections.workspace && (
+            <div className="sidebar-section-content">
+              <div
+                className={`sidebar-item nested-sidebar-item ${mainView === 'projects' ? 'active' : ''}`}
+                onClick={() => {
+                  setMainView('projects');
+                  dispatch(setActiveProject(null));
+                  dispatch(setActiveTeam(null));
+                }}
+              >
+                <Hash size={14} /> Projects
+              </div>
+              <div
+                className={`sidebar-item nested-sidebar-item ${mainView === 'all-teams' ? 'active' : ''}`}
+                onClick={() => {
+                  setMainView('all-teams');
+                  dispatch(setActiveProject(null));
+                  dispatch(setActiveTeam(null));
+                }}
+              >
+                <Users size={14} /> All Teams
+              </div>
+              <div
+                className={`sidebar-item nested-sidebar-item ${mainView === 'all-members' ? 'active' : ''}`}
+                onClick={() => {
+                  setMainView('all-members');
+                  dispatch(setActiveProject(null));
+                  dispatch(setActiveTeam(null));
+                }}
+              >
+                <UserCircle size={14} /> All Members
+              </div>
+              <div className="sidebar-item nested-sidebar-item secondary" onClick={handleCreateProject}>
+                <Plus size={14} /> Add Project
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="sidebar-section">
-          <div className="section-title">Projects</div>
-          <div
-            className={`sidebar-item ${mainView === 'projects' ? 'active' : ''}`}
-            onClick={() => {
-              setMainView('projects');
-              dispatch(setActiveProject(null));
-            }}
-          >
-            <Hash size={14} /> All Projects
+          <div className="sidebar-section-header" onClick={() => toggleSection('teams')}>
+            <span>Your teams</span>
+            {expandedSections.teams ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </div>
-          {linearProjects.map(proj => (
-            <div
-              key={proj._id}
-              className={`sidebar-item ${activeProjectId === proj._id && mainView === 'issues' ? 'active' : ''}`}
-              onClick={() => {
-                setMainView('issues');
-                dispatch(setActiveProject(proj._id));
-              }}
-            >
-              <Hash size={14} /> {proj.Title}
+          {expandedSections.teams && (
+            <div className="sidebar-section-content">
+              {teams.map(team => {
+                const isExpanded = expandedTeamIds.includes(team._id);
+                return (
+                  <div key={team._id}>
+                    <div
+                      className={`sidebar-item nested-sidebar-item ${activeTeamId === team._id && !['projects', 'issues', 'team-members'].includes(mainView) ? 'active-team-header' : ''}`}
+                      onClick={() => toggleTeam(team._id)}
+                    >
+                      <div className="team-key-badge">{team.key}</div>
+                      {team.name}
+                      <div style={{ marginLeft: 'auto' }}>
+                        {isExpanded ? <ChevronDown size={14} color="#8C8C8C" /> : <ChevronRight size={14} color="#8C8C8C" />}
+                      </div>
+                    </div>
+                    {isExpanded && (
+                      <div className="team-sub-items">
+                        <div
+                          className={`sidebar-item deep-nested-item ${activeTeamId === team._id && mainView === 'issues' ? 'active' : ''}`}
+                          onClick={() => {
+                            dispatch(setActiveTeam(team._id));
+                            setMainView('issues');
+                          }}
+                        >
+                          <Layout size={14} /> Issues
+                        </div>
+                        <div
+                          className={`sidebar-item deep-nested-item ${activeTeamId === team._id && mainView === 'projects' ? 'active' : ''}`}
+                          onClick={() => {
+                            dispatch(setActiveTeam(team._id));
+                            setMainView('projects');
+                          }}
+                        >
+                          <Hash size={14} /> Projects
+                        </div>
+                        <div
+                          className={`sidebar-item deep-nested-item ${activeTeamId === team._id && mainView === 'team-members' ? 'active' : ''}`}
+                          onClick={() => {
+                            dispatch(setActiveTeam(team._id));
+                            setMainView('team-members');
+                          }}
+                        >
+                          <UserCircle size={14} /> Members
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              <div className="sidebar-item nested-sidebar-item secondary" onClick={handleCreateTeam}>
+                <Plus size={14} /> Add Team
+              </div>
             </div>
-          ))}
-          <div className="sidebar-item secondary" onClick={handleCreateProject}>
-            <Plus size={14} /> Add Project
-          </div>
+          )}
         </div>
       </div>
 
@@ -299,17 +374,17 @@ function Project_1() {
                   {showDisplayMenu && (
                     <div className="display-menu" onMouseLeave={() => setShowDisplayMenu(false)}>
                       <div className="section-title">Layout</div>
-                      <div 
+                      <div
                         className={`display-option ${viewMode === 'kanban' ? 'active' : ''}`}
                         onClick={() => { setViewMode('kanban'); setShowDisplayMenu(false); }}
                       >
-                        Kanban <span>⌘1</span>
+                        Kanban <span>1</span>
                       </div>
-                      <div 
+                      <div
                         className={`display-option ${viewMode === 'list' ? 'active' : ''}`}
                         onClick={() => { setViewMode('list'); setShowDisplayMenu(false); }}
                       >
-                        List <span>⌘2</span>
+                        List <span>2</span>
                       </div>
                     </div>
                   )}
@@ -350,6 +425,7 @@ function Project_1() {
                             onDragStart={(e) => onDragStart(e, t._id)}
                             onDragEnd={onDragEnd}
                             onClick={() => setSelectedTask(t)}
+                            onContextMenu={(e) => handleContextMenu(e, 'task', t._id)}
                             style={{ opacity: draggingId === t._id ? 0.4 : 1 }}
                           >
                             <div className="card-top">
@@ -388,7 +464,12 @@ function Project_1() {
                   <div>Date</div>
                 </div>
                 {filteredTasks.map(t => (
-                  <div key={t._id} className="list-row" onClick={() => setSelectedTask(t)}>
+                  <div 
+                    key={t._id} 
+                    className="list-row" 
+                    onClick={() => setSelectedTask(t)}
+                    onContextMenu={(e) => handleContextMenu(e, 'task', t._id)}
+                  >
                     <div className="list-cell"><input type="checkbox" /></div>
                     <div className="list-cell">
                       <span className="issue-id">{getTaskId(t)}</span>
@@ -418,15 +499,62 @@ function Project_1() {
               setViewProject(proj);
               setMainView('project-detail');
             }}
+            onContextMenu={handleContextMenu}
           />
-        ) : (
+        ) : mainView === 'project-detail' ? (
           <ProjectDetailView
             project={viewProject}
             team={teams.find(t => t._id === viewProject?.teamId)}
             user={CURRENTUSER}
             onClose={() => setMainView('projects')}
           />
-        )}
+        ) : mainView === 'all-teams' ? (
+          <div className="list-view-container" style={{ padding: '24px' }}>
+            <div className="board-header" style={{ padding: '0 0 16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }}>
+              <div className="board-title"><Users size={18} color="#8C8C8C" /> All Teams</div>
+            </div>
+            <div className="list-header" style={{ gridTemplateColumns: '2fr 1fr 1fr' }}>
+              <div>Team Name</div>
+              <div>Key</div>
+              <div>Members</div>
+            </div>
+            {teams.map(t => (
+              <div key={t._id} className="list-row" style={{ gridTemplateColumns: '2fr 1fr 1fr' }}>
+                <div className="list-cell">{t.name}</div>
+                <div className="list-cell"><div className="team-key-badge">{t.key}</div></div>
+                <div className="list-cell">{t.members?.length || 0} members</div>
+              </div>
+            ))}
+          </div>
+        ) : mainView === 'all-members' ? (
+          <div className="list-view-container" style={{ padding: '24px' }}>
+            <div className="board-header" style={{ padding: '0 0 16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }}>
+              <div className="board-title"><UserCircle size={18} color="#8C8C8C" /> All Workspace Members</div>
+            </div>
+            <div className="list-header" style={{ gridTemplateColumns: '2fr 1fr' }}>
+              <div>Email</div>
+              <div>Role</div>
+            </div>
+            <div className="list-row" style={{ gridTemplateColumns: '2fr 1fr' }}>
+              <div className="list-cell">{CURRENTUSER.email || 'Current User'}</div>
+              <div className="list-cell">{CURRENTUSER.role || 'Member'}</div>
+            </div>
+          </div>
+        ) : mainView === 'team-members' ? (
+          <div className="list-view-container" style={{ padding: '24px' }}>
+            <div className="board-header" style={{ padding: '0 0 16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }}>
+              <div className="board-title"><UserCircle size={18} color="#8C8C8C" /> {activeTeam?.name} Members</div>
+            </div>
+            <div className="list-header" style={{ gridTemplateColumns: '2fr 1fr' }}>
+              <div>Email</div>
+              <div>Role</div>
+            </div>
+            <div className="list-row" style={{ gridTemplateColumns: '2fr 1fr' }}>
+              <div className="list-cell">{CURRENTUSER.email || 'Current User'}</div>
+              <div className="list-cell">{CURRENTUSER.role || 'Member'}</div>
+            </div>
+          </div>
+        ) : null}
 
         {/* FULL PAGE ISSUE DETAIL VIEW */}
         <IssueDetailView
@@ -461,6 +589,41 @@ function Project_1() {
         team={activeTeam}
         user={CURRENTUSER}
       />
+
+      {/* CONTEXT MENU */}
+      {contextMenu.visible && (
+        <div 
+          className="custom-context-menu" 
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="context-menu-section">
+            <div className="context-item disabled">
+              <Edit2 size={14} /> Edit {contextMenu.targetType}
+            </div>
+            <div className="context-item disabled">
+              <Plus size={14} /> Duplicate
+            </div>
+          </div>
+          <div className="context-menu-divider"></div>
+          <div className="context-menu-section">
+            <div 
+              className="context-item danger" 
+              onClick={() => {
+                if (contextMenu.targetType === 'task') {
+                  dispatch(deleteTaskDb(contextMenu.targetId));
+                } else if (contextMenu.targetType === 'project') {
+                  dispatch(deleteProjectDb(contextMenu.targetId));
+                }
+                closeContextMenu();
+              }}
+            >
+              <Trash2 size={14} /> Delete
+              <span className="shortcut">Ctrl Delete</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
