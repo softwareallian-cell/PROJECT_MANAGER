@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  fetchWorkspaces, fetchTeams, fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, addProjectByTeam, addTeam, setActiveWorkspace, setActiveTeam, setActiveProject
+  fetchWorkspaces, fetchTeams, fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, deleteTeamDb, addProjectByTeam, addTeam, setActiveWorkspace, setActiveTeam, setActiveProject
 } from './Redux';
 import {
   X, Edit2, Trash2, Layout, Plus, Filter, ChevronDown, ChevronRight, CheckCircle2, Circle, CircleDashed, ArrowUp, ArrowRight, ArrowDown, Hash, Users, Zap, Inbox, FileText, UserCircle
@@ -13,6 +13,8 @@ import CreateTeamModal from './CreateTeamModal';
 import CreateProjectModal from './CreateProjectModal';
 import ProjectsBoard from './ProjectsBoard';
 import ProjectDetailView from './ProjectDetailView';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
+import TeamSettingsModal from './TeamSettingsModal';
 import './ListView.css';
 
 const STATUS_COLUMNS = [
@@ -58,6 +60,9 @@ function Project_1() {
   const [viewProject, setViewProject] = useState(null);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban', 'list'
   const [showDisplayMenu, setShowDisplayMenu] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isTeamSettingsModalOpen, setIsTeamSettingsModalOpen] = useState(false);
+  const [settingsTeam, setSettingsTeam] = useState(null);
 
   const [expandedSections, setExpandedSections] = useState({ workspace: true, teams: true });
   const [expandedTeamIds, setExpandedTeamIds] = useState([]);
@@ -201,6 +206,26 @@ function Project_1() {
     setIsCreateTeamModalOpen(false);
   };
 
+  const handleDeleteConfirm = () => {
+    const { targetType, targetId } = contextMenu;
+    if (targetType === 'task') {
+      dispatch(deleteTaskDb(targetId));
+    } else if (targetType === 'project') {
+      dispatch(deleteProjectDb(targetId));
+    } else if (targetType === 'team') {
+      dispatch(deleteTeamDb(targetId));
+    }
+    setIsDeleteModalOpen(false);
+  };
+
+  const getDeleteTargetName = () => {
+    const { targetType, targetId } = contextMenu;
+    if (targetType === 'task') return tasks.find(t => t._id === targetId)?.title || 'Task';
+    if (targetType === 'project') return linearProjects.find(p => p._id === targetId)?.Title || 'Project';
+    if (targetType === 'team') return teams.find(t => t._id === targetId)?.name || 'Team';
+    return 'item';
+  };
+
   return (
     <div className="linear-wrapper">
 
@@ -296,6 +321,7 @@ function Project_1() {
                     <div
                       className={`sidebar-item nested-sidebar-item ${activeTeamId === team._id && !['projects', 'issues', 'team-members'].includes(mainView) ? 'active-team-header' : ''}`}
                       onClick={() => toggleTeam(team._id)}
+                      onContextMenu={(e) => handleContextMenu(e, 'team', team._id)}
                     >
                       <div className="team-key-badge">{team.key}</div>
                       {team.name}
@@ -590,6 +616,23 @@ function Project_1() {
         user={CURRENTUSER}
       />
 
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        itemName={getDeleteTargetName()}
+        itemType={contextMenu.targetType?.charAt(0).toUpperCase() + contextMenu.targetType?.slice(1)}
+      />
+
+      <TeamSettingsModal
+        isOpen={isTeamSettingsModalOpen}
+        onClose={() => {
+          setIsTeamSettingsModalOpen(false);
+          setSettingsTeam(null);
+        }}
+        team={settingsTeam}
+      />
+
       {/* CONTEXT MENU */}
       {contextMenu.visible && (
         <div 
@@ -598,7 +641,16 @@ function Project_1() {
           onClick={e => e.stopPropagation()}
         >
           <div className="context-menu-section">
-            <div className="context-item disabled">
+            <div 
+              className="context-item"
+              onClick={() => {
+                if (contextMenu.targetType === 'team') {
+                  setSettingsTeam(teams.find(t => t._id === contextMenu.targetId));
+                  setIsTeamSettingsModalOpen(true);
+                }
+                closeContextMenu();
+              }}
+            >
               <Edit2 size={14} /> Edit {contextMenu.targetType}
             </div>
             <div className="context-item disabled">
@@ -610,11 +662,7 @@ function Project_1() {
             <div 
               className="context-item danger" 
               onClick={() => {
-                if (contextMenu.targetType === 'task') {
-                  dispatch(deleteTaskDb(contextMenu.targetId));
-                } else if (contextMenu.targetType === 'project') {
-                  dispatch(deleteProjectDb(contextMenu.targetId));
-                }
+                setIsDeleteModalOpen(true);
                 closeContextMenu();
               }}
             >

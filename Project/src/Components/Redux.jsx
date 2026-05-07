@@ -221,6 +221,34 @@ export const addTeam = createAsyncThunk("teams/add", async (teamData, { rejectWi
     } catch (err) { return rejectWithValue(err.message); }
 });
 
+export const deleteTeamDb = createAsyncThunk("teams/delete", async (teamId, { rejectWithValue }) => {
+    try {
+        await axios.delete(`${TEAMS_URL}/${teamId}`);
+        return teamId;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+export const updateTeamDb = createAsyncThunk("teams/update", async ({ id, updatedData }, { rejectWithValue }) => {
+    try {
+        const res = await axios.put(`${TEAMS_URL}/${id}`, updatedData);
+        return res.data;
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+export const addTeamMemberDb = createAsyncThunk("teams/addMember", async ({ teamId, userId }, { rejectWithValue }) => {
+    try {
+        const res = await axios.post(`${TEAMS_URL}/${teamId}/members`, { userId });
+        return res.data; // Returns updated team
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
+export const removeTeamMemberDb = createAsyncThunk("teams/removeMember", async ({ teamId, userId }, { rejectWithValue }) => {
+    try {
+        const res = await axios.delete(`${TEAMS_URL}/${teamId}/members/${userId}`);
+        return res.data; // Returns updated team
+    } catch (err) { return rejectWithValue(err.message); }
+});
+
 export const fetchTasks = createAsyncThunk("tasks/fetchByTeam", async (teamId, { rejectWithValue }) => {
     try {
         const res = await axios.get(`${TEAMS_URL}/${teamId}/tasks`);
@@ -429,6 +457,24 @@ const FORMSLICE = createSlice({
             .addCase(addTeam.fulfilled, (state, action) => {
                 state.teams.push(action.payload);
                 state.activeTeamId = action.payload._id;
+            })
+            .addCase(deleteTeamDb.fulfilled, (state, action) => {
+                state.teams = state.teams.filter(t => t._id !== action.payload);
+                if (state.activeTeamId === action.payload) {
+                    state.activeTeamId = state.teams.length > 0 ? state.teams[0]._id : null;
+                }
+            })
+            .addCase(updateTeamDb.fulfilled, (state, action) => {
+                const idx = state.teams.findIndex(t => t._id === action.payload._id);
+                if (idx !== -1) state.teams[idx] = action.payload;
+            })
+            .addCase(addTeamMemberDb.fulfilled, (state, action) => {
+                const idx = state.teams.findIndex(t => t._id === action.payload._id);
+                if (idx !== -1) state.teams[idx] = action.payload;
+            })
+            .addCase(removeTeamMemberDb.fulfilled, (state, action) => {
+                const idx = state.teams.findIndex(t => t._id === action.payload._id);
+                if (idx !== -1) state.teams[idx] = action.payload;
             })
             .addCase(fetchTasks.fulfilled, (state, action) => {
                 state.tasks = action.payload;
