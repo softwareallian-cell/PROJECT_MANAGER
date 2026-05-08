@@ -1,6 +1,6 @@
-# AlianHub Backend — Node.js & Express
+# Project-Management-Tool Backend — Node.js & Express
 
-This directory contains the central API for the AlianHub Task OS. It handles authentication, project management, and high-performance time tracking data.
+This directory contains the central API for the Project-Management-Tool Task OS. It handles authentication, project management, and high-performance time tracking data.
 
 ## 🛠️ Tech Stack
 - **Framework**: Express.js

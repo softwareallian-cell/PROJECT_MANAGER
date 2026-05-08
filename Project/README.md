@@ -1,6 +1,6 @@
-# AlianHub Frontend — React & Vite
+# Project-Management-Tool Frontend — React & Vite
 
-This directory contains the user interface for AlianHub Task OS, featuring a premium glassmorphic design and integrated time tracking tools.
+This directory contains the user interface for Project-Management-Tool Task OS, featuring a premium glassmorphic design and integrated time tracking tools.
 
 ## 🛠️ Tech Stack
 - **Library**: React 18

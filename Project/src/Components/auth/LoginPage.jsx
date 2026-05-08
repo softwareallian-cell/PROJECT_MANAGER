@@ -39,7 +39,7 @@ function LoginPage() {
                     <div className="auth-logo">
                         <Command size={32} color="var(--accent-primary)" />
                     </div>
-                    <h1>Log in to AlianHub</h1>
+                    <h1>Log in to Project-Management-Tool</h1>
                     <p>Welcome back. Please enter your details.</p>
                 </div>
 

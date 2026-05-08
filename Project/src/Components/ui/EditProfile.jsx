@@ -43,25 +43,25 @@ function EditProfile() {
             <div className="login_page">
                 <h1>Edit Profile</h1>
                 <p className="login-subtitle">Update your account credentials</p>
-                
+
                 <form className="auth-form">
                     <div className="input-group">
                         <label><Mail size={16} /> Email Address</label>
-                        <input 
-                            type="email" 
-                            defaultValue={CURRENT_USER[0].email} 
-                            onChange={(e) => setEmail(e.target.value)} 
-                            required 
+                        <input
+                            type="email"
+                            defaultValue={CURRENT_USER[0].email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
                         />
                     </div>
 
                     <div className="input-group">
                         <label><Lock size={16} /> Password</label>
-                        <input 
-                            type="password" 
-                            defaultValue={CURRENT_USER[0].password} 
-                            onChange={(e) => setPassword(e.target.value)} 
-                            required 
+                        <input
+                            type="password"
+                            defaultValue={CURRENT_USER[0].password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -69,19 +69,19 @@ function EditProfile() {
                         <button onClick={handleSubmit} className="submit-btn" type="submit">
                             <Save size={18} /> Save Changes
                         </button>
-                        
+
                         <div style={{ display: "flex", gap: "12px" }}>
-                            <button 
+                            <button
                                 type="button"
-                                onClick={() => navigate("/projects")} 
+                                onClick={() => navigate("/projects")}
                                 className="tracker-btn-ghost"
                                 style={{ flex: 1, padding: "12px", borderRadius: "12px", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                             >
                                 <X size={16} /> Cancel
                             </button>
-                            <button 
+                            <button
                                 type="button"
-                                onClick={delete_profile} 
+                                onClick={delete_profile}
                                 className="tracker-btn-danger"
                                 style={{ flex: 1, padding: "12px", borderRadius: "12px", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                             >

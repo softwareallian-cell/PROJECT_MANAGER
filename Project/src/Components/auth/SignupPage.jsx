@@ -42,7 +42,7 @@ function SignupPage() {
                         <Command size={32} color="var(--accent-primary)" />
                     </div>
                     <h1>Create your account</h1>
-                    <p>Start managing your projects with AlianHub.</p>
+                    <p>Start managing your projects with Project-Management-Tool.</p>
                 </div>
 
                 <div className="google-auth-section">

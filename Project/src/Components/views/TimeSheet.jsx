@@ -4,8 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { X, Edit3, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchAllTimeSessions } from "../../redux/slices/projectSlice";
 import "./TimeSheet.css";
+import { BASE_URL } from "../../redux/constants";
 
-const API = "http://localhost:5000";
+const API = BASE_URL;
 
 const HOURS = Array.from({ length: 24 }, (_, i) => ({
     val: i,

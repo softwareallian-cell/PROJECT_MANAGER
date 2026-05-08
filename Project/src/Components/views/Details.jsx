@@ -5,6 +5,7 @@ import "./Details.css";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProjectDetails, fetchTimeSessions } from "../../redux/slices/projectSlice";
 import { startGlobalTracker } from "../../redux/slices/uiSlice";
+import { BASE_URL } from "../../redux/constants";
 
 const STATUS_CLASSES = {
     backlog: 'status-backlog',
@@ -122,7 +123,7 @@ function Details() {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const res = await fetch(`http://localhost:5000/api/projects/${id}/attachments`, {
+            const res = await fetch(`${BASE_URL}/api/projects/${id}/attachments`, {
                 method: 'POST',
                 body: formData
             });
@@ -144,7 +145,7 @@ function Details() {
     const deleteAttachment = async (fileId, filename) => {
         if (!window.confirm(`Delete "${filename}"?`)) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/projects/${id}/attachments/${fileId}`, {
+            const res = await fetch(`${BASE_URL}/api/projects/${id}/attachments/${fileId}`, {
                 method: 'DELETE'
             });
             if (!res.ok) throw new Error('Delete failed');
@@ -429,7 +430,7 @@ function Details() {
                                                 <div className="file-name">{att.filename}</div>
                                                 <div className="file-date">{new Date(att.uploadedAt).toLocaleDateString()}</div>
                                             </div>
-                                            <a href={`http://localhost:5000/api/attachments/${att.path}`} download className="btn-download">Download</a>
+                                            <a href={`${BASE_URL}/api/attachments/${att.path}`} download className="btn-download">Download</a>
                                             <button onClick={() => deleteAttachment(att.path, att.filename)} className="detail-action-btn"><X size={14} /></button>
                                         </div>
                                     ))}
@@ -487,7 +488,7 @@ function Details() {
                                             {timeSessions.map((sess, i) => (
                                                 <div key={i} className="timelog-card" onClick={() => setSelectedSession(sess)}>
                                                     {sess.screenshots && sess.screenshots.length > 0 && (
-                                                        <div className="timelog-card-preview" style={{ backgroundImage: `url(http://localhost:5000/api/screenshots/${sess.screenshots[sess.screenshots.length - 1].gridfsId})` }} />
+                                                        <div className="timelog-card-preview" style={{ backgroundImage: `url(${BASE_URL}/api/screenshots/${sess.screenshots[sess.screenshots.length - 1].gridfsId})` }} />
                                                     )}
                                                     <div className="timelog-card-body">
                                                         <div className="timelog-card-meta">
@@ -537,8 +538,8 @@ function Details() {
                                 <span className="section-label">Activity Timeline ({selectedSession.screenshots?.length || 0} Captures)</span>
                                 <div className="session-gallery">
                                     {selectedSession.screenshots?.map((shot, idx) => (
-                                        <div key={idx} className="gallery-item" onClick={() => window.open(`http://localhost:5000/api/screenshots/${shot.gridfsId}`)}>
-                                            <img src={`http://localhost:5000/api/screenshots/${shot.gridfsId}`} alt="Capture" />
+                                        <div key={idx} className="gallery-item" onClick={() => window.open(`${BASE_URL}/api/screenshots/${shot.gridfsId}`)}>
+                                            <img src={`${BASE_URL}/api/screenshots/${shot.gridfsId}`} alt="Capture" />
                                             <div className="gallery-item-time">
                                                 {new Date(shot.capturedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>

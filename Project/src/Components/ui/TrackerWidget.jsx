@@ -18,8 +18,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchTimeSessions } from "../../redux/slices/projectSlice";
 import { stopGlobalTracker, setTrackerPanelOpen } from "../../redux/slices/uiSlice";
 import "./TrackerWidget.css";
+import { BASE_URL } from "../../redux/constants";
 
-const API = "http://localhost:5000";
+const API = BASE_URL;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
