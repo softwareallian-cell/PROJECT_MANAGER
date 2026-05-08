@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { X, Edit3, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchAllTimeSessions } from "../redux/slices/projectSlice";
+import { fetchAllTimeSessions } from "../../redux/slices/projectSlice";
 import "./TimeSheet.css";
 
 const API = "http://localhost:5000";

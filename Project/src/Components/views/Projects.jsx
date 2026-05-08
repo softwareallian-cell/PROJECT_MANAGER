@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux";
 import KanbanBoard from "./KanbanBoard";
-import { logoutUser, clearUserSearch, searchUsers } from "../redux/slices/authSlice";
-import { addProjectDb, assignProjectDb, deleteProjectDb, editProjectDb, fetchAssignedProjects, fetchCreatedProjects, removeAssigneeDb } from "../redux/slices/projectSlice";
-import { toggleTheme } from "../redux/slices/uiSlice";
+import { logoutUser, clearUserSearch, searchUsers } from "../../redux/slices/authSlice";
+import { addProjectDb, assignProjectDb, deleteProjectDb, editProjectDb, fetchAssignedProjects, fetchCreatedProjects, removeAssigneeDb } from "../../redux/slices/projectSlice";
+import { toggleTheme } from "../../redux/slices/uiSlice";
 import { createPortal } from "react-dom";
 import './Projects.css'
 import { NavLink, useNavigate } from "react-router-dom";

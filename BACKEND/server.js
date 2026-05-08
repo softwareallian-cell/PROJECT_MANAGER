@@ -24,12 +24,18 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/timesessions', timeRoutes);
 
-// Shared File/Screenshot Access (Compatibility)
-const { GridFSBucket } = require('mongodb');
+// Shared File/Screenshot Access
+const { GridFSBucket, ObjectId } = require('mongodb');
+let bucket;
+
+mongoose.connection.once('open', () => {
+    bucket = new GridFSBucket(mongoose.connection.db, { bucketName: 'uploads' });
+    console.log("✅ GridFS Bucket Ready");
+});
+
 app.get('/api/attachments/:fileId', async (req, res) => {
     try {
-        const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: 'uploads' });
-        const { ObjectId } = require('mongodb');
+        if (!bucket) return res.status(503).json({ message: 'GridFS not initialized' });
         const fileId = new ObjectId(req.params.fileId);
         const files = await bucket.find({ _id: fileId }).toArray();
         if (!files || files.length === 0) return res.status(404).json({ message: 'File not found' });
@@ -41,8 +47,7 @@ app.get('/api/attachments/:fileId', async (req, res) => {
 
 app.get('/api/screenshots/:fileId', async (req, res) => {
     try {
-        const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: 'uploads' });
-        const { ObjectId } = require('mongodb');
+        if (!bucket) return res.status(503).json({ message: 'GridFS not initialized' });
         const fileId = new ObjectId(req.params.fileId);
         res.set('Content-Type', 'image/png');
         bucket.openDownloadStream(fileId).pipe(res);
@@ -57,3 +62,26 @@ mongoose.connect(process.env.MONGO_URI)
         app.listen(PORT, () => console.log(`🚀 Server on ${PORT}`));
     })
     .catch(err => console.error("❌ DB Error:", err));
+
+// Graceful Shutdown
+process.on('SIGINT', async () => {
+    try {
+        await mongoose.connection.close();
+        console.log("🛑 MongoDB Connection Closed (SIGINT)");
+        process.exit(0);
+    } catch (err) {
+        console.error("Error during shutdown:", err);
+        process.exit(1);
+    }
+});
+
+process.on('SIGTERM', async () => {
+    try {
+        await mongoose.connection.close();
+        console.log("🛑 MongoDB Connection Closed (SIGTERM)");
+        process.exit(0);
+    } catch (err) {
+        console.error("Error during shutdown:", err);
+        process.exit(1);
+    }
+});

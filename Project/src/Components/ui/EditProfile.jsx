@@ -1,9 +1,9 @@
 import React, { useState } from "react"
-import "./LoginPage.css"
+import "../auth/LoginPage.css"
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux";
 import { Mail, Lock, Save, Trash2, X } from "lucide-react";
-import { deleteProfile, updateProfile } from "../redux/slices/authSlice";
+import { deleteProfile, updateProfile } from "../../redux/slices/authSlice";
 
 function EditProfile() {
     const CURRENT_USER = JSON.parse(localStorage.getItem("CURRENTUSER"));

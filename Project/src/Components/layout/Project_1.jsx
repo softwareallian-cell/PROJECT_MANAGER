@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchWorkspaces, fetchTeams, addTeam, deleteTeamDb, setActiveWorkspace, setActiveTeam } from '../redux/slices/teamSlice';
-import { fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, addProjectByTeam, setActiveProject } from '../redux/slices/taskSlice';
+import { fetchWorkspaces, fetchTeams, addTeam, deleteTeamDb, setActiveWorkspace, setActiveTeam } from '../../redux/slices/teamSlice';
+import { fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, addProjectByTeam, setActiveProject } from '../../redux/slices/taskSlice';
 import {
   X, Edit2, Trash2, Layout, Plus, Filter, ChevronDown, ChevronRight, CheckCircle2, Circle, CircleDashed, ArrowUp, ArrowRight, ArrowDown, Hash, Users, Zap, Inbox, FileText, UserCircle
 } from 'lucide-react';
 import './Project_1.css';
-import NewIssueModal from './NewIssueModal';
-import IssueDetailView from './IssueDetailView';
-import CreateTeamModal from './CreateTeamModal';
-import CreateProjectModal from './CreateProjectModal';
-import ProjectsBoard from './ProjectsBoard';
-import ProjectDetailView from './ProjectDetailView';
-import DeleteConfirmationModal from './DeleteConfirmationModal';
-import TeamSettingsModal from './TeamSettingsModal';
-import './ListView.css';
+import NewIssueModal from '../modals/NewIssueModal';
+import IssueDetailView from '../views/IssueDetailView';
+import CreateTeamModal from '../modals/CreateTeamModal';
+import CreateProjectModal from '../modals/CreateProjectModal';
+import ProjectsBoard from '../views/ProjectsBoard';
+import ProjectDetailView from '../views/ProjectDetailView';
+import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
+import TeamSettingsModal from '../modals/TeamSettingsModal';
+import '../ui/ListView.css';
+import MembersView from '../views/MembersView';
 
 const STATUS_COLUMNS = [
   { id: 'backlog', label: 'Backlog', icon: <CircleDashed size={14} /> },
@@ -552,33 +553,9 @@ function Project_1() {
             ))}
           </div>
         ) : mainView === 'all-members' ? (
-          <div className="list-view-container" style={{ padding: '24px' }}>
-            <div className="board-header" style={{ padding: '0 0 16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }}>
-              <div className="board-title"><UserCircle size={18} color="#8C8C8C" /> All Workspace Members</div>
-            </div>
-            <div className="list-header" style={{ gridTemplateColumns: '2fr 1fr' }}>
-              <div>Email</div>
-              <div>Role</div>
-            </div>
-            <div className="list-row" style={{ gridTemplateColumns: '2fr 1fr' }}>
-              <div className="list-cell">{CURRENTUSER.email || 'Current User'}</div>
-              <div className="list-cell">{CURRENTUSER.role || 'Member'}</div>
-            </div>
-          </div>
+          <MembersView />
         ) : mainView === 'team-members' ? (
-          <div className="list-view-container" style={{ padding: '24px' }}>
-            <div className="board-header" style={{ padding: '0 0 16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }}>
-              <div className="board-title"><UserCircle size={18} color="#8C8C8C" /> {activeTeam?.name} Members</div>
-            </div>
-            <div className="list-header" style={{ gridTemplateColumns: '2fr 1fr' }}>
-              <div>Email</div>
-              <div>Role</div>
-            </div>
-            <div className="list-row" style={{ gridTemplateColumns: '2fr 1fr' }}>
-              <div className="list-cell">{CURRENTUSER.email || 'Current User'}</div>
-              <div className="list-cell">{CURRENTUSER.role || 'Member'}</div>
-            </div>
-          </div>
+          <MembersView teamId={activeTeamId} />
         ) : null}
 
         {/* FULL PAGE ISSUE DETAIL VIEW */}

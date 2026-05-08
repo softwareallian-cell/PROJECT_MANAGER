@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Layout, Circle, CircleDashed, CheckCircle2, XCircle, Calendar, Hash, Plus, Filter } from 'lucide-react';
+import { Layout, Circle, CircleDashed, CheckCircle2, XCircle, Calendar, Hash, Plus, Filter, ArrowUp } from 'lucide-react';
 import './ProjectsBoard.css';
-import './ListView.css';
+import '../ui/ListView.css';
 
 const PROJECT_COLUMNS = [
   { id: 'backlog', label: 'Backlog', icon: <CircleDashed size={14} /> },

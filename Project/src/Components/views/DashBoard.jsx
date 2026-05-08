@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Bell, Folder, Clock } from "lucide-react";
 import "./DashBoard.css"
 import GanttView from "./GanttView";
-import { fetchCreatedProjects, fetchAssignedProjects } from "../redux/slices/projectSlice";
+import { fetchCreatedProjects, fetchAssignedProjects } from "../../redux/slices/projectSlice";
 
 const STATUS_CLASSES = {
     backlog: 'status-backlog',

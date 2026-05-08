@@ -1,18 +1,18 @@
 import React, { useEffect } from "react"
-import SignUpPage from './Components/SignupPage'
+import SignUpPage from './Components/auth/SignupPage'
 import { BrowserRouter, Routes, Route, useParams } from "react-router-dom"
-import DashBoard from "./Components/DashBoard"
-import LoginPage from "./Components/LoginPage"
-import Projects from "./Components/Projects"
-import Details from "./Components/Details"
-import TrackerWidget from "./Components/TrackerWidget"
-import { GuestGuard, LoginGuard, ProjectGuard } from "./Components/Guards"
-import EditProfile from "./Components/EditProfile";
+import DashBoard from "./Components/views/DashBoard"
+import LoginPage from "./Components/auth/LoginPage"
+import Projects from "./Components/views/Projects"
+import Details from "./Components/views/Details"
+import TrackerWidget from "./Components/ui/TrackerWidget"
+import { GuestGuard, LoginGuard, ProjectGuard } from "./Components/auth/Guards"
+import EditProfile from "./Components/ui/EditProfile";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchNotifications } from "./redux/slices/authSlice";
 import { fetchAssignedProjects, fetchCreatedProjects } from "./redux/slices/projectSlice";
-import TimeSheet from "./Components/TimeSheet"
-import Project_1 from "./Components/Project_1"
+import TimeSheet from "./Components/views/TimeSheet"
+import Project_1 from "./Components/layout/Project_1"
 
 function App() {
   const dispatch = useDispatch();
@@ -31,7 +31,7 @@ function App() {
     }
   }, [dispatch, currentUser]);
 
-    const activeTracker = useSelector((state) => state.ui.activeTracker);
+  const activeTracker = useSelector((state) => state.ui.activeTracker);
   return (<>
     <BrowserRouter>
       <Routes>
@@ -47,8 +47,6 @@ function App() {
           <Route path="/profile" element={<EditProfile />} />
           <Route path="/timesheet" element={<TimeSheet />} />
           <Route path="/linear" element={<Project_1 />} />
-
-
           <Route element={<ProjectGuard />} >
             <Route path="/projects/:id" element={<Details />} />
           </Route>

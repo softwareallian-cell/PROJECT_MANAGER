@@ -1,0 +1,244 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease-out;
+}
+
+.invite-modal {
+    background: #1a1b1e;
+    border: 1px solid #2c2e33;
+    border-radius: 12px;
+    width: 480px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.invite-modal-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #2c2e33;
+}
+
+.workspace-badge {
+    background: #f2aa4d;
+    color: #000;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.invite-modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #e9ecef;
+}
+
+.close-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #909296;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: #fff;
+}
+
+.invite-modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #adb5bd;
+}
+
+.optional {
+    color: #5c5f66;
+    font-weight: 400;
+}
+
+textarea {
+    background: #141517;
+    border: 1px solid #2c2e33;
+    border-radius: 6px;
+    padding: 12px;
+    color: #fff;
+    min-height: 80px;
+    resize: none;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+textarea:focus {
+    border-color: #5e6ad2;
+}
+
+.team-select-trigger {
+    background: #141517;
+    border: 1px solid #2c2e33;
+    border-radius: 6px;
+    padding: 10px;
+    min-height: 40px;
+    font-size: 14px;
+    color: #5c5f66;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.selected-teams-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.team-badge {
+    background: rgba(94, 106, 210, 0.15);
+    color: var(--team-color);
+    border: 1px solid var(--team-color);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.team-badge button {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.team-options-dropdown {
+    background: #1a1b1e;
+    border: 1px solid #2c2e33;
+    border-radius: 6px;
+    max-height: 150px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+
+.team-option {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #adb5bd;
+    transition: background 0.2s;
+}
+
+.team-option:hover {
+    background: #25262b;
+    color: #fff;
+}
+
+.team-option.selected {
+    background: rgba(94, 106, 210, 0.1);
+    color: #5e6ad2;
+}
+
+.team-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #fff;
+    font-weight: 700;
+}
+
+.check-mark {
+    margin-left: auto;
+}
+
+.invite-modal-footer {
+    padding: 16px 20px;
+    background: #141517;
+    border-top: 1px solid #2c2e33;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.cancel-btn {
+    background: none;
+    border: none;
+    color: #909296;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.send-btn {
+    background: #5e6ad2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.send-btn:hover:not(:disabled) {
+    background: #4c58c0;
+}
+
+.send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

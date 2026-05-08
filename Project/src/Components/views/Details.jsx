@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock, Play, Calendar, Paperclip, FileText, Image, X, AlertCircle, Plus, Inbox, Ghost, Activity } from "lucide-react";
 import "./Details.css";
 import { useDispatch, useSelector } from "react-redux";
-import { updateProjectDetails, fetchTimeSessions } from "../redux/slices/projectSlice";
-import { startGlobalTracker } from "../redux/slices/uiSlice";
+import { updateProjectDetails, fetchTimeSessions } from "../../redux/slices/projectSlice";
+import { startGlobalTracker } from "../../redux/slices/uiSlice";
 
 const STATUS_CLASSES = {
     backlog: 'status-backlog',

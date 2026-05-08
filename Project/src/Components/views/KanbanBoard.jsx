@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { Calendar } from "lucide-react";
 import "./KanbanBoard.css";
 import { useDispatch } from "react-redux";
-import { editProjectDb } from "../redux/slices/projectSlice";
+import { editProjectDb } from "../../redux/slices/projectSlice";
 
 const STATUS_OPTIONS = ['backlog', 'todo', 'inprogress', 'inreview', 'onhold', 'done', 'complete'];
 
