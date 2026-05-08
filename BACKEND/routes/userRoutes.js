@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Project = require('../models/Projects');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // SIGNUP - create new user
 router.post('/signup', async (req, res) => {
@@ -29,6 +31,35 @@ router.post('/login', async (req, res) => {
     } catch (err) {
         console.error("LOGIN ERROR:", err.message);
         res.status(500).json({ message: err.message });
+    }
+});
+
+// GOOGLE LOGIN
+router.post('/google-login', async (req, res) => {
+    try {
+        const { token } = req.body;
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const { email, name, picture } = ticket.getPayload();
+
+        let user = await User.findOne({ email });
+        if (!user) {
+            // Create new user if doesn't exist
+            user = new User({
+                email,
+                name: name || email.split('@')[0],
+                password: Math.random().toString(36).slice(-10), // Random password
+                role: 'member'
+            });
+            await user.save();
+        }
+
+        res.json(user);
+    } catch (err) {
+        console.error("GOOGLE LOGIN ERROR:", err.message);
+        res.status(500).json({ message: "Google authentication failed" });
     }
 });
 

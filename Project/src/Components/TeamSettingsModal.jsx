@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { X, Settings, Users, UserPlus, Trash2, Search, Check } from 'lucide-react';
-import { updateTeamDb, addTeamMemberDb, removeTeamMemberDb, searchUsers, clearUserSearch } from './Redux';
+import { searchUsers, clearUserSearch } from '../redux/slices/authSlice';
+import { updateTeamDb, addTeamMemberDb, removeTeamMemberDb } from '../redux/slices/teamSlice';
 import './TeamSettingsModal.css';
 
 const TeamSettingsModal = ({ isOpen, onClose, team }) => {
@@ -10,8 +11,8 @@ const TeamSettingsModal = ({ isOpen, onClose, team }) => {
   const [formData, setFormData] = useState({ name: '', key: '' });
   const [memberSearch, setMemberSearch] = useState('');
   
-  const userSearchResults = useSelector(state => state.registration.userSearchResults);
-  const currentUser = useSelector(state => state.registration.currentUser);
+  const userSearchResults = useSelector(state => state.auth.userSearchResults);
+  const currentUser = useSelector(state => state.auth.currentUser);
 
   useEffect(() => {
     if (team) {

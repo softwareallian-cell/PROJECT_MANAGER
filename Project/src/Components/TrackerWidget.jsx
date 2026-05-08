@@ -15,7 +15,8 @@ import {
     Folder
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { stopGlobalTracker, setTrackerPanelOpen, fetchTimeSessions } from "./Redux";
+import { fetchTimeSessions } from "../redux/slices/projectSlice";
+import { stopGlobalTracker, setTrackerPanelOpen } from "../redux/slices/uiSlice";
 import "./TrackerWidget.css";
 
 const API = "http://localhost:5000";
@@ -37,11 +38,11 @@ function randomBetween(min, max) {
 
 export default function TrackerWidget() {
     const dispatch = useDispatch();
-    const currentUser = useSelector((s) => s.registration.currentUser);
-    const activeTracker = useSelector((s) => s.registration.activeTracker);
-    const panelOpen = useSelector((s) => s.registration.trackerPanelOpen);
-    const createdProjects = useSelector((s) => s.registration.createdProjects);
-    const assignedProjects = useSelector((s) => s.registration.assignedProjects);
+    const currentUser = useSelector((s) => s.auth.currentUser);
+    const activeTracker = useSelector((s) => s.ui.activeTracker);
+    const panelOpen = useSelector((s) => s.ui.trackerPanelOpen);
+    const createdProjects = useSelector((s) => s.projects.createdProjects);
+    const assignedProjects = useSelector((s) => s.projects.assignedProjects);
 
     // Find full project data from Redux
     const project = activeTracker

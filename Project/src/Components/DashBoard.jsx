@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Bell, Folder, Clock } from "lucide-react";
 import "./DashBoard.css"
 import GanttView from "./GanttView";
-import { fetchCreatedProjects, fetchAssignedProjects } from "./Redux";
+import { fetchCreatedProjects, fetchAssignedProjects } from "../redux/slices/projectSlice";
 
 const STATUS_CLASSES = {
     backlog: 'status-backlog',
@@ -214,9 +214,9 @@ function DashBoard() {
         dispatch(fetchAssignedProjects(CURRENTUSER_ID));
     }, [dispatch, CURRENTUSER_ID]);
 
-    const createdProjects = useSelector((state) => state.registration.createdProjects);
-    const assignedProjects = useSelector((state) => state.registration.assignedProjects);
-    const notifications = useSelector((state) => state.registration.notifications);
+    const createdProjects = useSelector((state) => state.projects.createdProjects);
+    const assignedProjects = useSelector((state) => state.projects.assignedProjects);
+    const notifications = useSelector((state) => state.auth.notifications);
 
     const unreadCount = notifications.filter(n => !n.read).length;
     const today = new Date().toISOString().substring(0, 10);

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux";
 import KanbanBoard from "./KanbanBoard";
-import { addProjectDb, assignProjectDb, clearUserSearch, deleteProjectDb, editProjectDb, fetchAssignedProjects, fetchCreatedProjects, logoutUser, removeAssigneeDb, searchUsers, toggleTheme } from "./Redux";
+import { logoutUser, clearUserSearch, searchUsers } from "../redux/slices/authSlice";
+import { addProjectDb, assignProjectDb, deleteProjectDb, editProjectDb, fetchAssignedProjects, fetchCreatedProjects, removeAssigneeDb } from "../redux/slices/projectSlice";
+import { toggleTheme } from "../redux/slices/uiSlice";
 import { createPortal } from "react-dom";
 import './Projects.css'
 import { NavLink, useNavigate } from "react-router-dom";
@@ -36,11 +38,11 @@ const CURRENTUSER_ID = CURRENTUSER._id;
 const CURRENTUSER_EMAIL = CURRENTUSER.email;
 const CURRENTUSER_ROLE = CURRENTUSER.role;
     const isManager = CURRENTUSER_ROLE === 'manager';
-const themeMode = useSelector((state) => state.registration.mode);
+const themeMode = useSelector((state) => state.ui.mode);
 
-    const createdProjects = useSelector((state) => state.registration.createdProjects);
-    const assignedProjects = useSelector((state) => state.registration.assignedProjects);
-    const userSearchResults = useSelector((state) => state.registration.userSearchResults);
+    const createdProjects = useSelector((state) => state.projects.createdProjects);
+    const assignedProjects = useSelector((state) => state.projects.assignedProjects);
+    const userSearchResults = useSelector((state) => state.auth.userSearchResults);
 
     const [activeTab, setActiveTab] = useState("mine");
     const [viewMode, setViewMode] = useState("list");

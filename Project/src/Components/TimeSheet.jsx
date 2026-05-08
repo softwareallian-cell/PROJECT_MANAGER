@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { X, Edit3, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchAllTimeSessions } from "./Redux";
+import { fetchAllTimeSessions } from "../redux/slices/projectSlice";
 import "./TimeSheet.css";
 
 const API = "http://localhost:5000";
@@ -87,8 +87,8 @@ function FullPreviewPortal({ shot, onClose, currentUser }) {
 export default function TimeSheet() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const currentUser = useSelector((s) => s.registration.currentUser);
-    const allSessions = useSelector((s) => s.registration.allTimeSessions);
+    const currentUser = useSelector((s) => s.auth.currentUser);
+    const allSessions = useSelector((s) => s.projects.allTimeSessions);
 
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedShot, setSelectedShot] = useState(null);

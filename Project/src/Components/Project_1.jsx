@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  fetchWorkspaces, fetchTeams, fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, deleteTeamDb, addProjectByTeam, addTeam, setActiveWorkspace, setActiveTeam, setActiveProject
-} from './Redux';
+import { fetchWorkspaces, fetchTeams, addTeam, deleteTeamDb, setActiveWorkspace, setActiveTeam } from '../redux/slices/teamSlice';
+import { fetchTasks, fetchProjectsByTeam, addTaskDb, editTaskDb, deleteTaskDb, addProjectByTeam, setActiveProject } from '../redux/slices/taskSlice';
 import {
   X, Edit2, Trash2, Layout, Plus, Filter, ChevronDown, ChevronRight, CheckCircle2, Circle, CircleDashed, ArrowUp, ArrowRight, ArrowDown, Hash, Users, Zap, Inbox, FileText, UserCircle
 } from 'lucide-react';
@@ -39,14 +38,14 @@ function Project_1() {
   const CURRENTUSER = storedUser ? JSON.parse(storedUser)[0] : {};
 
   // Linear Architecture State
-  const workspaces = useSelector(state => state.registration.workspaces);
-  const teams = useSelector(state => state.registration.teams);
-  const tasks = useSelector(state => state.registration.tasks);
-  const linearProjects = useSelector(state => state.registration.linearProjects);
+  const workspaces = useSelector(state => state.teams.workspaces);
+  const teams = useSelector(state => state.teams.teams);
+  const tasks = useSelector(state => state.tasks.tasks);
+  const linearProjects = useSelector(state => state.tasks.linearProjects);
 
-  const activeWorkspaceId = useSelector(state => state.registration.activeWorkspaceId);
-  const activeTeamId = useSelector(state => state.registration.activeTeamId);
-  const activeProjectId = useSelector(state => state.registration.activeProjectId);
+  const activeWorkspaceId = useSelector(state => state.teams.activeWorkspaceId);
+  const activeTeamId = useSelector(state => state.teams.activeTeamId);
+  const activeProjectId = useSelector(state => state.tasks.activeProjectId);
 
   const [draggingId, setDraggingId] = useState(null);
   const [overColumn, setOverColumn] = useState(null);

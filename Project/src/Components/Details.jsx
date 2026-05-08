@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock, Play, Calendar, Paperclip, FileText, Image, X, AlertCircle, Plus, Inbox, Ghost, Activity } from "lucide-react";
 import "./Details.css";
 import { useDispatch, useSelector } from "react-redux";
-import { updateProjectDetails, fetchTimeSessions, startGlobalTracker } from "./Redux";
+import { updateProjectDetails, fetchTimeSessions } from "../redux/slices/projectSlice";
+import { startGlobalTracker } from "../redux/slices/uiSlice";
 
 const STATUS_CLASSES = {
     backlog: 'status-backlog',
@@ -26,8 +27,8 @@ function Details() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const createdProjects = useSelector((state) => state.registration.createdProjects);
-    const assignedProjects = useSelector((state) => state.registration.assignedProjects);
+    const createdProjects = useSelector((state) => state.projects.createdProjects);
+    const assignedProjects = useSelector((state) => state.projects.assignedProjects);
     const allProjects = [...createdProjects, ...assignedProjects];
     const project = allProjects.find((p) => p._id === id);
 
@@ -39,8 +40,8 @@ function Details() {
     const [selectedSession, setSelectedSession] = useState(null);
 
     // Time sessions
-    const timeSessions = useSelector((s) => s.registration.timeSessions);
-    const activeTracker = useSelector((state) => state.registration.activeTracker);
+    const timeSessions = useSelector((s) => s.projects.timeSessions);
+    const activeTracker = useSelector((state) => state.ui.activeTracker);
 
     useEffect(() => {
         if (activeTab === "timelog" && project) {

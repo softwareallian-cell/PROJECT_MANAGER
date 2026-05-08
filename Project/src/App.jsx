@@ -9,13 +9,14 @@ import TrackerWidget from "./Components/TrackerWidget"
 import { GuestGuard, LoginGuard, ProjectGuard } from "./Components/Guards"
 import EditProfile from "./Components/EditProfile";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAssignedProjects, fetchCreatedProjects, fetchNotifications } from "./Components/Redux"
+import { fetchNotifications } from "./redux/slices/authSlice";
+import { fetchAssignedProjects, fetchCreatedProjects } from "./redux/slices/projectSlice";
 import TimeSheet from "./Components/TimeSheet"
 import Project_1 from "./Components/Project_1"
 
 function App() {
   const dispatch = useDispatch();
-  const mode = useSelector((state) => state.registration.mode);
+  const mode = useSelector((state) => state.ui.mode);
   useEffect(() => {
     document.body.className = mode;
   }, [mode]);
@@ -28,9 +29,9 @@ function App() {
       dispatch(fetchAssignedProjects(userId));
       dispatch(fetchNotifications(userId));
     }
-  }, [currentUser?._id]);
+  }, [dispatch, currentUser]);
 
-    const activeTracker = useSelector((state) => state.registration.activeTracker);
+    const activeTracker = useSelector((state) => state.ui.activeTracker);
   return (<>
     <BrowserRouter>
       <Routes>

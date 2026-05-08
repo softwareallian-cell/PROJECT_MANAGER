@@ -18,8 +18,8 @@ const ProjectGuard = () => {
 
     const CURRENTUSER_ID = JSON.parse(currentUserRaw)[0]._id;
 
-    const createdProjects = useSelector((state) => state.registration.createdProjects);
-    const assignedProjects = useSelector((state) => state.registration.assignedProjects);
+    const createdProjects = useSelector((state) => state.projects.createdProjects);
+    const assignedProjects = useSelector((state) => state.projects.assignedProjects);
     const allProjects = [...createdProjects, ...assignedProjects];
 
     const matchedProject = allProjects.find((p) => p._id === id);

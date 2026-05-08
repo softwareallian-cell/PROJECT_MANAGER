@@ -16,8 +16,8 @@ const STATUS_COLORS = {
 
 function GanttView() {
 
-    const createdProjects = useSelector((state) => state.registration.createdProjects);
-    const assignedProjects = useSelector((state) => state.registration.assignedProjects);
+    const createdProjects = useSelector((state) => state.projects.createdProjects);
+    const assignedProjects = useSelector((state) => state.projects.assignedProjects);
     // Show all projects the user is involved in
     const allProjects = [
         ...createdProjects,

@@ -2,8 +2,9 @@
   --font-main: 'Inter', system-ui, -apple-system, sans-serif;
   
   /* Shared Defaults */
+  --accent-primary: #5e6ad2;
+  --accent-primary-hover: #4c56af;
   --accent-amber: #f2aa4d;
-  --accent-amber-hover: #d97706;
   --danger: #ef4444;
   --success: #22c55e;
   
@@ -15,15 +16,15 @@
 }
 
 .dark {
-  --bg-main: #0a0a1a;
-  --bg-secondary: #16213e;
-  --card-bg: rgba(26, 26, 46, 0.95);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --input-bg: rgba(255, 255, 255, 0.05);
-  --input-border: rgba(255, 255, 255, 0.1);
-  --shadow-main: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --bg-main: #08090a;
+  --bg-secondary: #121417;
+  --card-bg: #16181d;
+  --card-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #f7f8f8;
+  --text-secondary: #b1b3b5;
+  --input-bg: #0d0e10;
+  --input-border: #2b2e33;
+  --shadow-main: 0 10px 40px rgba(0, 0, 0, 0.6);
   --glass-blur: blur(12px);
 }
 
@@ -76,12 +77,12 @@ h1 {
 }
 
 button {
-  background-color: var(--accent-amber);
-  color: #0a0a1a;
+  background-color: var(--accent-primary);
+  color: white;
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -92,8 +93,8 @@ button {
 
 button:hover {
   transform: translateY(-1px);
-  filter: brightness(1.1);
-  box-shadow: 0 4px 12px rgba(242, 170, 77, 0.2);
+  background-color: var(--accent-primary-hover);
+  box-shadow: 0 4px 12px rgba(94, 106, 210, 0.2);
 }
 
 button:active {
@@ -115,7 +116,8 @@ select {
 
 input:focus,
 textarea:focus {
-  border-color: var(--accent-amber);
+  border-color: var(--accent-primary);
+  background-color: #121417;
 }
 
 /* Scrollbar Styles */
